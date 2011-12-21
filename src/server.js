@@ -25,7 +25,7 @@ app.configure('production', function () {
   app.use(express.errorHandler())
 })
 
-require('./system/router').init(app, require('./app/config/routes'))
+require('./router').init(require('./config/routes'))
 
 app.listen(3000)
 console.log("Server running on port %d in %s mode".green, app.address().port, app.settings.env)
