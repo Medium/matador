@@ -6,7 +6,7 @@ module.exports = Class(function (req, res) {
   this.request = req
   this.layout = 'layout'
   this._viewFolder = ''
-  this.controller = 'base'
+
   beforeFilters = []
   excludeFilters = []
   this.__defineGetter__('filters', function () {
@@ -29,15 +29,6 @@ module.exports = Class(function (req, res) {
     }
   , getHelper: function (name) {
       return require(app.set('helpers') + '/' + name)
-    }
-  , render: function (view, data, fn) {
-      data = data || {}
-      data.controller = this.controller
-      this.response.render(this.viewFolder + view, {
-          layout: this.layout
-        , partials: getViewPartials(this.viewFolder)
-        , locals: data
-      }, fn)
     }
   , addBeforeFilter: function (actions, fn) {
       if (!fn) { fn = actions, actions = null }
