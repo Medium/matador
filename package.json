@@ -10,15 +10,16 @@
       , "url": "https://github.com/Obvious/framework.git"
     }
   , "engines": {
-      "node": ">=0.4.0"
+      "node": ">=0.6.0"
     }
   , "bin": {
       "matador": "bin/matador.js"
     }
   , "dependencies": {
-        "valentine": "*"
+        "express": "*"
+      , "valentine": "*"
       , "klass": "*"
-      , "express": "*"
       , "colors": "*"
+      , "express-hogan.js": "*"
     }
 }

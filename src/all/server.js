@@ -1,9 +1,12 @@
 var matador = require('matador')
 app.configure(function () {
-  app.set('models', __dirname + '/models')
-  app.set('helpers', __dirname + '/helpers')
-  app.set('views', __dirname + '/views')
-  app.set('controllers', __dirname + '/controllers')
+  app.set('models', __dirname + '/app/models')
+  app.set('helpers', __dirname + '/app/helpers')
+  app.set('views', __dirname + '/app/views')
+  app.set('controllers', __dirname + '/app/controllers')
+
+  app.set('view engine', 'html')
+  app.register('.html', matador.engine)
 
   app.use(matador.cookieParser())
   app.use(matador.bodyParser())
@@ -18,6 +21,6 @@ app.configure('development', function () {
 app.configure('production', function () {
   app.use(matador.errorHandler())
 })
-matador.mount(require('./config/routes'))
+matador.mount(require('./app/config/routes'))
 app.listen(3000)
 console.log('matador running on port 3000')
