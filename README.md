@@ -32,9 +32,29 @@ hello: function (name) {
 Uses Twitters [Hogan.js](http://twitter.github.com/hogan.js/) with layouts, partials, and i18n support.
 
 ``` js
+// app/controllers/HomeController.js
 this.response.render('index', {
   locals: {
     title: 'Hello Bull Fighters'
   }
 })
+```
+
+``` html
+<!-- app/views/layout.html -->
+{{{body}}}
+```
+
+``` html
+<!-- app/views/index.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+  </body>
+</html>
 ```
