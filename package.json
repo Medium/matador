@@ -7,7 +7,7 @@
   , "main": "src/matador.js"
   , "repository": {
         "type": "git"
-      , "url": "https://github.com/Obvious/framework.git"
+      , "url": "https://github.com/Obvious/matador.git"
     }
   , "engines": {
       "node": ">=0.6.0"
