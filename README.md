@@ -59,6 +59,10 @@ this.response.render('index', {
 </html>
 ```
 
+# Authors
+
+Obviously, [Dustin Senos](http://dustinsenos.com) & [Dustin Diaz](http://dustindiaz.com)
+
 # License
 
 Copyright 2012 Obvious Corporation
