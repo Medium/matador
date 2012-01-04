@@ -5,7 +5,6 @@ module.exports = require('./BaseController').extend()
       data.controller = this.controller
       this.response.render(this.viewFolder + view, {
           layout: this.layout
-        , partials: getViewPartials(this.viewFolder)
         , locals: data
       }, fn)
     }
