@@ -1,0 +1,12 @@
+body {
+  padding: 60px 0 0 60px;
+  background: rgb(250, 250, 250);
+  color: rgb(71, 71, 71);
+  font-family: "Liberation Serif", Georgia, serif;
+  font-size: 16px;
+  line-height: 22px;
+}
+h1 {
+  margin: 0 0 10px 0;
+  font-weight: 400;
+}
