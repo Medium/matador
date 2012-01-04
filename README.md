@@ -5,16 +5,12 @@ An MVC framework for Node built on [Express](http://expressjs.com) and [Klass](h
     $ npm install matador -g
 
 ## Create an app
-    $ matador build ./my-app/
+    $ matador my-app
+    $ cd !$ && npm install matador
 
 ## Start your app
-    $ cd my-app
-    $ node server.js
+    $ cd my-app && node server.js
 
-``` js
-// app.js
-require('matador').listen(3000)
-```
 
 ## Build on your app
 
@@ -34,19 +30,12 @@ Uses Twitters [Hogan.js](http://twitter.github.com/hogan.js/) with layouts, part
 ``` js
 // app/controllers/HomeController.js
 this.response.render('index', {
-  locals: {
-    title: 'Hello Bull Fighters'
-  }
+  title: 'Hello Bull Fighters'
 })
 ```
 
 ``` html
 <!-- app/views/layout.html -->
-{{{body}}}
-```
-
-``` html
-<!-- app/views/index.html -->
 <!DOCTYPE html>
 <html>
   <head>
@@ -54,14 +43,37 @@ this.response.render('index', {
     <title>{{title}}</title>
   </head>
   <body>
-    <h1>{{title}}</h1>
+    {{{body}}}
   </body>
 </html>
 ```
 
+``` html
+<!-- app/views/index.html -->
+<h1>{{title}}</h1>
+```
+
+## Request Filtering
+``` js
+// app/controllers/ApplicationController.js
+module.exports = require('./BaseController').extend(function () {
+  this.addBeforeFilter(this.requireAuth)
+  this.addExcludeFilter(['welcome'], this.requireAuth)
+})
+  .methods({
+    requireAuth: function (callback) {
+      if (this.request.cookies.authed) return callback(null)
+      this.response.redirect('/welcome')
+    }
+  , welcome: function () {
+      this.render('welcome')
+    }
+  })
+```
+
 # Authors
 
-Obviously, [Dustin Senos](http://dustinsenos.com) & [Dustin Diaz](http://dustindiaz.com)
+Obviously, [Dustin Senos](https://github.com/dustinsenos) & [Dustin Diaz](https://github.com/ded)
 
 # License
 
