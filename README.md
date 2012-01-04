@@ -36,11 +36,6 @@ this.response.render('index', {
 
 ``` html
 <!-- app/views/layout.html -->
-{{{body}}}
-```
-
-``` html
-<!-- app/views/index.html -->
 <!DOCTYPE html>
 <html>
   <head>
@@ -48,9 +43,14 @@ this.response.render('index', {
     <title>{{title}}</title>
   </head>
   <body>
-    <h1>{{title}}</h1>
+    {{{body}}}
   </body>
 </html>
+```
+
+``` html
+<!-- app/views/index.html -->
+<h1>{{title}}</h1>
 ```
 
 ## Request Filtering
