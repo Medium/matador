@@ -1,5 +1,6 @@
 # Matador
 Sane defaults and a simple structure, scaling as your application grows.
+
 Matador is a clean, organized framework for [Node.js](http://nodejs.org) architected to suit MVC enthusiasts. It gives you a well-defined development environment with flexible routing, easy controller mappings, and basic request filtering.
 It&#8217;s built on open source libraries such as [Hogan.js](http://twitter.github.com/hogan.js) for view rendering, [Klass](https://github.com/ded/klass) for its inheritance model, [Valentine](https://github.com/ded/valentine)
 for functional development, and [Express](http://expressjs.com) to give a bundle of other Node server related helpers.
@@ -33,7 +34,7 @@ Uses Twitters [Hogan.js](http://twitter.github.com/hogan.js/) with layouts, part
 
 ``` js
 // app/controllers/HomeController.js
-this.response.render('index', {
+this.render('index', {
   title: 'Hello Bull Fighters'
 })
 ```
@@ -74,6 +75,46 @@ module.exports = require('./BaseController').extend(function () {
     }
   })
 ```
+
+### How can I organize my Models?
+By default, Models are thin with just a Base and Application Model in place. You can give them some meat, for example, and embed [Mongo](http://mongoosejs.com) Schemas. See the following as a brief illustration:
+
+``` js
+// app/models/ApplicationModel.js
+module.exports = require('./BaseModel').extend(function () {
+  this.mongo = require('mongodb')
+  this.mongoose = require('mongoose')
+  this.Schema = this.mongoose.Schema
+  this.mongoose.connect('mongodb://localhost/myapp')
+})
+```
+
+Then create, for example, a UserModel.js that extended it...
+
+``` js
+module.exports = require('./ApplicationModel').extend(function () {
+  this.DBModel = this.mongoose.model('User', new this.Schema({
+      name: { type: String, required: true, trim: true }
+    , email: { type: String, required: true, lowercase: true, trim: true }
+  }))
+})
+  .methods({
+    create: function (name, email, callback) {
+      var user = new this.DBModel({
+          name: name
+        , email: email
+      })
+      user.save(callback)
+    }
+  , find: function (id, callback) {
+      this.DBModel.findById(id, callback)
+    }
+  })
+```
+
+This provides a proper abstraction between controller logic and how your models interact with a database then return data back to controllers.
+
+Take special note that models do not have access to requests or responses, as they rightfully shouldn't.
 
 # Authors
 
