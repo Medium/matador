@@ -20,7 +20,7 @@ for functional development, and [Express](http://expressjs.com) to give a bundle
 
 ``` js
 // app/config/routes.js
-['get', '/', 'Home', 'hello/:name']
+['get', '/hello/:name', 'Home', 'hello']
 
 // app/controllers/HomeController.js
 hello: function (name) {
