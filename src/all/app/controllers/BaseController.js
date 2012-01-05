@@ -19,7 +19,7 @@ module.exports = Class(function (req, res) {
     this._viewFolder = val
   })
   this.__defineGetter__('viewFolder', function () {
-    return this._viewFolder + '/'
+    return this._viewFolder ? this._viewFolder + '/' : ''
   })
 })
   .methods({
