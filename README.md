@@ -139,6 +139,6 @@ Obviously, [Dustin Senos](https://github.com/dustinsenos) & [Dustin Diaz](https:
 
 # License
 
-Copyright 2012 Obvious Corporation
+Copyright 2012 [Obvious Corporation](http://obvious.com)
 
 Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
