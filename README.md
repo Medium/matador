@@ -116,6 +116,23 @@ This provides a proper abstraction between controller logic and how your models 
 
 Take special note that models do not have access to requests or responses, as they rightfully shouldn't.
 
+### Model & Controller Inheritance
+The inheritance model Matador uses is built with [Klass](https://github.com/ded/klass), and is exposed via a global `Class` variable (not all globals are bad). Class comes in two flavors where by constructors can be set via an `initialize` method, or a function reference, and by default (in the scaffold), Matador uses the function reference style so that you may benefit from the auto-initialization of super classes, and there is no need to call `this.supr()` in your constructors.
+
+### Valentine
+The Valentine module is included as a simple tool giving you type checking, functional iterators, and some other nice utilities that often get used in applications of any size. It is exposed globally as `v`. It is used liberally in the Matador router, thus feel free to take advantage of its existence as well.
+
+# Todo
+There are always things to do. Our short-list currently includes the following:
+
+  * build more scaffolding commands (for models, controllers, helpers)
+  * better view partials support
+  * official docs
+
+
+# Contributing
+Questions, pull requests, bug reports are all welcome. Submit them here on Github.
+
 # Authors
 
 Obviously, [Dustin Senos](https://github.com/dustinsenos) & [Dustin Diaz](https://github.com/ded)
