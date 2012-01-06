@@ -10,11 +10,11 @@ for functional development, and [Express](http://expressjs.com) to give a bundle
     $ npm install matador -g
 
 ### Create an app
-    $ matador my-app
+    $ matador init my-app
     $ cd !$ && npm install matador
 
 ### Start your app
-    $ cd my-app && node server.js
+    $ node server.js
 
 # Dancing with the Bulls
 ### Build on your app
@@ -122,15 +122,21 @@ The inheritance model Matador uses is built with [Klass](https://github.com/ded/
 ### Valentine
 The Valentine module is included as a simple tool giving you type checking, functional iterators, and some other nice utilities that often get used in applications of any size. It is exposed globally as `v`. It is used liberally in the Matador router, thus feel free to take advantage of its existence as well.
 
+# Scaffolding
+
+    $ matador controller [name]
+    $ matador model [name]
+
 # Todo
 There are always things to do. Our short-list currently includes the following:
 
-  * build more scaffolding commands (for models, controllers, helpers)
+  * ~~build more scaffolding commands (for models, controllers, helpers)~~
   * official docs
   * ~~better view partials support~~
 
 
 # Contributing
+
 Questions, pull requests, bug reports are all welcome. Submit them here on Github.
 
 # Authors
