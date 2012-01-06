@@ -5,7 +5,7 @@ function match(prefix, method, route, controllerName, action) {
   var controllerFile = app.set('controllers') + prefix + '/' + controllerName + 'Controller'
     , Controller = require(controllerFile)
   app[method](route, function (req, res, next) {
-    var inst = new Controller(req, res)
+    var inst = new Controller(req, res, next)
       , beforeFilters = v(inst.filters).chain()
           .filter(function (f) {
             return !v.find(inst.excludeFilters, function (x) {
