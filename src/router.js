@@ -4,7 +4,7 @@ function match(prefix, method, route, controllerName, action) {
   route = prefix ? ((route != '/') ? prefix + route : prefix) : route
   var controllerFile = app.set('controllers') + prefix + '/' + controllerName + 'Controller'
     , Controller = require(controllerFile)
-  app[method](route, function (req, res) {
+  app[method](route, function (req, res, next) {
     var inst = new Controller(req, res)
       , beforeFilters = v(inst.filters).chain()
           .filter(function (f) {

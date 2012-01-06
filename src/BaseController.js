@@ -2,9 +2,10 @@ var beforeFilters = []
   , excludeFilters = []
   , pr = require('./partialRenderer')
 
-module.exports = Class(function (req, res) {
+module.exports = Class(function (req, res, next) {
   this.response = res
   this.request = req
+  this.next = next
   this.layout = 'layout'
   this._viewFolder = ''
 
