@@ -1,7 +1,7 @@
 {
     "name": "matador"
   , "description": "an MVC framework for Node"
-  , "version": "0.0.4"
+  , "version": "0.0.5"
   , "homepage": "https://github.com/Obvious/matador"
   , "authors": ["Dustin Diaz <dustin@obvious.com> (https://github.com/ded)", "Dustin Senos <ds@obvious.com> (https://github.com/dustinsenos)"]
   , "main": "src/matador.js"
@@ -10,13 +10,13 @@
       , "url": "https://github.com/Obvious/matador.git"
     }
   , "engines": {
-      "node": ">=0.6.0"
+      "node": ">=0.6.0 <0.7.0"
     }
   , "bin": {
       "matador": "bin/matador.js"
     }
   , "dependencies": {
-        "express": "*"
+        "express": ">=2.5.0 <3.0.0"
       , "valentine": "*"
       , "klass": "*"
       , "colors": "*"

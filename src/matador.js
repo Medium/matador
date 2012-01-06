@@ -1,6 +1,4 @@
 var express = module.exports = require('express')
-  , fs = require('fs')
-
   // not all globals are bad
   , app = global.app = express.createServer()
   , Class = global.Class = require('klass')
@@ -14,3 +12,4 @@ app.configure(function () {
 module.exports.mount = require('./router').init
 module.exports.engine = require('express-hogan.js')
 module.exports.BaseController = require('./BaseController')
+module.exports.partials = require('./partialRenderer')

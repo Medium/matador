@@ -1,5 +1,6 @@
 var beforeFilters = []
   , excludeFilters = []
+  , pr = require('./partialRenderer')
 
 module.exports = Class(function (req, res) {
   this.response = res
@@ -35,6 +36,7 @@ module.exports = Class(function (req, res) {
       this.response.render(this.viewFolder + view, {
           layout: this.layout
         , locals: data
+        , partials: pr.get(this.viewFolder, app.set('viewPartials'))
       }, fn)
     }
   , addBeforeFilter: function (actions, fn) {

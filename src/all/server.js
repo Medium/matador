@@ -22,7 +22,7 @@ app.configure('development', function () {
 app.configure('production', function () {
   app.use(matador.errorHandler())
 })
-
+app.set('viewPartials', matador.partials.build(app.set('views')))
 matador.mount(require('./app/config/routes'))
 app.listen(3000)
 console.log('matador running on port 3000')
