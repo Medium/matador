@@ -126,8 +126,8 @@ The Valentine module is included as a simple tool giving you type checking, func
 There are always things to do. Our short-list currently includes the following:
 
   * build more scaffolding commands (for models, controllers, helpers)
-  * better view partials support
   * official docs
+  * ~~better view partials support~~
 
 
 # Contributing
