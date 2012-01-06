@@ -30,6 +30,13 @@ module.exports = Class(function (req, res) {
   , getHelper: function (name) {
       return require(app.set('helpers') + '/' + name)
     }
+  , render: function (view, data, fn) {
+      data = data || {}
+      this.response.render(this.viewFolder + view, {
+          layout: this.layout
+        , locals: data
+      }, fn)
+    }
   , addBeforeFilter: function (actions, fn) {
       if (!fn) { fn = actions, actions = null }
       v(v.is.arr(actions) ? actions : [actions]).each(function (action) {

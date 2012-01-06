@@ -1,4 +1,5 @@
 var matador = require('matador')
+
 app.configure(function () {
   app.set('models', __dirname + '/app/models')
   app.set('helpers', __dirname + '/app/helpers')
@@ -21,6 +22,7 @@ app.configure('development', function () {
 app.configure('production', function () {
   app.use(matador.errorHandler())
 })
+
 matador.mount(require('./app/config/routes'))
 app.listen(3000)
 console.log('matador running on port 3000')
