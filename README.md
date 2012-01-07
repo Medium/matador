@@ -58,6 +58,108 @@ this.render('index', {
 <h1>{{title}}</h1>
 ```
 
+### View Partials
+
+Matador looks for view partials in a folder named partials in the views directory: ```app/views/partials/```
+
+``` js
+// app/controllers/HomeController.js
+module.exports = require('./BaseController').extend()
+  .methods({
+    index: function () {
+      this.render('index', {
+          user: {
+              first: "John"
+            , last: "Smith"
+          }
+        , todo: [{ name: 'dishes', id: 0 }, { name: 'mow lawn', id: 1 }]
+      })
+    }
+  })
+```
+
+```html
+<!-- app/views/partials/fullname.html -->
+{{first}} {{last}}
+```
+
+```html
+<!-- app/views/partials/tasks.html -->
+<ul>
+  {{#todo}}
+  <li>{{name}}</li>
+  {{/todo}}
+</ul>
+```
+
+```html
+<!-- app/views/index.html -->
+<h1>Hello {{#user}}{{> fullname}}{{/user}} welcome to Matador!</h1>
+{{> tasks}}
+```
+
+Produces the following HTML:
+
+```html
+<h1>Hello John Smith welcome to Matador!</h1>
+<ul>
+  <li>dishes</li>
+  <li>mow lawn</li>
+</ul>
+```
+
+### Overriding View Partials
+
+Matador allows you to easily override view partials on a per-directory basis.
+To override a partial create a new folder named 'partials' in the folder your controller is using as its ```viewFolder```.
+Matador will look first in this folder for partials, if no matching partial exists it will traverse up the directory tree until it finds a matching partial.
+
+``` js
+// app/controllers/admin/AdminController.js
+module.exports = require('../ApplicationController').extend(function () {
+  this.viewFolder = "admin" // we've set the view folder to "admin"
+})
+  .methods({
+    index: function () {
+      this.render('index', {
+        user: {
+            first: "John"
+          , last: "Smith"
+        }
+      })
+    }
+  })
+```
+
+```html
+<!-- app/views/admin/partials/tasks.html -->
+<!-- This file will override the tasks.html partial found in app/views/partials -->
+<ul>
+{{#todo}}
+<li><a href="/edit/{{id}}">Edit the "{{name}}" task </a> or <a href="/delete/{{id}}">delete it</a></li>
+{{/todo}}
+</ul>
+```
+
+```html
+<!-- app/views/admin/index.html -->
+<!-- 'app/views/admin/partials/fullname.html' Does not exist, so 'app/views/partials/fullname.html' will be used -->
+<h1>Welcome {{#user}}{{> fullname}}{{/user}} to the Admin Area</h1>
+{{> tasks}}
+```
+
+Produces the following HTML:
+
+```html
+<h1>Welcome John Smith to the Admin Area</h1>
+<ul>
+  <li><a href="/edit/0">Edit the "dishes" task</a> or <a href="/delete/0">delete it</a></li>
+  <li><a href="/edit/1">Edit the "mow lawn" task</a> or <a href="/delete/1">delete it</a></li>
+</ul>
+```
+
+**Note:** For performance reasons, partials are fetched when the application starts. You must restart you application for changes in partials to be reflected.
+
 ### Request Filtering
 ``` js
 // app/controllers/ApplicationController.js
