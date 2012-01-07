@@ -122,10 +122,11 @@ module.exports = require('../ApplicationController').extend(function () {
   .methods({
     index: function () {
       this.render('index', {
-        user: {
-            first: "John"
-          , last: "Smith"
-        }
+          user: {
+              first: "John"
+            , last: "Smith"
+          }
+        , todo: [{ name: 'dishes', id: 0 }, { name: 'mow lawn', id: 1 }]
       })
     }
   })
