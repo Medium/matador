@@ -159,7 +159,7 @@ Produces the following HTML:
 </ul>
 ```
 
-**Note:** For performance reasons, partials are fetched when the application starts. You must restart you application for changes in partials to be reflected.
+**Note:** For performance reasons, partials are fetched when the application starts. You must restart your application for changes in partials to be reflected.
 
 ### Request Filtering
 ``` js
