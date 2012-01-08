@@ -57,4 +57,7 @@ module.exports = Class(function (req, res, next) {
         })
       })
     }
+  , json: function(data, headers, status){
+      this.response.json(data, headers, status);
+    }
   })
