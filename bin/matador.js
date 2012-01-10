@@ -13,14 +13,24 @@ var methods = {
     })
   }
 , controller: function (name) {
-    console.log('generating controller ' + name)
-    var destinationFile = './app/controllers/' + name.replace(/^(.{1})/, function (m, l) {
-      return l.toUpperCase()
-    }) + 'Controller.js'
-    var stub = __dirname + '/../src/StubController.js'
-    exec('cp ' + stub + ' ' + destinationFile, function (er, out) {
-      console.log('Successfully created ' + destinationFile)
-    })
+    if (name.match(/([^\/]+)\//)) {
+      exec('mkdir -p ' + RegExp.$1, copyContents)
+    }
+    else {
+      copyContents()
+    }
+    function copyContents() {
+      var destinationFile = './app/controllers/' + name.replace(/(?:[^\/]+)$/, function (m) {
+        return m.replace(/(.{1})/, function (m, l) {
+          return l.toUpperCase()
+        })
+      }) + 'Controller.js'
+      console.log('generating controller ' + destinationFile)
+      var stub = __dirname + '/../src/StubController.js'
+      exec('cp ' + stub + ' ' + destinationFile, function (er, out) {
+        console.log('Successfully created ' + destinationFile)
+      })
+    }
   }
 , model: function (name) {
     console.log('generating model ' + name)
