@@ -1,6 +1,4 @@
-var beforeFilters = []
-  , excludeFilters = []
-  , pr = require('./partialRenderer')
+var pr = require('./partialRenderer')
 
 module.exports = Class(function (req, res, next) {
   this.response = res
@@ -9,14 +7,9 @@ module.exports = Class(function (req, res, next) {
   this.layout = 'layout'
   this._viewFolder = ''
 
-  beforeFilters = []
-  excludeFilters = []
-  this.__defineGetter__('filters', function () {
-    return beforeFilters
-  })
-  this.__defineGetter__('excludeFilters', function () {
-    return excludeFilters
-  })
+  this.beforeFilters = []
+  this.excludeFilters = []
+
   this.__defineSetter__('viewFolder', function (val) {
     this._viewFolder = val
   })
@@ -43,19 +36,19 @@ module.exports = Class(function (req, res, next) {
   , addBeforeFilter: function (actions, fn) {
       if (!fn) { fn = actions, actions = null }
       v(v.is.arr(actions) ? actions : [actions]).each(function (action) {
-        beforeFilters.push({
+        this.beforeFilters.push({
             action: action
           , filter: fn
         })
-      })
+      }, this)
     }
   , addExcludeFilter: function (actions, fn) {
       v(v.is.arr(actions) ? actions : [actions]).each(function (action) {
-        excludeFilters.push({
+        this.excludeFilters.push({
             action: action
           , filter: fn
         })
-      })
+      }, this)
     }
   , json: function(data, headers, status){
       this.response.json(data, headers, status)
