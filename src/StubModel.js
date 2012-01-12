@@ -1,1 +1,1 @@
-module.exports = require('./ApplicationModel').extend()
+module.exports = require(app.set('models') + '/ApplicationModel').extend()

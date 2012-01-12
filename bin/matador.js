@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 var fs = require('fs')
   , exec = require('child_process').exec
-require('colors')
 
 var methods = {
   init: function (path) {
@@ -42,7 +41,6 @@ var methods = {
       console.log('Successfully created ' + destinationFile)
     })
   }
-
 }
 !function (args) {
   var command = args.shift()

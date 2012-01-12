@@ -1,4 +1,4 @@
-module.exports = require('./ApplicationController').extend()
+module.exports = require(app.set('controllers') + '/ApplicationController').extend()
   .methods({
     index: function () {
       this.render('index', {
