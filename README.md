@@ -179,6 +179,22 @@ module.exports = require('./BaseController').extend(function () {
   })
 ```
 
+### Routing
+The `app/config/routes.js` file is where you specify an array of tuples indicating where incoming requests will map to a `controller` and the appropriate method. When a method isn't defined, it uses `index` by default.
+
+Nesting routes under `root` will receive all bottom level routes at `/` - but you could also nest them under custom keys as illustrated below:
+
+``` js
+module.exports = {
+  root: [
+    ['get', '/', 'Home'] // maps to ./HomeController.js => index
+  ]
+, admin: [
+    ['get', '/', 'Admin', 'show'] // maps to ./admin/AdminController.js => show
+  ]
+}
+```
+
 ### How can I organize my Models?
 By default, Models are thin with just a Base and Application Model in place. You can give them some meat, for example, and embed [Mongo](http://mongoosejs.com) Schemas. See the following as a brief illustration:
 
