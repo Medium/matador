@@ -64,7 +64,7 @@ Matador looks for view partials in a folder named partials in the views director
 
 ``` js
 // app/controllers/HomeController.js
-module.exports = require('./BaseController').extend()
+module.exports = require('matador').BaseController.extend()
   .methods({
     index: function () {
       this.render('index', {
