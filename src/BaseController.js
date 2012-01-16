@@ -4,8 +4,10 @@ module.exports = Class(function (req, res, next) {
   this.response = res
   this.request = req
   this.next = next
-  this.layout = 'layout'
   this._viewFolder = ''
+
+  var layout = app.set('view options').layout
+  this.layout = (undefined === layout) ? 'layout' : layout
 
   this.beforeFilters = []
   this.excludeFilters = []
