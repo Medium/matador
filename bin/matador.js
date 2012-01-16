@@ -8,7 +8,7 @@ var methods = {
     fs.mkdirSync('./' + path)
     exec('cp -R ' + __dirname + '/../src/all/ ' + path, function (err, out) {
       if (err) return console.log('error', err)
-      console.log('Success!'.green)
+      console.log('Success!')
     })
   }
 , controller: function (name) {
