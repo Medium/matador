@@ -7,7 +7,7 @@ module.exports = Class(function (req, res, next) {
   this._viewFolder = ''
 
   var viewOptions = app.set('view options')
-  this.layout = (viewOptions && undefined !== typeof viewOptions.layout) ? viewOptions.layout : 'layout'
+  this.layout = (viewOptions && 'undefined' !== typeof viewOptions.layout) ? viewOptions.layout : 'layout'
 
   this.beforeFilters = []
   this.excludeFilters = []
