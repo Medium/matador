@@ -1,6 +1,6 @@
 var matador = require('matador'),
-  cluster = require('cluster');
-  http = require('http');
+  cluster = require('cluster'),
+  http = require('http'),
   numCPUs = require('os').cpus().length,
 
   // Command line arguments
