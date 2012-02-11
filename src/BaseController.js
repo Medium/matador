@@ -29,8 +29,10 @@ module.exports = Class(function (req, res, next) {
     }
   , render: function (view, data, fn) {
       data = data || {}
+	  layout = data.layout || this.layout
+	  delete data.layout
       this.response.render(this.viewFolder + view, {
-          layout: this.layout
+          layout: layout
         , locals: data
         , partials: pr.get(this.viewFolder, app.set('viewPartials'))
       }, fn)
