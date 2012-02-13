@@ -1,10 +1,10 @@
-function match(prefix, method, route, controllerName, action) {
+function match(prefix, method, route, middleware, controllerName, action) {
   action = action || 'index'
   prefix = prefix == 'root' ? '' : '/' + prefix
   route = prefix ? ((route != '/') ? prefix + route : prefix) : route
   var controllerFile = app.set('controllers') + prefix + '/' + controllerName + 'Controller'
     , Controller = require(controllerFile)
-  app[method](route, function (req, res, next) {
+  app[method](route, middleware, function (req, res, next) {
     var inst = new Controller(req, res, next)
       , beforeFilters = v(inst.beforeFilters).chain()
           .filter(function (f) {
@@ -30,8 +30,15 @@ function match(prefix, method, route, controllerName, action) {
 module.exports.init = function (routes) {
   v.each(routes, function(key, value) {
     v(value).each(function (tuple) {
-      tuple.unshift(key)
-      match.apply(null, tuple)
+      var tupleLen = tuple.length
+        , numOptionalArgs = tupleLen - 2
+        , trailingArgs = numOptionalArgs && typeof tuple[tupleLen-1] === 'string' ? tuple.slice(
+           typeof tuple[tupleLen-2] === 'string' ? -2 : -1
+          ) : []
+        , middlewareLen = tupleLen - trailingArgs.length - 2
+        , middleware = tuple.splice(2, middlewareLen)
+      
+      match.apply(null, [key, tuple[0], tuple[1], middleware].concat(trailingArgs))
     })
   })
 }
