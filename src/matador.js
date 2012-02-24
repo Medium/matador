@@ -1,16 +1,159 @@
-var express = module.exports = require('express')
+var fs = require('fs')
+  , express = module.exports = require('express')
   , hogan = require('hogan.js')
-  // not all globals are bad
-  , app = global.app = express.createServer()
   , Class = global.Class = require('klass')
   , v = global.v = require('valentine')
-  , modelCache = {}
-app.configure(function () {
-  app.set('modelCache', modelCache)
-})
+  , router = require('./router')
+  , BaseController = require('./BaseController')
 
+module.exports.createApp = function(baseDir, configuration, options) {
+  configuration = configuration || {}
+  options = options || {}
+  
+  var appDir = baseDir + "/app"
+    , fileCache = {'services':{},'helpers':{},'models':{}, 'controllers':{}}
+    , objCache = {'services':{},'helpers':{},'models':{}, 'controllers':{}}
+    , pathCache = {'services':{},'helpers':{},'models':{}, 'controllers':{}}
+    , partialCache = {}
+    , appDirs = [appDir].concat(v.map(
+        fs.readdirSync(appDir + "/modules")
+        , function(dir) {
+          return appDir + "/modules/" + dir
+        }
+      ))
+    , app = express.createServer()
+    , loadFile = function(subdir, name, path) {
+        if (typeof(fileCache[subdir][name]) !== 'undefined') return fileCache[subdir][name];
+        
+        var dir = v.find((path ? [path] : appDirs), function(dir) {
+          var filename = dir + '/' + subdir + '/' + name + '.js';
+          try{
+            fs.statSync(filename);
+          }catch(e) {
+            return false;
+          }
+          fileCache[subdir][name] = require(filename)(app, (configuration[subdir] && configuration[subdir][name] ? configuration[subdir][name] : {}));
+          pathCache[subdir][name] = dir === appDir ? [appDir] : [dir,appDir];
+          return true;
+        })
+        if (!dir) throw new Error("Unable to find " + subdir + "/" + name);
+        
+        return fileCache[subdir][name];
+      }
+    , loadClass = function(subdir, name, definitionOnly) {
+        if(definitionOnly) return loadFile(subdir, name);
+        if (!objCache[subdir][name]) {
+          var file = loadFile(subdir, name);
+          objCache[subdir][name] = new file;
+          objCache[subdir][name]._paths = pathCache[subdir][name];
+        }
+        return objCache[subdir][name];
+      }
+      
+  app.mount = function() {
+    var router = require('./router')
+      , self = this;
+      
+    v.each(appDirs, function(dir) {
+      var filename = dir + '/config/routes.js';
+      try{
+        fs.statSync(filename);
+      }catch(e) {
+        return;
+      }
+      try{
+        router.init(self, require(filename)(self))
+      }catch(e){
+        console.log(e.stack)
+      }
+    })
+  }
+  
+  app.prefetch = function(options) {
+    var self = this;
+    
+    v.each(["helpers", "models", "services", "controllers"], function(type) {
+      v.each(appDirs, function(dir) {
+        try{
+          v.each(fs.readdirSync(dir + "/" + type), function(file){
+            if(file.substr(file.length - 3) === '.js') file = file.substr(0, file.length - 3);
+            loadFile(type, file, dir);
+          })
+        }catch(e){
+        }
+      });
+    });
+  }
+  
+  app.getPartials = function(paths) {
+    var partials = {}
+      , objs = v.map(paths, function(path) {
+        if(!partialCache[path]) {
+          var viewSuffix = '.' + app.set('view engine')
+            , viewsRoot = path + "/views"
+            , pathPartials = {}
+            , dirs = [viewsRoot]
+            
+          while(dirs.length) {
+            var dir = dirs.shift()
+                
+            try{
+              v.each(fs.readdirSync(dir), function(file) {
+                var fullPath = dir + "/" + file
+                  , stat = fs.statSync(fullPath)
+                  , localDir = dir.substr(viewsRoot.length+1)
+                
+                if(!stat.isDirectory()) return;
+                if(file !== "partials") return dirs.push(fullPath);
+                
+                v.each(fs.readdirSync(fullPath), function(partial) {
+                  var viewFile = localDir 
+                    + (localDir.length ? "/" : "") 
+                    + partial.substr(0,partial.length-viewSuffix.length)
+                    , partialContent = fs.readFileSync(fullPath + "/" + partial, 'utf8')
+                    
+                  pathPartials[viewFile] = hogan.compile(partialContent)
+                });
+              });
+            }catch(e){
+            }
+          }
+          
+          partialCache[path] = pathPartials;
+        }
+        
+        return partialCache[path];
+      });
+    
+    v.each(objs, function(obj){
+      v.each(obj, function(name, partial) {
+        if(!partials[name]) partials[name] = partial;
+      })
+    })
+    return partials
+  }
+      
+  app.getService = function(name, definitionOnly) {
+    return loadClass("services", name + "Service", definitionOnly)
+  }
+  
+  app.getController = function(name, definitionOnly) {
+    return loadClass("controllers", name + "Controller", definitionOnly)
+  }
+  
+  app.getModel = function(name, definitionOnly) {
+    return loadClass("models", name + "Model", definitionOnly)
+  }
+  
+  app.getHelper = function(name) {
+    return loadFile('helpers', name, true)
+  }
+  
+  app.BaseController = BaseController(app)
+ 
+  return app;
+}
 
-module.exports.mount = require('./router').init
 module.exports.engine = {
   compile: function(source, options) {
     if (typeof source != 'string') return source
@@ -26,5 +169,3 @@ module.exports.engine = {
     }
   }
 }
-module.exports.BaseController = require('./BaseController')
-module.exports.partials = require('./partialRenderer')

@@ -1,6 +1,10 @@
-module.exports = require(app.set('controllers') + '/ApplicationController').extend()
+module.exports = function(app,config) {
+  
+  return app.getController("Application",true).extend()
   .methods({
-    index: function () {
+    index: function (req, res) {
 
     }
   })
+  
+}

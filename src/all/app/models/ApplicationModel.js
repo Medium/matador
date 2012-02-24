@@ -1,1 +1,3 @@
-module.exports = require('./BaseModel').extend()
+module.exports = function(app,config) {
+  return app.getModel('Base',true).extend()
+}

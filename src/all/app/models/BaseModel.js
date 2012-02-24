@@ -1,1 +1,3 @@
-module.exports = Class()
+module.exports = function(app,config) {
+  return Class()
+}

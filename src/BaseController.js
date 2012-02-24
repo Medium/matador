@@ -1,61 +1,58 @@
-var pr = require('./partialRenderer')
+var fs = require('fs')
 
-module.exports = Class(function (req, res, next) {
-  this.response = res
-  this.request = req
-  this.next = next
-  this._viewFolder = ''
-
-  var viewOptions = app.set('view options')
-  this.layout = (viewOptions && 'undefined' !== typeof viewOptions.layout) ? viewOptions.layout : 'layout'
-
-  this.beforeFilters = []
-  this.excludeFilters = []
-
-  this.__defineSetter__('viewFolder', function (val) {
-    this._viewFolder = val
+module.exports = function(app){
+  var viewCache = {}
+  
+  return Class(function() {
+    this.beforeFilters = {}
+    this.excludeFilters = {}
   })
-  this.__defineGetter__('viewFolder', function () {
-    return this._viewFolder ? this._viewFolder + '/' : ''
-  })
-})
-  .methods({
-    getModel: function (name) {
-      if (app.set('modelCache')[name]) return app.set('modelCache')[name]
-      return (app.set('modelCache')[name] = new (require(app.set('models') + '/' + name + 'Model')))
-    }
-  , getHelper: function (name) {
-      return require(app.set('helpers') + '/' + name)
-    }
-  , render: function (view, data, fn) {
-      data = data || {}
-      this.response.render(this.viewFolder + view, {
-          layout: this.layout
-        , locals: data
-        , partials: pr.get(this.viewFolder, app.set('viewPartials'))
-      }, fn)
-    }
-  , addBeforeFilter: function (actions, fn) {
-      if (!fn) { fn = actions, actions = null }
-      v(v.is.arr(actions) ? actions : [actions]).each(function (action) {
-        this.beforeFilters.push({
-            action: action
-          , filter: fn
-        })
-      }, this)
-    }
-  , addExcludeFilter: function (actions, fn) {
-      v(v.is.arr(actions) ? actions : [actions]).each(function (action) {
-        this.excludeFilters.push({
-            action: action
-          , filter: fn
-        })
-      }, this)
-    }
-  , json: function(data, headers, status){
-      this.response.json(data, headers, status)
-    }
-  , error: function () {
-      this.response.send(400)
-    }
-  })
+    .methods({
+       addBeforeFilter: function (actions, fn) {
+        if (!fn) { fn = actions, actions = '*' }
+        v(v.is.arr(actions) ? actions : [actions]).each(function (action) {
+          if(typeof this.beforeFilters[action] === 'undefined') this.beforeFilters[action] = [];
+          this.beforeFilters[action].push(fn);
+        }, this)
+      }
+    , addExcludeFilter: function (actions, fn) {
+        v(v.is.arr(actions) ? actions : [actions]).each(function (action) {
+          if(typeof this.excludeFilters[action] === 'undefined') this.excludeFilters[action] = [];
+          this.excludeFilters[action].push(fn);
+        }, this)
+      }
+      
+    , json: function(res, data, headers, status){
+        res.json(data, headers, status)
+      }
+      
+    , error: function (res) {
+        res.send(400)
+      }
+      
+    , render: function (res, view, data, fn) {
+        if(!viewCache[view]) {
+          var suffix = '.' + app.set("view engine")
+            , path = v.find(this._paths, function(path) {
+                try{
+                  var viewFile = path + "/views/" + view;
+                  fs.statSync(viewFile + suffix);
+                  viewCache[view] = viewFile;
+                  return true
+                }catch(e) {
+                  return false;
+                }
+              })
+        }
+
+        data = data || {}
+        res.render(viewCache[view], {
+            layout: this.layout
+          , locals: data
+          , partials: app.getPartials(this._paths) 
+        }, fn)
+      }
+    })
+}
+
+

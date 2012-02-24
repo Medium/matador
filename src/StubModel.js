@@ -1,1 +1,5 @@
-module.exports = require(app.set('models') + '/ApplicationModel').extend()
+module.exports = function(app,config) {
+
+  return app.getModel("Application",true).extend()
+
+}

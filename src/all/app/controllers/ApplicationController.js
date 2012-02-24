@@ -1,3 +1,3 @@
-module.exports = require('matador').BaseController.extend(function () {
-  this.viewFolder = ''
-})
+module.exports = function(app,config) {
+  app.BaseController.extend()
+}

@@ -1,5 +1,7 @@
-module.exports = {
-  root: [
-    ['get', '/', 'Home']
-  ]
+module.exports = function(app) {
+  return {
+    root: [
+      ['get', '/', 'Home']
+    ]
+  }
 }
