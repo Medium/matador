@@ -1,8 +1,8 @@
-module.exports = function(app,config) {
+module.exports = function(app, config) {
   return app.getController("Application", true).extend()
   .methods({
     index: function (req, res) {
-      this.render(req, 'index', {
+      this.render(res, 'index', {
         title: 'The Matador Framework'
       })
     }

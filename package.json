@@ -1,7 +1,7 @@
 {
     "name": "matador"
   , "description": "an MVC framework for Node"
-  , "version": "0.0.14"
+  , "version": "1.0.0"
   , "homepage": "https://github.com/Obvious/matador"
   , "authors": ["Dustin Diaz <dustin@obvious.com> (https://github.com/ded)", "Dustin Senos <ds@obvious.com> (https://github.com/dustinsenos)"]
   , "main": "src/matador.js"
@@ -21,5 +21,6 @@
       , "klass": "*"
       , "colors": "*"
       , "hogan.js": "*"
+      , "optimist": "*"
     }
 }

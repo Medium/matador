@@ -3,35 +3,36 @@ function match(app, prefix, method, route, middleware, controllerName, action) {
   prefix = prefix == 'root' ? '' : '/' + prefix
   route = prefix ? ((route != '/') ? prefix + route : prefix) : route
   var Controller = app.getController(controllerName)
-  
-  var filters = [];
-  if(Controller.beforeFilters['*']) filters = filters.concat(Controller.beforeFilters['*'])
-  if(Controller.beforeFilters[action]) filters = filters.concat(Controller.beforeFilters[action])
-  
-  if(filters.length) {
+    , filters = []
+  if (Controller.beforeFilters['*']) filters = filters.concat(Controller.beforeFilters['*'])
+  if (Controller.beforeFilters[action]) filters = filters.concat(Controller.beforeFilters[action])
+
+  if (filters.length) {
     middleware = typeof Controller.excludeFilters[action] === 'undefined' ?
       filters.concat(middleware) :
       v(filters).filter(function(filter){
         return !v.inArray(Controller.excludeFilters[action], filter)
-      }).concat(middleware);
+      }).concat(middleware)
   }
-  
+
   app[method](route, middleware, function (req, res, next) {
-    Controller[action].apply(Controller, [req,res].concat(v(req.params).values()));
+    Controller[action].apply(Controller, [req, res].concat(v(req.params).values()))
   })
 }
 
 module.exports.init = function (app, routes) {
+  // static directory server
+  routes.root.push(['get', /(.+)/, 'Static'])
   v.each(routes, function(key, value) {
     v(value).each(function (tuple) {
       var tupleLen = tuple.length
         , numOptionalArgs = tupleLen - 2
-        , trailingArgs = numOptionalArgs && typeof tuple[tupleLen-1] === 'string' ? tuple.slice(
-           numOptionalArgs > 1 && typeof tuple[tupleLen-2] === 'string' ? -2 : -1
+        , trailingArgs = numOptionalArgs && typeof tuple[tupleLen - 1] === 'string' ? tuple.slice(
+           numOptionalArgs > 1 && typeof tuple[tupleLen - 2] === 'string' ? -2 : -1
           ) : []
         , middlewareLen = tupleLen - trailingArgs.length - 2
         , middleware = tuple.splice(2, middlewareLen)
-      
+
       match.apply(null, [app, key, tuple[0], tuple[1], middleware].concat(trailingArgs))
     })
   })

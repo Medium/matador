@@ -1,0 +1,39 @@
+html,body {
+  margin: 0;
+  padding: 0;
+  font-size: 1.1em;
+  line-height: 1.5;
+  background-color: #ececec;
+}
+#doc {
+  width: 600px;
+  margin: 1em auto;
+}
+a {
+  color: #4689c8;
+  display: block;
+  padding: 5px;
+  border-radius: 5px;
+  text-decoration: none;
+}
+a:hover {
+  color: #466bc8;
+  background-color: #fff;
+}
+ul,li {
+  list-style: none;
+}
+
+h1 {
+  font-size: 1.2em;
+  font-weight: 100;
+}
+h1 span {
+  display: block;
+  font-size: 14px;
+  background-color: #fff;
+  padding: 3px;
+  border-radius: 4px;
+  white-space: pre;
+  overflow: hidden;
+}

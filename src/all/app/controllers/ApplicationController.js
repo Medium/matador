@@ -1,3 +1,3 @@
-module.exports = function(app,config) {
-  app.BaseController.extend()
+module.exports = function (app, config) {
+  return app.controllers.Base.extend()
 }
