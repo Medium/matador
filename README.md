@@ -24,8 +24,8 @@ for functional development, and [Express](http://expressjs.com) to give a bundle
 ['get', '/hello/:name', 'Home', 'hello']
 
 // app/controllers/HomeController.js
-hello: function (name) {
-  this.response.send('hello' + name)
+hello: function (request, response, name) {
+  response.send('hello ' + name)
 }
 ```
 
@@ -34,7 +34,7 @@ Uses Twitters [Hogan.js](http://twitter.github.com/hogan.js/) with layouts, part
 
 ``` js
 // app/controllers/HomeController.js
-this.render('index', {
+this.render(response, 'index', {
   title: 'Hello Bull Fighters'
 })
 ```
@@ -64,10 +64,11 @@ Matador looks for view partials in a folder named partials in the views director
 
 ``` js
 // app/controllers/HomeController.js
-module.exports = require('matador').BaseController.extend()
+module.exports = function (app, config) {
+  return app.controllers.Base.extend()
   .methods({
-    index: function () {
-      this.render('index', {
+    index: function (req, res) {
+      this.render(res, 'index', {
           user: {
               first: "John"
             , last: "Smith"
@@ -76,6 +77,7 @@ module.exports = require('matador').BaseController.extend()
       })
     }
   })
+}
 ```
 
 ```html
@@ -116,12 +118,13 @@ Matador will look first in this folder for partials, if no matching partial exis
 
 ``` js
 // app/controllers/admin/AdminController.js
-module.exports = require('../ApplicationController').extend(function () {
-  this.viewFolder = "admin" // we've set the view folder to "admin"
-})
+module.exports = function (app, config) {
+  return app.getController('Application', true).extend(function () {
+    this.viewFolder = "admin" // we've set the view folder to "admin"
+  })
   .methods({
-    index: function () {
-      this.render('index', {
+    index: function (req, res) {
+      this.render(res, 'index', {
           user: {
               first: "John"
             , last: "Smith"
@@ -130,6 +133,7 @@ module.exports = require('../ApplicationController').extend(function () {
       })
     }
   })
+}
 ```
 
 ```html
@@ -164,10 +168,11 @@ Produces the following HTML:
 ### Request Filtering
 ``` js
 // app/controllers/ApplicationController.js
-module.exports = require('./BaseController').extend(function () {
-  this.addBeforeFilter(this.requireAuth)
-  this.addExcludeFilter(['welcome'], this.requireAuth)
-})
+module.exports = function (app, config) {
+  return app.controllers.Base.extend(function () {
+    this.addBeforeFilter(this.requireAuth)
+    this.addExcludeFilter(['welcome'], this.requireAuth)
+  })
   .methods({
     requireAuth: function (callback) {
       if (this.request.cookies.authed) return callback(null)
@@ -177,6 +182,7 @@ module.exports = require('./BaseController').extend(function () {
       this.render('welcome')
     }
   })
+}
 ```
 
 ### Routing
@@ -200,23 +206,26 @@ By default, Models are thin with just a Base and Application Model in place. You
 
 ``` js
 // app/models/ApplicationModel.js
-module.exports = require('./BaseModel').extend(function () {
-  this.mongo = require('mongodb')
-  this.mongoose = require('mongoose')
-  this.Schema = this.mongoose.Schema
-  this.mongoose.connect('mongodb://localhost/myapp')
-})
+module.exports = function (app, config) {
+  return app.getModel('Base', true).extend(function () {
+    this.mongo = require('mongodb')
+    this.mongoose = require('mongoose')
+    this.Schema = this.mongoose.Schema
+    this.mongoose.connect('mongodb://localhost/myapp')
+  })
+}
 ```
 
 Then create, for example, a UserModel.js that extended it...
 
 ``` js
-module.exports = require('./ApplicationModel').extend(function () {
-  this.DBModel = this.mongoose.model('User', new this.Schema({
-      name: { type: String, required: true, trim: true }
-    , email: { type: String, required: true, lowercase: true, trim: true }
-  }))
-})
+module.exports = function (app, config) {
+  return app.getModel('Application', true).extend(function () {
+    this.DBModel = this.mongoose.model('User', new this.Schema({
+        name: { type: String, required: true, trim: true }
+      , email: { type: String, required: true, lowercase: true, trim: true }
+    }))
+  })
   .methods({
     create: function (name, email, callback) {
       var user = new this.DBModel({
@@ -229,6 +238,7 @@ module.exports = require('./ApplicationModel').extend(function () {
       this.DBModel.findById(id, callback)
     }
   })
+}
 ```
 
 This provides a proper abstraction between controller logic and how your models interact with a database then return data back to controllers.
@@ -250,8 +260,8 @@ The Valentine module is included as a simple tool giving you type checking, func
 There are always things to do. Our short-list currently includes the following:
 
   * ~~build more scaffolding commands (for models, controllers, helpers)~~
-  * official docs
   * ~~better view partials support~~
+  * official docs
 
 
 # Contributing

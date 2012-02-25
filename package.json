@@ -3,7 +3,11 @@
   , "description": "an MVC framework for Node"
   , "version": "1.0.0"
   , "homepage": "https://github.com/Obvious/matador"
-  , "authors": ["Dustin Diaz <dustin@obvious.com> (https://github.com/ded)", "Dustin Senos <ds@obvious.com> (https://github.com/dustinsenos)"]
+  , "authors": [
+        "Dustin Diaz <dustin@obvious.com> (https://github.com/ded)"
+      , "Dustin Senos <ds@obvious.com> (https://github.com/dustinsenos)"
+      , "Jeremy Stanley <jeremy@obvious.com> (https://github.com/azulus)"
+    ]
   , "main": "src/matador.js"
   , "repository": {
         "type": "git"
