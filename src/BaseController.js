@@ -3,7 +3,7 @@ var fs = require('fs')
 module.exports = function (app) {
   var viewCache = {}
 
-  return Class(function () {
+  return klass(function () {
     this._paths = [app.set('base_dir')]
     this.beforeFilters = {}
     this.excludeFilters = {}
@@ -11,8 +11,11 @@ module.exports = function (app) {
     this.layout = (viewOptions && typeof viewOptions.layout !== 'undefined') ? viewOptions.layout : 'layout'
   })
     .methods({
-       addBeforeFilter: function (actions, fn) {
-        if (!fn) { fn = actions, actions = '*' }
+      addBeforeFilter: function (actions, fn) {
+        if (!fn) {
+          fn = actions
+          actions = '*'
+        }
         v(v.is.arr(actions) ? actions : [actions]).each(function (action) {
           if (typeof this.beforeFilters[action] === 'undefined') this.beforeFilters[action] = []
           this.beforeFilters[action].push(fn)
@@ -21,7 +24,7 @@ module.exports = function (app) {
 
     , addExcludeFilter: function (actions, fn) {
         v(v.is.arr(actions) ? actions : [actions]).each(function (action) {
-          if(typeof this.excludeFilters[action] === 'undefined') this.excludeFilters[action] = []
+          if (typeof this.excludeFilters[action] === 'undefined') this.excludeFilters[action] = []
           this.excludeFilters[action].push(fn)
         }, this)
       }
@@ -37,7 +40,7 @@ module.exports = function (app) {
     , render: function (res, view, data, fn) {
         if (!viewCache[view]) {
           var suffix = '.' + app.set('view engine')
-          v.find(this._paths, function(p) {
+          v.find(this._paths, function (p) {
             try {
               var viewFile = p + '/views/' + view
               fs.statSync(viewFile + suffix)
@@ -55,7 +58,8 @@ module.exports = function (app) {
             layout: this.layout
           , locals: data
           , partials: app.getPartials(this._paths)
-        }, fn)
+          }, fn
+        )
       }
     })
 }

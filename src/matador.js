@@ -2,7 +2,7 @@ var fs = require('fs')
   , express = module.exports = require('express')
   , path = require('path')
   , hogan = require('hogan.js')
-  , Class = global.Class = require('klass')
+  , klass = global.klass = require('klass')
   , v = global.v = require('valentine')
   , router = require('./router')
   , argv = module.exports.argv = require('optimist').argv
@@ -12,9 +12,9 @@ module.exports.createApp = function (baseDir, configuration, options) {
   options = options || {}
 
   var appDir = baseDir + "/app"
-    , fileCache = {'services':{},'helpers':{},'models':{}, 'controllers':{}}
-    , objCache = {'services':{},'helpers':{},'models':{}, 'controllers':{}}
-    , pathCache = {'services':{},'helpers':{},'models':{}, 'controllers':{}}
+    , fileCache = {'services': {}, 'helpers': {}, 'models': {}, 'controllers': {}}
+    , objCache = {'services': {}, 'helpers': {}, 'models': {}, 'controllers': {}}
+    , pathCache = {'services': {}, 'helpers': {}, 'models': {}, 'controllers': {}}
     , partialCache = {}
     , appDirs = [appDir].concat(v(function () {
         var dir = appDir + '/modules'
@@ -35,7 +35,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
             return false
           }
           fileCache[subdir][name] = require(filename)(app, (configuration[subdir] && configuration[subdir][name] ? configuration[subdir][name] : {}))
-          pathCache[subdir][name] = dir === appDir ? [appDir] : [dir,appDir]
+          pathCache[subdir][name] = dir === appDir ? [appDir] : [dir, appDir]
           return true
         })
         if (!dir) throw new Error("Unable to find " + subdir + "/" + name)
@@ -43,10 +43,10 @@ module.exports.createApp = function (baseDir, configuration, options) {
         return fileCache[subdir][name]
       }
     , loadClass = function (subdir, name, definitionOnly) {
-        if(definitionOnly) return loadFile(subdir, name)
+        if (definitionOnly) return loadFile(subdir, name)
         if (!objCache[subdir][name]) {
-          var file = loadFile(subdir, name)
-          objCache[subdir][name] = new file
+          var File = loadFile(subdir, name)
+          objCache[subdir][name] = new File()
           objCache[subdir][name]._paths = pathCache[subdir][name]
         }
         return objCache[subdir][name]
@@ -93,7 +93,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
       v.each(appDirs, function (dir) {
         try {
           v.each(fs.readdirSync(dir + "/" + type), function (file) {
-            if(file.substr(file.length - 3) === '.js') file = file.substr(0, file.length - 3)
+            if (file.substr(file.length - 3) === '.js') file = file.substr(0, file.length - 3)
             loadFile(type, file, dir)
           })
         }
@@ -126,7 +126,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
                 v.each(fs.readdirSync(fullPath), function (partial) {
                   var viewFile = localDir
                     + (localDir.length ? "/" : "")
-                    + partial.substr(0,partial.length-viewSuffix.length)
+                    + partial.substr(0, partial.length - viewSuffix.length)
                     , partialContent = fs.readFileSync(fullPath + "/" + partial, 'utf8')
 
                   pathPartials[viewFile] = hogan.compile(partialContent)
@@ -143,7 +143,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
     v.each(objs, function (obj) {
       v.each(obj, function (name, partial) {
-        if(!partials[name]) partials[name] = partial
+        if (!partials[name]) partials[name] = partial
       })
     })
     return partials
@@ -155,7 +155,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
   app.getController = function (name, definitionOnly) {
     if (app.controllers[name]) {
-      return definitionOnly ? app.controllers[name] : new app.controllers[name]
+      return definitionOnly ? app.controllers[name] : new app.controllers[name]()
     }
     else {
       return loadClass('controllers', name + "Controller", definitionOnly)

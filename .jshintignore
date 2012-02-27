@@ -1,0 +1,5 @@
+node_modules
+src/node_modules
+src/all/node_modules
+src/all/app/public
+.git

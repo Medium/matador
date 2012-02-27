@@ -1,3 +1,3 @@
-module.exports = function(app,config) {
-  return Class()
+module.exports = function (app, config) {
+  return klass()
 }

@@ -2,7 +2,7 @@ var fs = require('fs')
   , path = require('path')
 
 function Cache() {
- this._ = {}
+  this._ = {}
 }
 Cache.prototype = {
   get: function (k) {
@@ -15,7 +15,7 @@ Cache.prototype = {
 }
 
 var cache = new Cache()
-module.exports = function(app, config) {
+module.exports = function (app, config) {
   return app.controllers.Base.extend(function () {
     this.layout = false
   })
@@ -36,8 +36,8 @@ module.exports = function(app, config) {
             return '<a href="' + f + '">' + f + '</a>'
           })
         this.render(response, 'directory', {
-            directory: req
-          , files: files
+          directory: req
+        , files: files
         })
       }
     })

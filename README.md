@@ -258,17 +258,13 @@ The Valentine module is included as a simple tool giving you type checking, func
     $ matador controller [name]
     $ matador model [name]
 
-# Todo
-There are always things to do. Our short-list currently includes the following:
-
-  * ~~build more scaffolding commands (for models, controllers, helpers)~~
-  * ~~better view partials support~~
-  * official docs
-
-
-# Contributing
+# Contributing & Development
 
 Questions, pull requests, bug reports are all welcome. Submit them here on Github.
+When submitting pull requests, please run through the linter to conform to the framework style
+
+    $ npm install -d
+    $ npm run-script lint
 
 # Authors
 

@@ -1,5 +1,5 @@
 module.exports = {
-    models: {}
-  , services: {}
-  , controllers: {}
+  models: {}
+, services: {}
+, controllers: {}
 }

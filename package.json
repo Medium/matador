@@ -28,4 +28,10 @@
       , "hogan.js": "*"
       , "optimist": "*"
     }
+  , "devDependencies": {
+      "jshint": "0.5.8"
+    }
+  , "scripts": {
+      "lint": "node_modules/jshint/bin/hint src/ --reporter dev/reporter.js"
+    }
 }

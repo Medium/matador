@@ -10,7 +10,7 @@ function match(app, prefix, method, route, middleware, controllerName, action) {
   if (filters.length) {
     middleware = typeof Controller.excludeFilters[action] === 'undefined' ?
       filters.concat(middleware) :
-      v(filters).filter(function(filter){
+      v(filters).filter(function (filter) {
         return !v.inArray(Controller.excludeFilters[action], filter)
       }).concat(middleware)
   }
@@ -23,7 +23,7 @@ function match(app, prefix, method, route, middleware, controllerName, action) {
 module.exports.init = function (app, routes) {
   // static directory server
   routes.root.push(['get', /(.+)/, 'Static'])
-  v.each(routes, function(key, value) {
+  v.each(routes, function (key, value) {
     v(value).each(function (tuple) {
       var tupleLen = tuple.length
         , numOptionalArgs = tupleLen - 2
