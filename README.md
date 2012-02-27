@@ -60,6 +60,8 @@ this.render(response, 'index', {
 
 ### View Partials
 
+**To Be Updated**
+
 Matador looks for view partials in a folder named partials in the views directory: ```app/views/partials/```
 
 ``` js
