@@ -55,7 +55,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
   app.set('base_dir', appDir)
 
   v(appDirs).each(function (dir) {
-    // this is a no.... must re-do
+    // @TODO - this is a no.... must re-do
     var directory = dir + '/public'
     app.set('public', directory)
     path.existsSync(directory) && app.use(express.static(directory))
@@ -83,6 +83,11 @@ module.exports.createApp = function (baseDir, configuration, options) {
       catch (e) {
         console.log(e.stack)
       }
+    })
+    // static directory server
+
+    router.init(this, {
+      root: [['get', /(.+)/, 'Static']]
     })
   }
 

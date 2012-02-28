@@ -21,8 +21,6 @@ function match(app, prefix, method, route, middleware, controllerName, action) {
 }
 
 module.exports.init = function (app, routes) {
-  // static directory server
-  routes.root.push(['get', /(.+)/, 'Static'])
   v.each(routes, function (key, value) {
     v(value).each(function (tuple) {
       var tupleLen = tuple.length
