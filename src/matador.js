@@ -9,7 +9,7 @@ var fs = require('fs')
   , minifyViews = process.env.minify || false
 var minify = function () {
   var r = /(<script[^>]*>[\s\S]+?<\/script>)/
-    , scr = /^<script[^>]*>([\s\S]+?)<\/script>/
+    , scr = /^<script([^>]*)>([\s\S]+?)<\/script>/
     , white = /\s+/g
     , closeTags = />\s+</g
     , jsp = require('uglify-js').parser
@@ -27,7 +27,7 @@ var minify = function () {
   return function (doc) {
     if (!minifyViews) return doc
     return doc.trim().replace(/ +/g, ' ').split(r).map(function (p, i, m) {
-      return (m = p.match(scr)) ? '<script>' + uglify(m[1]) + '</script>' : p.replace(white, ' ')
+      return (m = p.match(scr)) ? '<script' + m[1] + '>' + uglify(m[2]) + '</script>' : p.replace(white, ' ')
     }).join('').replace(closeTags, '><')
   }
 }()
