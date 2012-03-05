@@ -1,2 +1,8 @@
 <h1>Welcome to {{title}}</h1>
 {{>helloworld}}
+<script>
+  var welcome = function (msg) {
+    console.log(msg)
+  }
+  welcome('welcome to {{title}}')
+</script>

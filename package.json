@@ -1,7 +1,7 @@
 {
     "name": "matador"
   , "description": "an MVC framework for Node"
-  , "version": "1.0.1-beta"
+  , "version": "1.0.2-beta"
   , "homepage": "https://github.com/Obvious/matador"
   , "main": "src/matador.js"
   , "authors": [
@@ -27,6 +27,7 @@
       , "colors": "*"
       , "hogan.js": "*"
       , "optimist": "*"
+      , "uglify-js": ">=1.2.5"
     }
   , "devDependencies": {
       "jshint": "0.5.8"

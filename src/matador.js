@@ -6,12 +6,37 @@ var fs = require('fs')
   , v = global.v = require('valentine')
   , router = require('./router')
   , argv = module.exports.argv = require('optimist').argv
+  , minifyViews = process.env.minify || false
+var minify = function () {
+  var r = /(<script[^>]*>[\s\S]+?<\/script>)/
+    , scr = /^<script[^>]*>([\s\S]+?)<\/script>/
+    , white = /\s+/g
+    , closeTags = />\s+</g
+    , jsp = require('uglify-js').parser
+    , pro = require('uglify-js').uglify
+    , uglify = function (src) {
+        try {
+          var ast = jsp.parse(src)
+          ast = pro.ast_squeeze(ast)
+          return pro.gen_code(ast)
+        }
+        catch (ex) {
+          return src
+        }
+      }
+  return function (doc) {
+    if (!minifyViews) return doc
+    return doc.trim().replace(/ +/g, ' ').split(r).map(function (p, i, m) {
+      return (m = p.match(scr)) ? '<script>' + uglify(m[1]) + '</script>' : p.replace(white, ' ')
+    }).join('').replace(closeTags, '><')
+  }
+}()
 
 module.exports.createApp = function (baseDir, configuration, options) {
   configuration = configuration || {}
   options = options || {}
 
-  var appDir = baseDir + "/app"
+  var appDir = baseDir + '/app'
     , fileCache = {'services': {}, 'helpers': {}, 'models': {}, 'controllers': {}}
     , objCache = {'services': {}, 'helpers': {}, 'models': {}, 'controllers': {}}
     , pathCache = {'services': {}, 'helpers': {}, 'models': {}, 'controllers': {}}
@@ -20,7 +45,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
         var dir = appDir + '/modules'
         return path.existsSync(dir) ? fs.readdirSync(dir) : []
       }()).map(function (dir) {
-        return appDir + "/modules/" + dir
+        return appDir + '/modules/' + dir
       }))
     , app = express.createServer()
     , loadFile = function (subdir, name, path) {
@@ -38,7 +63,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
           pathCache[subdir][name] = dir === appDir ? [appDir] : [dir, appDir]
           return true
         })
-        if (!dir) throw new Error("Unable to find " + subdir + "/" + name)
+        if (!dir) throw new Error('Unable to find ' + subdir + '/' + name)
 
         return fileCache[subdir][name]
       }
@@ -81,7 +106,6 @@ module.exports.createApp = function (baseDir, configuration, options) {
         router.init(self, require(filename)(self))
       }
       catch (e) {
-        console.log(e.stack)
       }
     })
     // static directory server
@@ -94,10 +118,10 @@ module.exports.createApp = function (baseDir, configuration, options) {
   app.prefetch = function (options) {
     var self = this
 
-    v.each(["helpers", "models", "services", "controllers"], function (type) {
+    v.each(['helpers', 'models', 'services', 'controllers'], function (type) {
       v.each(appDirs, function (dir) {
         try {
-          v.each(fs.readdirSync(dir + "/" + type), function (file) {
+          v.each(fs.readdirSync(dir + '/' + type), function (file) {
             if (file.substr(file.length - 3) === '.js') file = file.substr(0, file.length - 3)
             loadFile(type, file, dir)
           })
@@ -112,7 +136,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
       , objs = v.map(paths, function (path) {
         if (!partialCache[path]) {
           var viewSuffix = '.' + app.set('view engine')
-            , viewsRoot = path + "/views"
+            , viewsRoot = path + '/views'
             , pathPartials = {}
             , dirs = [viewsRoot]
 
@@ -121,20 +145,20 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
             try {
               v.each(fs.readdirSync(dir), function (file) {
-                var fullPath = dir + "/" + file
+                var fullPath = dir + '/' + file
                   , stat = fs.statSync(fullPath)
                   , localDir = dir.substr(viewsRoot.length + 1)
 
                 if (!stat.isDirectory()) return
-                if (file !== "partials") return dirs.push(fullPath)
+                if (file !== 'partials') return dirs.push(fullPath)
 
                 v.each(fs.readdirSync(fullPath), function (partial) {
                   var viewFile = localDir
-                    + (localDir.length ? "/" : "")
+                    + (localDir.length ? '/' : '')
                     + partial.substr(0, partial.length - viewSuffix.length)
-                    , partialContent = fs.readFileSync(fullPath + "/" + partial, 'utf8')
+                    , partialContent = fs.readFileSync(fullPath + '/' + partial, 'utf8')
 
-                  pathPartials[viewFile] = hogan.compile(partialContent)
+                  pathPartials[viewFile] = hogan.compile(minify(partialContent))
                 })
               })
             }
@@ -155,7 +179,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
   }
 
   app.getService = function (name, definitionOnly) {
-    return loadClass("services", name + "Service", definitionOnly)
+    return loadClass('services', name + 'Service', definitionOnly)
   }
 
   app.getController = function (name, definitionOnly) {
@@ -163,12 +187,12 @@ module.exports.createApp = function (baseDir, configuration, options) {
       return definitionOnly ? app.controllers[name] : new app.controllers[name]()
     }
     else {
-      return loadClass('controllers', name + "Controller", definitionOnly)
+      return loadClass('controllers', name + 'Controller', definitionOnly)
     }
   }
 
   app.getModel = function (name, definitionOnly) {
-    return loadClass("models", name + "Model", definitionOnly)
+    return loadClass('models', name + 'Model', definitionOnly)
   }
 
   app.getHelper = function (name) {
@@ -180,9 +204,12 @@ module.exports.createApp = function (baseDir, configuration, options) {
   return app
 }
 
+
+
 module.exports.engine = {
   compile: function (source, options) {
-    if (typeof source != 'string') return source
+    if (typeof source !== 'string') return source
+    source = minify(source)
     return function (options) {
       options.locals = options.locals || {}
       options.partials = options.partials || {}
