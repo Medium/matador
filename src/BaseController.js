@@ -1,7 +1,9 @@
 var fs = require('fs')
+  , path = require('path')
 
 module.exports = function (app) {
   var viewCache = {}
+    , layoutCache = {}
 
   return klass(function () {
     this._paths = [app.set('base_dir')]
@@ -52,10 +54,17 @@ module.exports = function (app) {
             }
           })
         }
+        
+        if (!layoutCache[this.layout]) {
+          var layoutPath = v(this._paths).find(function (_path) {
+            return path.existsSync(_path + "/views/" + this.layout + suffix)
+          })
+          layoutCache[this.layout] = layoutPath ? layoutPath + "/views/" + this.layout : this.layout
+        }
 
         data = data || {}
         return res.render(viewCache[view], {
-            layout: this.layout
+            layout: layoutCache[this.layout]
           , locals: data
           , partials: app.getPartials(this._paths)
           }, fn
