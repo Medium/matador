@@ -58,7 +58,7 @@ module.exports = function (app) {
         if (!layoutCache[this.layout]) {
           var layoutPath = v(this._paths).find(function (_path) {
             return path.existsSync(_path + "/views/" + this.layout + suffix)
-          }.bind(this)
+          }.bind(this))
           layoutCache[this.layout] = layoutPath ? layoutPath + "/views/" + this.layout : this.layout
         }
 
