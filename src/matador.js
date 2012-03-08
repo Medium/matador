@@ -67,11 +67,11 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
         return fileCache[subdir][name]
       }
-    , loadClass = function (subdir, name, definitionOnly) {
+    , loadClass = function (subdir, name, localName, definitionOnly) {
         if (definitionOnly) return loadFile(subdir, name)
         if (!objCache[subdir][name]) {
           var File = loadFile(subdir, name)
-          objCache[subdir][name] = new File()
+          objCache[subdir][name] = new File(localName, pathCache[subdir][name])
           objCache[subdir][name]._paths = pathCache[subdir][name]
         }
         return objCache[subdir][name]
@@ -179,20 +179,20 @@ module.exports.createApp = function (baseDir, configuration, options) {
   }
 
   app.getService = function (name, definitionOnly) {
-    return loadClass('services', name + 'Service', definitionOnly)
+    return loadClass('services', name + 'Service', name, definitionOnly)
   }
 
   app.getController = function (name, definitionOnly) {
     if (app.controllers[name]) {
-      return definitionOnly ? app.controllers[name] : new app.controllers[name]()
+      return definitionOnly ? app.controllers[name] : new app.controllers[name](name, [])
     }
     else {
-      return loadClass('controllers', name + 'Controller', definitionOnly)
+      return loadClass('controllers', name + 'Controller', name, definitionOnly)
     }
   }
 
   app.getModel = function (name, definitionOnly) {
-    return loadClass('models', name + 'Model', definitionOnly)
+    return loadClass('models', name + 'Model', name, definitionOnly)
   }
 
   app.getHelper = function (name) {
