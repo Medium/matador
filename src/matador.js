@@ -78,11 +78,9 @@ module.exports.createApp = function (baseDir, configuration, options) {
       }
 
   app.set('base_dir', appDir)
-
+  app.set('public', appDir + '/public')
   v(appDirs).each(function (dir) {
-    // @TODO - this is a no.... must re-do
     var directory = dir + '/public'
-    app.set('public', directory)
     path.existsSync(directory) && app.use(express.static(directory))
   })
 
