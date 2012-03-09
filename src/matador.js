@@ -48,12 +48,12 @@ module.exports.createApp = function (baseDir, configuration, options) {
         return appDir + '/modules/' + dir
       }))
     , app = express.createServer()
-    , loadFile = function (subdir, name, path) {
+    , loadFile = function (subdir, name, p) {
         if (typeof(fileCache[subdir][name]) !== 'undefined') return fileCache[subdir][name]
 
-        var dir = v.find((path ? [path] : appDirs), function (dir) {
+        var dir = v.find((p ? [p] : appDirs), function (dir) {
           var filename = dir + '/' + subdir + '/' + name + '.js'
-          if(!path.existsSync(filename)) return false
+          if (!path.existsSync(filename)) return false
           fileCache[subdir][name] = require(filename)(app, (configuration[subdir] && configuration[subdir][name] ? configuration[subdir][name] : {}))
           pathCache[subdir][name] = dir === appDir ? [appDir] : [dir, appDir]
           return true
