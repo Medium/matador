@@ -33,7 +33,12 @@ var minify = function () {
 }()
 
 function isDirectory(p) {
-  return fs.statSync(p).isDirectory()
+  try {
+    return fs.statSync(p).isDirectory()
+  }
+  catch (ex) {
+    return false
+  }
 }
 
 module.exports.createApp = function (baseDir, configuration, options) {
