@@ -61,12 +61,17 @@ module.exports = function (app) {
           }.bind(this))
           layoutCache[this.layout] = layoutPath ? layoutPath + "/views/" + this.layout : this.layout
         }
-
+        var partials = v(this._paths).map(function (p) {
+          return p + '/views'
+        })
+        if (layoutCache[this.layout]) {
+          partials = [viewCache[view].replace(/\/[^\/]*$/, '')].concat(partials)
+        }
         data = data || {}
         return res.render(viewCache[view], {
             layout: layoutCache[this.layout]
           , locals: data
-          , partials: app.getPartials(this._paths)
+          , partials: app.getPartials(partials)
           }, fn
         )
       }
