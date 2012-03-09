@@ -32,6 +32,10 @@ var minify = function () {
   }
 }()
 
+function isDirectory(p) {
+  return fs.statSync(p).isDirectory()
+}
+
 module.exports.createApp = function (baseDir, configuration, options) {
   configuration = configuration || {}
   options = options || {}
@@ -89,7 +93,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
     v.each(appDirs, function (dir) {
       var filename = dir + '/config/routes.js'
-      if(!path.existsSync(filename)) return
+      if (!path.existsSync(filename)) return
       router.init(self, require(filename)(self))
     })
     // static directory server
@@ -104,7 +108,9 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
     v.each(['helpers', 'models', 'services', 'controllers'], function (type) {
       v.each(appDirs, function (dir) {
-        v.each(fs.readdirSync(dir + '/' + type), function (file) {
+        var d = dir + '/' + type
+        if (!isDirectory(d)) return
+        v.each(fs.readdirSync(d), function (file) {
           if (file.substr(file.length - 3) === '.js') file = file.substr(0, file.length - 3)
           loadFile(type, file, dir)
         })
