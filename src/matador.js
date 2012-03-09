@@ -53,12 +53,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
         var dir = v.find((path ? [path] : appDirs), function (dir) {
           var filename = dir + '/' + subdir + '/' + name + '.js'
-          try {
-            fs.statSync(filename)
-          }
-          catch (e) {
-            return false
-          }
+          if(!path.existsSync(filename)) return false
           fileCache[subdir][name] = require(filename)(app, (configuration[subdir] && configuration[subdir][name] ? configuration[subdir][name] : {}))
           pathCache[subdir][name] = dir === appDir ? [appDir] : [dir, appDir]
           return true
@@ -94,17 +89,8 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
     v.each(appDirs, function (dir) {
       var filename = dir + '/config/routes.js'
-      try {
-        fs.statSync(filename)
-      }
-      catch (e) {
-        return
-      }
-      try {
-        router.init(self, require(filename)(self))
-      }
-      catch (e) {
-      }
+      if(!path.existsSync(filename)) return
+      router.init(self, require(filename)(self))
     })
     // static directory server
 
@@ -118,13 +104,10 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
     v.each(['helpers', 'models', 'services', 'controllers'], function (type) {
       v.each(appDirs, function (dir) {
-        try {
-          v.each(fs.readdirSync(dir + '/' + type), function (file) {
-            if (file.substr(file.length - 3) === '.js') file = file.substr(0, file.length - 3)
-            loadFile(type, file, dir)
-          })
-        }
-        catch (e) {}
+        v.each(fs.readdirSync(dir + '/' + type), function (file) {
+          if (file.substr(file.length - 3) === '.js') file = file.substr(0, file.length - 3)
+          loadFile(type, file, dir)
+        })
       })
     })
   }
