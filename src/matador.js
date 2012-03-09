@@ -117,7 +117,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
       , objs = v.map(paths, function (path) {
         if (!partialCache[path]) {
           var viewSuffix = '.' + app.set('view engine')
-            , viewsRoot = path + '/views'
+            , viewsRoot = path
             , pathPartials = {}
             , dirs = [viewsRoot]
 
