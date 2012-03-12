@@ -16,7 +16,7 @@ function match(app, prefix, method, route, middleware, controllerName, action) {
   }
 
   app[method](route, middleware, function (req, res, next) {
-    Controller[action].apply(Controller, [req, res].concat(v(req.params).values()))
+    Controller[action].apply(Controller, [req, res].concat(v(req.params).values().concat(next)))
   })
 }
 
