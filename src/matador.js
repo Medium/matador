@@ -46,9 +46,9 @@ module.exports.createApp = function (baseDir, configuration, options) {
   options = options || {}
 
   var appDir = baseDir + '/app'
-    , fileCache = {'services': {}, 'helpers': {}, 'models': {}, 'controllers': {}}
+    , fileCache = {'services': {}, 'helpers': {}, 'models': {}, 'controllers': {}, 'config': {}}
     , objCache = {'services': {}, 'helpers': {}, 'models': {}, 'controllers': {}}
-    , pathCache = {'services': {}, 'helpers': {}, 'models': {}, 'controllers': {}}
+    , pathCache = {'services': {}, 'helpers': {}, 'models': {}, 'controllers': {}, 'config': {}}
     , partialCache = {}
     , appDirs = [appDir].concat(v(function () {
         var dir = appDir + '/modules'
@@ -61,8 +61,16 @@ module.exports.createApp = function (baseDir, configuration, options) {
         if (typeof(fileCache[subdir][name]) !== 'undefined') return fileCache[subdir][name]
 
         var dir = v.find((p ? [p] : appDirs), function (dir) {
-          var filename = dir + '/' + subdir + '/' + name + '.js'
-          if (!path.existsSync(filename)) return false
+          var base = dir + '/' + subdir + '/' + name
+          var filename
+          if (path.existsSync(base + '.js'))  {
+            filename = base + '.js'
+          } else if (path.existsSync(base + '.coffee')) {
+            filename = base + '.coffee'
+          } else {
+            return false
+          }
+
           fileCache[subdir][name] = require(filename)(app, (configuration[subdir] && configuration[subdir][name] ? configuration[subdir][name] : {}))
           pathCache[subdir][name] = dir === appDir ? [appDir] : [dir, appDir]
           return true
@@ -97,9 +105,10 @@ module.exports.createApp = function (baseDir, configuration, options) {
       , self = this
 
     v.each(appDirs, function (dir) {
-      var filename = dir + '/config/routes.js'
-      if (!path.existsSync(filename)) return
-      router.init(self, require(filename)(self))
+      var routes = loadFile('config', 'routes', dir)
+      if (routes) {
+        router.init(self, routes)
+      }
     })
     // static directory server
 
@@ -116,7 +125,12 @@ module.exports.createApp = function (baseDir, configuration, options) {
         var d = dir + '/' + type
         if (!isDirectory(d)) return
         v.each(fs.readdirSync(d), function (file) {
-          if (file.substr(file.length - 3) === '.js') file = file.substr(0, file.length - 3)
+          if (file.substr(file.length - 3) === '.js') {
+            file = file.substr(0, file.length - 3);
+          }
+          else if (file.substr(file.length - 7) === '.coffee') {
+            file = file.substr(0, file.length - 7);
+          }
           loadFile(type, file, dir)
         })
       })
