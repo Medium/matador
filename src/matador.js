@@ -1,7 +1,7 @@
 var fs = require('fs')
   , express = module.exports = require('express')
   , path = require('path')
-  , hogan = require('hogan.js')
+  , hogan = require('hogan')
   , klass = global.klass = require('klass')
   , v = global.v = require('valentine')
   , router = require('./router')
