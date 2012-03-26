@@ -15,9 +15,7 @@ function match(app, prefix, method, route, middleware, controllerName, action) {
       }).concat(middleware)
   }
 
-  app[method](route, middleware, function (req, res, next) {
-    Controller[action].apply(Controller, [req, res].concat(v(req.params).values()))
-  })
+  app[method](route, middleware, Controller[action].bind(Controller))
 }
 
 module.exports.init = function (app, routes) {
