@@ -151,16 +151,23 @@ module.exports.createApp = function (baseDir, configuration, options) {
                 if (file !== 'partials') return dirs.push(fullPath)
 
                 v.each(fs.readdirSync(fullPath), function (partial) {
-                  var viewFile = localDir
+                  var partialFilename = fullPath + '/' + partial
+                    , viewFile = localDir
                     + (localDir.length ? '/' : '')
                     + partial.substr(0, partial.length - viewSuffix.length)
-                    , partialContent = fs.readFileSync(fullPath + '/' + partial, 'utf8')
+                    , partialContent = fs.readFileSync(partialFilename, 'utf8')
 
-                  pathPartials[viewFile] = hogan.compile(minify(partialContent))
+                  try {
+                    pathPartials[viewFile] = hogan.compile(minify(partialContent))
+                  }catch (e) {
+                    console.log("Unable to compile partial", partialFilename, e)
+                  }
                 })
               })
             }
-            catch (e) {}
+            catch (e) {
+              console.log(e)
+            }
           }
           partialCache[path] = pathPartials
         }
@@ -212,7 +219,11 @@ module.exports.engine = {
       if (options.body) options.locals.body = options.body
       for (var i in options.partials) {
         if (v.is.fun(options.partials[i].r)) continue
-        options.partials[i] = hogan.compile(options.partials[i])
+          try {
+            options.partials[i] = hogan.compile(options.partials[i])
+          }catch (e) {
+            console.log("Unable to compile partial", i, e)
+          }
       }
       return hogan.compile(source, options).render(options.locals, options.partials)
     }
