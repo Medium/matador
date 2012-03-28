@@ -92,6 +92,10 @@ module.exports.createApp = function (baseDir, configuration, options) {
     Base: require('./BaseController')(app)
   }
 
+  app.addModulePath = function (dir) {
+    appDirs.push(dir)
+  }
+
   app.mount = function () {
     var router = require('./router')
       , self = this
@@ -195,8 +199,6 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
   return app
 }
-
-
 
 module.exports.engine = {
   compile: function (source, options) {
