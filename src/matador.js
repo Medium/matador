@@ -80,13 +80,14 @@ module.exports.createApp = function (baseDir, configuration, options) {
         }
         return objCache[subdir][name]
       }
+    , mountPublicDir = function (moduleDir) {
+      var directory = dir + '/public'
+      path.existsSync(directory) && app.use(express.static(directory))
+    }
 
   app.set('base_dir', appDir)
   app.set('public', appDir + '/public')
-  v(appDirs).each(function (dir) {
-    var directory = dir + '/public'
-    path.existsSync(directory) && app.use(express.static(directory))
-  })
+  v(appDirs).each(mountPublicDir)
 
   app.controllers = {
     Base: require('./BaseController')(app)
@@ -94,6 +95,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
   app.addModulePath = function (dir) {
     appDirs.push(dir)
+    mountPublicDir(dir)
   }
 
   app.mount = function () {
