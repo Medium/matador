@@ -80,7 +80,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
         }
         return objCache[subdir][name]
       }
-    , mountPublicDir = function (moduleDir) {
+    , mountPublicDir = function (dir) {
       var directory = dir + '/public'
       path.existsSync(directory) && app.use(express.static(directory))
     }
