@@ -201,7 +201,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
   }
 
   app.getHelper = function (name) {
-    return loadFile('helpers', name, true)
+    return loadFile('helpers', name + 'Helper')
   }
 
   app.controllers.Static = require('./StaticController')(app)
