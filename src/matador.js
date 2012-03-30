@@ -135,19 +135,19 @@ module.exports.createApp = function (baseDir, configuration, options) {
    *
    * All templates are added from the /partials/ folder within the current view directory.  We then
    * move to the parent directory and add any partials from it's /partials/ folder that don't conflict
-   * with ones already added.  We then move to the next parent directory and so on until we reach the
+   * with ones already added. We then move to the next parent directory and so on until we reach the
    * application root.
    *
-   * This allows views to use common templates, and be able to override sub-templates. 
+   * This allows views to use common templates, and be able to override sub-templates.
    *
-   * Example:  consider the following directory structure:
+   * Example: consider the following directory structure:
    *   app/
    *       views/
    *           partials/
    *               user-details.html  - contains {{> user-link}})
    *               user-link.html
    *           search/
-   *               results.html  - contains {{> user-details}}
+   *               results.html - contains {{> user-details}}
    *               partials/
    *                   user-link.html
    *           post/
@@ -157,10 +157,10 @@ module.exports.createApp = function (baseDir, configuration, options) {
    *   app/views/search/partial/user-link.html
    *   app/views/partial/user-details.html
    *
-   * The partials for app/views/post will only contain app/views/partials/*
+   * The partials for app/views/post will only contain app/views/partials/%
    *
    *
-   * TODO: This uses synchronous filesystem APIs.  It should either be performed at start up
+   * TODO: This uses synchronous filesystem APIs. It should either be performed at start up
    * for all controllers or else switched to use async APIs.
    */
   app.getPartials = function (viewDir) {
@@ -170,7 +170,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
     if (!partialCache[viewDir]) {
 
       if (path.relative(rootDir, viewDir).indexOf('../') != -1) {
-        throw Error('View directories must live beneath the application root.')
+        throw new Error('View directories must live beneath the application root.')
       }
 
       var partials = {}
@@ -188,8 +188,8 @@ module.exports.createApp = function (baseDir, configuration, options) {
             // If the map already contains this partial it means it has already been specified higher
             // up the view hierarchy.
             if (!partials[partialName]) {
+              var partialFilename = path.resolve(partialDir, file)
               try {
-                var partialFilename = path.resolve(partialDir, file)
                 var partialContent = fs.readFileSync(partialFilename, 'utf8')
                 partials[partialName] = hogan.compile(minify(partialContent))
               } catch (e) {
@@ -199,7 +199,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
           })
         } catch (e) {
           // Only log errors if they are not a "no such file or directory" error, since we expect
-          // those to happen.  (Saves us an fs.statSync.)
+          // those to happen. (Saves us an fs.statSync.)
           if (e.code != 'ENOENT') console.log('Unable to read partials directory', partialDir, e)
         }
         viewDir = path.resolve(viewDir, '../')
@@ -208,7 +208,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
     }
 
     // Note: This does more work than is necessary, since common parents of views will
-    // be hit once for each view.  If this turns out to be problematic we can cache at
+    // be hit once for each view. If this turns out to be problematic we can cache at
     // intermediate folders as well.
 
     return partialCache[viewDir]
@@ -250,11 +250,11 @@ module.exports.engine = {
       if (options.body) options.locals.body = options.body
       for (var i in options.partials) {
         if (v.is.fun(options.partials[i].r)) continue
-          try {
-            options.partials[i] = hogan.compile(options.partials[i])
-          }catch (e) {
-            console.log("Unable to compile partial", i, e)
-          }
+        try {
+          options.partials[i] = hogan.compile(options.partials[i])
+        } catch (e) {
+          console.log("Unable to compile partial", i, e)
+        }
       }
       return hogan.compile(source, options).render(options.locals, options.partials)
     }

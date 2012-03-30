@@ -59,7 +59,7 @@ module.exports = function (app) {
   /**
    * Searches through a set of paths for a matching view file.
    */
-  function findViewFile (paths, view) {
+  function findViewFile(paths, view) {
     if (!viewCache[view]) {
       viewCache[view] = findFile(paths, 'views/' + view + '.' + app.set('view engine'))
     }
@@ -69,7 +69,7 @@ module.exports = function (app) {
   /**
    * Searches through a set of paths for a matching layout file.
    */
-  function findLayoutFile (paths, layout) {
+  function findLayoutFile(paths, layout) {
     if (!layoutCache[layout]) {
       var suffix = '.' + app.set('view engine')
       var layoutPath = findFile(paths, 'views/' + layout + suffix)
@@ -81,7 +81,7 @@ module.exports = function (app) {
   /**
    * Searches a set of paths for a given file, returning the full path if it is found.
    */
-  function findFile (paths, file) {
+  function findFile(paths, file) {
     for (var i = 0; i < paths.length; i++) {
       var filePath = path.resolve(paths[i], file)
       if (path.existsSync(filePath)) {
