@@ -73,7 +73,7 @@ module.exports = function (app) {
     if (!layoutCache[layout]) {
       var suffix = '.' + app.set('view engine')
       var layoutPath = findFile(paths, 'views/' + layout + suffix)
-      layoutCache[layout] = layoutPath ? layoutPath.substr(0, suffix.length) : layout
+      layoutCache[layout] = layoutPath ? layoutPath.substr(0, layoutPath.length - suffix.length) : layout
     }
     return layoutCache[layout]
   }
