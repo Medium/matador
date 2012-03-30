@@ -40,42 +40,57 @@ module.exports = function (app) {
       }
 
     , render: function (res, view, data, fn) {
-        if (!viewCache[view]) {
-          var suffix = '.' + app.set('view engine')
-          v.find(this._paths, function (p) {
-            try {
-              var viewFile = p + '/views/' + view
-              fs.statSync(viewFile + suffix)
-              viewCache[view] = viewFile
-              return true
-            }
-            catch (e) {
-              return false
-            }
-          })
-        }
-        
-        if (!layoutCache[this.layout]) {
-          var layoutPath = v(this._paths).find(function (_path) {
-            return path.existsSync(_path + "/views/" + this.layout + suffix)
-          }.bind(this))
-          layoutCache[this.layout] = layoutPath ? layoutPath + "/views/" + this.layout : this.layout
-        }
-        var partials = v(this._paths).map(function (p) {
-          return p + '/views'
-        })
-        if (layoutCache[this.layout]) {
-          partials = [viewCache[view].replace(/\/[^\/]*$/, '')].concat(partials)
-        }
         data = data || {}
-        return res.render(viewCache[view], {
-            layout: layoutCache[this.layout]
+        var layoutFile = findLayoutFile(this._paths, this.layout)
+        var viewFile = findViewFile(this._paths, view)
+
+        // Start looking for partials in the same directory as the view file.
+        var partialsDir = path.resolve(viewFile, '../')
+
+        return res.render(viewFile, {
+            layout: layoutFile
           , locals: data
-          , partials: app.getPartials(partials)
+          , partials: app.getPartials(partialsDir)
           }, fn
         )
       }
     })
+
+  /**
+   * Searches through a set of paths for a matching view file.
+   */
+  function findViewFile (paths, view) {
+    if (!viewCache[view]) {
+      viewCache[view] = findFile(paths, 'views/' + view + '.' + app.set('view engine'))
+    }
+    return viewCache[view]
+  }
+
+  /**
+   * Searches through a set of paths for a matching layout file.
+   */
+  function findLayoutFile (paths, layout) {
+    if (!layoutCache[layout]) {
+      var suffix = '.' + app.set('view engine')
+      var layoutPath = findFile(paths, 'views/' + layout + suffix)
+      layoutCache[layout] = layoutPath ? layoutPath.substr(0, suffix.length) : layout
+    }
+    return layoutCache[layout]
+  }
+
+  /**
+   * Searches a set of paths for a given file, returning the full path if it is found.
+   */
+  function findFile (paths, file) {
+    for (var i = 0; i < paths.length; i++) {
+      var filePath = path.resolve(paths[i], file)
+      if (path.existsSync(filePath)) {
+        return filePath
+      }
+    }
+    return null
+  }
+
 }
 
 
