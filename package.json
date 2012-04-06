@@ -25,7 +25,7 @@
       , "valentine": "*"
       , "klass": "*"
       , "colors": "*"
-      , "hogan.js": "*"
+      , "hogan": "*"
       , "optimist": "*"
       , "uglify-js": ">=1.2.5"
     }
