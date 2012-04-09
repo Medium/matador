@@ -122,6 +122,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
         var d = dir + '/' + type
         if (!isDirectory(d)) return
         v.each(fs.readdirSync(d), function (file) {
+          if (file.charAt(0) == '.') return
           if (file.substr(file.length - 3) === '.js') file = file.substr(0, file.length - 3)
           loadFile(type, file, dir)
         })
