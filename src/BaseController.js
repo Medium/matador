@@ -32,7 +32,14 @@ module.exports = function (app) {
       }
 
     , json: function (res, data, headers, status) {
-        res.json(data, headers, status)
+        var body = JSON.stringify(data)
+
+        var xssiPrefix = app.set('xssi prefix')
+        if (xssiPrefix) body = xssiPrefix + body
+
+        res.header('Content-Type', 'application/json')
+        res.charset = 'utf-8'
+        res.send(body, headers, status)
       }
 
     , error: function (res) {
