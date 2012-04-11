@@ -59,16 +59,15 @@ module.exports.createApp = function (baseDir, configuration, options) {
     , app = express.createServer()
     , loadFile = function (subdir, name, p) {
         if (typeof(fileCache[subdir][name]) !== 'undefined') return fileCache[subdir][name]
-
+        var pathname = name.replace(/\./g, '/')
         var dir = v.find((p ? [p] : appDirs), function (dir) {
-          var pathname = name.replace(/\./g, '/')
           var filename = dir + '/' + subdir + '/' + pathname + '.js'
           if (!path.existsSync(filename)) return false
           fileCache[subdir][name] = require(filename)(app, (configuration[subdir] && configuration[subdir][name] ? configuration[subdir][name] : {}))
           pathCache[subdir][name] = dir === appDir ? [appDir] : [dir, appDir]
           return true
         })
-        if (!dir) throw new Error('Unable to find ' + subdir + '/' + name)
+        if (!dir) throw new Error('Unable to find ' + subdir + '/' + pathname)
 
         return fileCache[subdir][name]
       }
@@ -123,6 +122,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
         var d = dir + '/' + type
         if (!isDirectory(d)) return
         v.each(fs.readdirSync(d), function (file) {
+          if (isDirectory(d + "/" + file)) return
           if (file.charAt(0) == '.') return
           if (file.substr(file.length - 3) === '.js') file = file.substr(0, file.length - 3)
           loadFile(type, file, dir)
