@@ -61,7 +61,8 @@ module.exports.createApp = function (baseDir, configuration, options) {
         if (typeof(fileCache[subdir][name]) !== 'undefined') return fileCache[subdir][name]
 
         var dir = v.find((p ? [p] : appDirs), function (dir) {
-          var filename = dir + '/' + subdir + '/' + name + '.js'
+          var pathname = name.replace(/\./g, '/')
+          var filename = dir + '/' + subdir + '/' + pathname + '.js'
           if (!path.existsSync(filename)) return false
           fileCache[subdir][name] = require(filename)(app, (configuration[subdir] && configuration[subdir][name] ? configuration[subdir][name] : {}))
           pathCache[subdir][name] = dir === appDir ? [appDir] : [dir, appDir]
