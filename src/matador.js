@@ -98,6 +98,10 @@ module.exports.createApp = function (baseDir, configuration, options) {
     mountPublicDir(dir)
   }
 
+  app.getModulePaths = function () {
+    return appDirs
+  }
+
   app.mount = function () {
     var router = require('./router')
       , self = this
