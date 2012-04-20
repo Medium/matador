@@ -45,7 +45,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
   configuration = configuration || {}
   options = options || {}
 
-  var appDir = baseDir + '/app'
+  var appDir = path.join(baseDir, '/app')
     , fileCache = {'services': {}, 'helpers': {}, 'models': {}, 'controllers': {}}
     , objCache = {'services': {}, 'helpers': {}, 'models': {}, 'controllers': {}}
     , pathCache = {'services': {}, 'helpers': {}, 'models': {}, 'controllers': {}}
