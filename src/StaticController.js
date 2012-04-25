@@ -24,7 +24,10 @@ module.exports = function (app, config) {
         var index
           , req = request.params[0]
           , place = app.set('public') + req
-        if (!path.existsSync(place)) return this.render(response, '404')
+        if (!path.existsSync(place)) {
+          response.statusCode = 404
+          return this.render(response, '404')
+        }
         if (!fs.statSync(place).isDirectory()) {
           if (fs.statSync(index = place.replace(/\/*$/, '') + '/index.html')) {
             return response.send(cache.get(index) || cache.set(fs.readFileSync(index)))
