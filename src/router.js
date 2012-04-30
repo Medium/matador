@@ -15,6 +15,7 @@ function match(app, prefix, method, route, middleware, controllerName, action) {
       }).concat(middleware)
   }
 
+  if (typeof Controller[action] !== 'function') throw new Error('Unable to find method \'' + action + '\' in controller \'' + controllerName + '\'')
   app[method](route, middleware, Controller[action].bind(Controller))
 }
 
