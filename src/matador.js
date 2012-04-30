@@ -294,33 +294,6 @@ module.exports.createApp = function (baseDir, configuration, options) {
   }
 
   /**
-   * Clear the existing controller instance from the cache
-   *
-   * @param {String} name the name of the controller
-   */
-  app.clearController = function (name) {
-    delete objCache[paths.CONTROLLERS][name]
-  }
-
-  /**
-   * Clear the existing service instance from the cache
-   *
-   * @param {String} name the name of the service
-   */
-  app.clearService = function (name) {
-    delete objCache[paths.SERVICES][name]
-  }
-
-  /**
-   * Clear the existing model instance from the cache
-   *
-   * @param {String} name the name of the model
-   */
-  app.clearModel = function (name, definitionOnly) {
-    delete objCache[paths.MODELS][name]
-  }
-
-  /**
    * Override the existing cached version of a service
    *
    * @param {String} name the name of the service
