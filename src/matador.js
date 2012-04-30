@@ -63,9 +63,9 @@ module.exports.createApp = function (baseDir, configuration, options) {
     , objCache = {}
     , pathCache = {}
     , updateCaches = v(paths).each(function (key, val) {
-        fileCache[key] = {}
-        objCache[key] = {}
-        pathCache[key] = {}
+        fileCache[val] = {}
+        objCache[val] = {}
+        pathCache[val] = {}
       })
     , partialCache = {}
     , appDirs = [appDir].concat(v(function () {
@@ -144,7 +144,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
   app.prefetch = function (options) {
     var self = this
 
-    v.each(paths).each(function (key, type) {
+    v(paths).each(function (key, type) {
       v.each(appDirs, function (dir) {
         var d = dir + '/' + type
         if (!isDirectory(d)) return
