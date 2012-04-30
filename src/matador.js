@@ -7,6 +7,19 @@ var fs = require('fs')
   , router = require('./router')
   , argv = module.exports.argv = require('optimist').argv
   , minifyViews = process.env.minify || false
+  , paths = {
+      SERVICES: 'services'
+    , HELPERS: 'helpers'
+    , MODELS: 'models'
+    , CONTROLLERS: 'controllers'
+  }
+  , filenameSuffixes = {
+      SERVICES: 'Service'
+    , HELPERS: 'Helper'
+    , MODELS: 'Model'
+    , CONTROLLERS: 'Controller'
+  }
+
 var minify = function () {
   var r = /(<script[^>]*>[\s\S]+?<\/script>)/
     , scr = /^<script([^>]*)>([\s\S]+?)<\/script>/
@@ -46,9 +59,14 @@ module.exports.createApp = function (baseDir, configuration, options) {
   options = options || {}
 
   var appDir = path.join(baseDir, '/app')
-    , fileCache = {'services': {}, 'helpers': {}, 'models': {}, 'controllers': {}}
-    , objCache = {'services': {}, 'helpers': {}, 'models': {}, 'controllers': {}}
-    , pathCache = {'services': {}, 'helpers': {}, 'models': {}, 'controllers': {}}
+    , fileCache = {}
+    , objCache = {}
+    , pathCache = {}
+    , updateCaches = v(paths).each(function (key, val) {
+        fileCache[key] = {}
+        objCache[key] = {}
+        pathCache[key] = {}
+      })
     , partialCache = {}
     , appDirs = [appDir].concat(v(function () {
         var dir = appDir + '/modules'
@@ -77,6 +95,11 @@ module.exports.createApp = function (baseDir, configuration, options) {
           var File = loadFile(subdir, name)
           objCache[subdir][name] = new File(localName, pathCache[subdir][name])
           objCache[subdir][name]._paths = pathCache[subdir][name]
+
+          if (subdir === paths.MODELS) app.emit('createModel', localName, objCache[subdir][name])
+          else if (subdir === paths.SERVICES) app.emit('createService', localName, objCache[subdir][name])
+          else if (subdir === paths.CONTROLLERS) app.emit('createController', localName, objCache[subdir][name])
+          //not emitting an event for helpers here as we never actually instantiate a helper
         }
         return objCache[subdir][name]
       }
@@ -121,7 +144,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
   app.prefetch = function (options) {
     var self = this
 
-    v.each(['helpers', 'models', 'services', 'controllers'], function (type) {
+    v.each(paths).each(function (key, type) {
       v.each(appDirs, function (dir) {
         var d = dir + '/' + type
         if (!isDirectory(d)) return
@@ -220,25 +243,85 @@ module.exports.createApp = function (baseDir, configuration, options) {
     return partialCache[viewDir]
   }
 
+  /**
+   * Get a service instance or class
+   *
+   * @param {String} name the name of the service
+   * @param {Boolean} definitionOnly whether to just grab the class or to grab an actual
+   *     instance
+   * @return {Object} a service class or instance
+   */
   app.getService = function (name, definitionOnly) {
-    return loadClass('services', name + 'Service', name, definitionOnly)
+    return loadClass(paths.SERVICES, name + filenameSuffixes.SERVICES, name, definitionOnly)
   }
 
+  /**
+   * Get a controller instance or class
+   *
+   * @param {String} name the name of the controller
+   * @param {Boolean} definitionOnly whether to just grab the class or to grab an actual
+   *     instance
+   * @return {Object} a controller class or instance
+   */
   app.getController = function (name, definitionOnly) {
     if (app.controllers[name]) {
       return definitionOnly ? app.controllers[name] : new app.controllers[name](name, [])
     }
     else {
-      return loadClass('controllers', name + 'Controller', name, definitionOnly)
+      return loadClass(paths.CONTROLLERS, name + filenameSuffixes.CONTROLLERS, name, definitionOnly)
     }
   }
 
+  /**
+   * Get a model instance or class
+   *
+   * @param {String} name the name of the model
+   * @param {Boolean} definitionOnly whether to just grab the class or to grab an actual
+   *     instance
+   * @return {Object} a model class or instance
+   */
   app.getModel = function (name, definitionOnly) {
-    return loadClass('models', name + 'Model', name, definitionOnly)
+    return loadClass(paths.MODELS, name + filenameSuffixes.MODELS, name, definitionOnly)
   }
 
+  /**
+   * Get a helper
+   *
+   * @param {String} name of the helper
+   * @return {Object} a helper instance
+   */
   app.getHelper = function (name) {
-    return loadFile('helpers', name + 'Helper')
+    return loadFile(paths.HELPERS, name + filenameSuffixes.HELPERS)
+  }
+
+  /**
+   * Override the existing cached version of a service
+   *
+   * @param {String} name the name of the service
+   * @param {Object} instance the service instance
+   */
+  app.setService = function (name, instance) {
+    objCache[paths.SERVICES][name + filenameSuffixes.SERVICES] = instance
+  }
+
+  /**
+   * Override the existing cached version of a controller
+   *
+   * @param {String} name the name of the controller
+   * @param {Object} instance the controller instance
+   */
+  app.setController = function (name, instance) {
+    objCache[paths.CONTROLLERS][name + filenameSuffixes.Controller] = instance
+  }
+
+  /**
+   * Override the existing cached version of a model
+   *
+   * @param {String} name the name of the model
+   * @param {Object} instance the model instance
+   */
+  app.setModel = function (name, instance) {
+    objCache[paths.MODELS][name + filenameSuffixes.MODELS] = instance
   }
 
   app.controllers.Static = require('./StaticController')(app)
