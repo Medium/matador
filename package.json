@@ -1,7 +1,7 @@
 {
     "name": "matador"
   , "description": "an MVC framework for Node"
-  , "version": "1.0.27-beta"
+  , "version": "1.0.28-beta"
   , "homepage": "https://github.com/Obvious/matador"
   , "main": "src/matador.js"
   , "authors": [
