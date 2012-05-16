@@ -311,7 +311,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
    * @param {Object} instance the controller instance
    */
   app.setController = function (name, instance) {
-    objCache[paths.CONTROLLERS][name + filenameSuffixes.Controller] = instance
+    objCache[paths.CONTROLLERS][name + filenameSuffixes.CONTROLLERS] = instance
   }
 
   /**
