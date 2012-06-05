@@ -68,6 +68,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
         pathCache[val] = {}
       })
     , partialCache = {}
+    , listingCache = {}
     , appDirs = [appDir].concat(v(function () {
         var dir = appDir + '/modules'
         return path.existsSync(dir) ? fs.readdirSync(dir) : []
@@ -75,12 +76,19 @@ module.exports.createApp = function (baseDir, configuration, options) {
         return appDir + '/modules/' + dir
       }))
     , app = express.createServer()
+    , fileExists = function (filename) {
+        // We check for file existence this way so that our lookups are case sensitive regardless of the underlying filesystem.
+        var dir = path.dirname(filename)
+          , base = path.basename(filename)
+        if (!listingCache[dir]) listingCache[dir] = path.existsSync(dir) ? fs.readdirSync(dir) : []
+        return listingCache[dir].indexOf(base) !== -1
+      }
     , loadFile = function (subdir, name, p) {
         if (typeof(fileCache[subdir][name]) !== 'undefined') return fileCache[subdir][name]
         var pathname = name.replace(/\./g, '/')
         var dir = v.find((p ? [p] : appDirs), function (dir) {
           var filename = dir + '/' + subdir + '/' + pathname + '.js'
-          if (!path.existsSync(filename)) return false
+          if (!fileExists(filename)) return false
           fileCache[subdir][name] = require(filename)(app, (configuration[subdir] && configuration[subdir][name] ? configuration[subdir][name] : {}))
           pathCache[subdir][name] = dir === appDir ? [appDir] : [dir, appDir]
           return true
@@ -105,7 +113,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
       }
     , mountPublicDir = function (dir) {
       var directory = dir + '/public'
-      path.existsSync(directory) && app.use(express.static(directory))
+      fileExists(directory) && app.use(express.static(directory))
     }
 
   app.set('base_dir', appDir)
@@ -131,7 +139,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
     v.each(appDirs, function (dir) {
       var filename = dir + '/config/routes.js'
-      if (!path.existsSync(filename)) return
+      if (!fileExists(filename)) return
       router.init(self, require(filename)(self))
     })
     // static directory server
