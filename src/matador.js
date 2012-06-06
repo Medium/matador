@@ -169,7 +169,6 @@ module.exports.createApp = function (baseDir, configuration, options) {
     var soyOptions = {
       allowDynamicRecompile: app.enabled('soy allowDynamicRecompile')
     }
-    console.log(soyOptions)
     soynode.setOptions(soyOptions)
 
     // Precompile all Closure templates.
@@ -177,32 +176,11 @@ module.exports.createApp = function (baseDir, configuration, options) {
       dir = dir + '/views'
       if (!isDirectory(dir)) return
 
-      // Iterative search of all sub directories containing soy files.
-      var dirs = [dir]
-      while (dirs.length) {
-        var d = dirs.pop()
-        var containsSoy = false
-        v.each(fs.readdirSync(d), function (file) {
-          var f = d + '/' + file
-          if (isDirectory(f)) {
-            dirs.push(f)
-            return
-          }
-          if (file.substr(file.length - 4) === '.soy') {
-            containsSoy = true
-            return
-          }
-        });
-
-        if (containsSoy) {
-          console.log('Compiling templates in: ' + d)
-          soynode.compileTemplates(d, function (err) {
-            if (err) {
-              throw err
-            }
-          })
+      soynode.compileTemplates(d, function (err) {
+        if (err) {
+          throw err
         }
-      }
+      })
     })
   }
 

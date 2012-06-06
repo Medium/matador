@@ -80,11 +80,11 @@ module.exports = function (app) {
    * Renders a closure template that has already been compiled.
    */
   function renderClosureTemplate (templateName, data) {
-    var f = soynode.get(templateName)
-    if (!f) {
+    var templateFunction = soynode.get(templateName)
+    if (!templateFunction) {
       throw new Error('Unable to find template: ' + templateName)
     }
-    return f(data)
+    return templateFunction(data)
   }
 
   /**
