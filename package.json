@@ -28,6 +28,7 @@
       , "hogan.js": "*"
       , "optimist": "*"
       , "uglify-js": ">=1.2.5"
+      , "soynode": ">=0.1.1"
     }
   , "devDependencies": {
       "jshint": "0.5.8"
