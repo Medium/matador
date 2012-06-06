@@ -176,7 +176,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
       dir = dir + '/views'
       if (!isDirectory(dir)) return
 
-      soynode.compileTemplates(d, function (err) {
+      soynode.compileTemplates(dir, function (err) {
         if (err) {
           throw err
         }
