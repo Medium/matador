@@ -1,0 +1,30 @@
+
+{namespace matador.templates}
+
+/**
+ * Renders the index page.
+ * @param title Title of the page
+ */
+{template .index}
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta http-equiv='Content-type' content='text/html; charset=utf-8'>
+      <title>{$title}</title>
+      <link rel='stylesheet' href='/css/main.css' type='text/css'>
+    </head>
+    <body>
+      {call .body_ data="all" /}
+    </body>
+  </html>
+{/template}
+
+/**
+ * Renders the body of the index page.
+ * @param title Title of the page
+ * @private
+ */
+{template .body_}
+  <h1>Welcome to {$title}</h1>
+  (rendered with Closure Templates)
+{/template}

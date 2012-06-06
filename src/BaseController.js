@@ -1,5 +1,6 @@
 var fs = require('fs')
   , path = require('path')
+  , soynode = require('soynode')
 
 module.exports = function (app) {
   var viewCache = {}
@@ -48,6 +49,17 @@ module.exports = function (app) {
 
     , render: function (res, view, data, fn) {
         data = data || {}
+
+        var prefix = view.substring(0, view.indexOf(':'))
+        if (prefix == 'soy') {
+          // NOTE: The Express template rendering system assumes that all template names
+          // are file names, whereas multiple closure templates exist in a single soy file,
+          // so we short-circuit the rendering framework altogether. The only loss of functionality
+          // is caching, but soynode gives that to us for free.
+          var output = renderClosureTemplate(view.substring(4), data, fn)
+          return fn ? fn(output) : res.send(output)
+        }
+
         var layoutFile = findLayoutFile(this._paths, this.layout)
         var viewFile = findViewFile(this._paths, view)
 
@@ -62,6 +74,18 @@ module.exports = function (app) {
         )
       }
     })
+
+  
+  /**
+   * Renders a closure template that has already been compiled.
+   */
+  function renderClosureTemplate (templateName, data) {
+    var templateFunction = soynode.get(templateName)
+    if (!templateFunction) {
+      throw new Error('Unable to find template: ' + templateName)
+    }
+    return templateFunction(data)
+  }
 
   /**
    * Searches through a set of paths for a matching view file.

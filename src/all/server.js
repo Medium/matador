@@ -19,6 +19,7 @@ app.configure(function () {
 
 app.configure('development', function () {
   app.use(matador.errorHandler({ dumpExceptions: true, showStack: true }))
+  app.enable('soy allowDynamicRecompile')
 })
 
 app.configure('production', function () {
