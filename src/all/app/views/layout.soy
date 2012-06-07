@@ -4,7 +4,6 @@
 /**
  * Renders the index page.
  * @param title Title of the page.
- * @param bodyHtml Body of the page.
  */
 {template .layout autoescape="contextual"}
   <!DOCTYPE html>
@@ -15,7 +14,7 @@
       <link rel='stylesheet' href='/css/main.css' type='text/css'>
     </head>
     <body>
-      {$bodyHtml |noAutoescape}
+      {$ij.bodyHtml |noAutoescape}
     </body>
   </html>
 {/template}

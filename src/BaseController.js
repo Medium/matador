@@ -7,6 +7,7 @@ module.exports = function (app) {
     , layoutCache = {}
     , DEFAULT_LAYOUT = 'layout'
     , DEFAULT_CLOSURE_LAYOUT = 'soy:views.layout.layout'
+    , CLOSURE_LAYOUT_BODY_HTML_KEY = 'bodyHtml'
 
   return klass(function () {
     this._paths = [app.set('base_dir')]
@@ -93,10 +94,12 @@ module.exports = function (app) {
    * @param {*} the layout requested.
    */
   function getClosureLayout(data, layout) {
+    // If an override is specified, then use it.
     if (typeof data['layout'] !== 'undefined') {
       layout = data['layout']
     }
 
+    // If the layout specified is a string, remap the default layout to the Closure version.
     if (typeof layout === 'string') {
       layout = (layout === DEFAULT_LAYOUT) ? DEFAULT_CLOSURE_LAYOUT : layout
     } else if (layout || typeof layout === 'undefined') {
@@ -132,9 +135,9 @@ module.exports = function (app) {
       return templateFn(data)
     }
 
-    // TODO(david): Use $ij to pass in the body html to help avoid name conflicts?
-    data['bodyHtml'] = templateFn(data)
-    return layoutFn(data)
+    var ijData = {}
+    ijData[CLOSURE_LAYOUT_BODY_HTML_KEY] = templateFn(data)
+    return layoutFn(data, null, ijData)
   }
 
   /**
