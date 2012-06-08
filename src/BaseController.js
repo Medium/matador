@@ -5,13 +5,16 @@ var fs = require('fs')
 module.exports = function (app) {
   var viewCache = {}
     , layoutCache = {}
+    , DEFAULT_LAYOUT = 'layout'
+    , DEFAULT_CLOSURE_LAYOUT = 'soy:views.layout.layout'
+    , CLOSURE_LAYOUT_BODY_HTML_KEY = 'bodyHtml'
 
   return klass(function () {
     this._paths = [app.set('base_dir')]
     this.beforeFilters = {}
     this.excludeFilters = {}
     var viewOptions = app.set('view options')
-    this.layout = (viewOptions && typeof viewOptions.layout !== 'undefined') ? viewOptions.layout : 'layout'
+    this.layout = (viewOptions && typeof viewOptions.layout !== 'undefined') ? viewOptions.layout : DEFAULT_LAYOUT
   })
     .methods({
       addBeforeFilter: function (actions, fn) {
@@ -56,7 +59,7 @@ module.exports = function (app) {
           // are file names, whereas multiple closure templates exist in a single soy file,
           // so we short-circuit the rendering framework altogether. The only loss of functionality
           // is caching, but soynode gives that to us for free.
-          var output = renderClosureTemplate(view.substring(4), data, fn)
+          var output = renderClosureTemplate(view.substring(4), data, fn, this.layout)
           return fn ? fn(output) : res.send(output)
         }
 
@@ -75,16 +78,66 @@ module.exports = function (app) {
       }
     })
 
+  /**
+   * Strips the soy prefix if found and returns the result.
+   * @param {string} name to be stripped.
+   * @return {string} the original name or stripped result.
+   */
+  function maybeStripSoyPrefix(name) {
+    var prefix = name.substring(0, name.indexOf(':'))
+    return (prefix == 'soy') ? name.substring(4) : name
+  }
+
+  /**
+   * Returns the closure layout template. Note that the layout can be overridden in data.
+   * @param {Object} data the soy data object.
+   * @param {*} the layout requested.
+   */
+  function getClosureLayout(data, layout) {
+    // If an override is specified, then use it.
+    if (typeof data['layout'] !== 'undefined') {
+      layout = data['layout']
+    }
+
+    // If the layout specified is a string, remap the default layout to the Closure version.
+    if (typeof layout === 'string') {
+      layout = (layout === DEFAULT_LAYOUT) ? DEFAULT_CLOSURE_LAYOUT : layout
+    } else if (layout || typeof layout === 'undefined') {
+      layout = DEFAULT_CLOSURE_LAYOUT
+    }
+
+    return layout ? maybeStripSoyPrefix(layout) : layout
+  }
   
   /**
    * Renders a closure template that has already been compiled.
+   * @param {string} templateName
+   * @param {Object} data
+   * @param {*} layout
    */
-  function renderClosureTemplate (templateName, data) {
-    var templateFunction = soynode.get(templateName)
-    if (!templateFunction) {
+  function renderClosureTemplate (templateName, data, layout) {
+    var templateFn = soynode.get(templateName)
+    if (!templateFn) {
       throw new Error('Unable to find template: ' + templateName)
     }
-    return templateFunction(data)
+
+    var layoutFn = null
+    layout = getClosureLayout(data, layout)
+    if (layout) {
+      layoutFn = soynode.get(layout)
+      if (!layoutFn) {
+        throw new Error('Unable to find layout template: ' + layout)
+      }
+    }
+
+    // TODO(david): Support $ij
+    if (!layoutFn) {
+      return templateFn(data)
+    }
+
+    var ijData = {}
+    ijData[CLOSURE_LAYOUT_BODY_HTML_KEY] = templateFn(data)
+    return layoutFn(data, null, ijData)
   }
 
   /**

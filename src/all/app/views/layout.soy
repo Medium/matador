@@ -1,0 +1,20 @@
+
+{namespace views.layout}
+
+/**
+ * Renders the index page.
+ * @param title Title of the page.
+ */
+{template .layout autoescape="contextual"}
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta http-equiv='Content-type' content='text/html; charset=utf-8'>
+      <title>{$title}</title>
+      <link rel='stylesheet' href='/css/main.css' type='text/css'>
+    </head>
+    <body>
+      {$ij.bodyHtml |noAutoescape}
+    </body>
+  </html>
+{/template}
