@@ -166,9 +166,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
       })
     })
 
-    var soyOptions = {
-      allowDynamicRecompile: app.enabled('soy allowDynamicRecompile')
-    }
+    var soyOptions = app.set('soy options') || {}
     soynode.setOptions(soyOptions)
 
     // Precompile all Closure templates.
