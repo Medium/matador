@@ -69,12 +69,16 @@ module.exports = function (app) {
         // Start looking for partials in the same directory as the view file.
         var partialsDir = path.resolve(viewFile, '../')
 
-        return res.render(viewFile, {
-            layout: layoutFile
-          , locals: data
-          , partials: app.getPartials(partialsDir)
-          }, fn
-        )
+        try {
+          return res.render(viewFile, {
+              layout: layoutFile
+            , locals: data
+            , partials: app.getPartials(partialsDir)
+            }, fn)
+        } catch (e) {
+          console.error('Rendering error, view:', viewFile, 'layout:', layoutFile, 'error:', e.message, e.stack)
+          throw e
+        }
       }
     })
 
