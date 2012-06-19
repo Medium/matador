@@ -138,9 +138,9 @@ module.exports.createApp = function (baseDir, configuration, options) {
   }
 
   /**
-   * Shim to set up a lot of the stuff that express gave us by default
+   * Return middleware which will set up a bunch of methods on the request object for convenience
    */
-  app.expressShim = function () {
+  app.requestDecorator = function () {
     var templateCache = {}
 
     /**
@@ -192,7 +192,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
     /**
      * Shim function to emulate express functionality
      */
-    return function (req, res, next) {
+    return function requestDecorator(req, res, next) {
       // this is stupid
       req.res = res
       req.params = {}
