@@ -1,7 +1,7 @@
 {
     "name": "matador"
   , "description": "an MVC framework for Node"
-  , "version": "1.0.35-beta"
+  , "version": "1.0.36-beta"
   , "homepage": "https://github.com/Obvious/matador"
   , "main": "src/matador.js"
   , "authors": [
@@ -21,7 +21,7 @@
       "matador": "bin/matador.js"
     }
   , "dependencies": {
-        "express": "2.5.9"
+        "connect": "2.3.3"
       , "valentine": "*"
       , "klass": "*"
       , "colors": "*"

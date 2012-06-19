@@ -1,36 +1,44 @@
-function match(app, prefix, method, route, middleware, controllerName, action) {
-  action = action || 'index'
-  prefix = prefix == 'root' ? '' : '/' + prefix
-  route = prefix ? ((route != '/') ? prefix + route : prefix) : route
-  var Controller = app.getController(controllerName)
-    , filters = []
-  if (Controller.beforeFilters['*']) filters = filters.concat(Controller.beforeFilters['*'])
-  if (Controller.beforeFilters[action]) filters = filters.concat(Controller.beforeFilters[action])
-
-  if (filters.length) {
-    middleware = typeof Controller.excludeFilters[action] === 'undefined' ?
-      filters.concat(middleware) :
-      v(filters).filter(function (filter) {
-        return !v.inArray(Controller.excludeFilters[action], filter)
-      }).concat(middleware)
-  }
-
-  if (typeof Controller[action] !== 'function') throw new Error('Unable to find method \'' + action + '\' in controller \'' + controllerName + '\'')
-  app[method](route, middleware, Controller[action].bind(Controller))
-}
+var pathMatcher = require('./pathMatcher')
 
 module.exports.init = function (app, routes) {
-  v.each(routes, function (key, value) {
-    v(value).each(function (tuple) {
-      var tupleLen = tuple.length
-        , numOptionalArgs = tupleLen - 2
-        , trailingArgs = numOptionalArgs && typeof tuple[tupleLen - 1] === 'string' ? tuple.slice(
-           numOptionalArgs > 1 && typeof tuple[tupleLen - 2] === 'string' ? -2 : -1
-          ) : []
-        , middlewareLen = tupleLen - trailingArgs.length - 2
-        , middleware = tuple.splice(2, middlewareLen)
+  //set up
+  if (!app._routes) {
+    app._pathMatchers = {
+        'DELETE': new pathMatcher()
+      , 'GET': new pathMatcher()
+      , 'PUT': new pathMatcher()
+      , 'POST': new pathMatcher()
+    }
+  }
 
-      match.apply(null, [app, key, tuple[0], tuple[1], middleware].concat(trailingArgs))
-    })
-  })
+  //loop through all of the paths and set up middleware as well as handlers
+  for (var path in routes) {
+    var handlers = routes[path]
+
+    //if the handler is a string, use it for delete, get, put, and post
+    if (typeof handlers === 'string') {
+      handlers = {
+          'DELETE': handlers
+        , 'GET': handlers
+        , 'PUT': handlers
+        , 'POST': handlers
+      }
+    }
+
+    //for each of the handler methods, figure out which middleware to use
+    for (var method in handlers) {
+
+      var controllerName = handlers[method].split(/\./)[0]
+      var actionName = handlers[method].split(/\./)[1]
+      var controller = app.getController(controllerName)
+      var controllerMethod = controller[actionName]
+      var middleware = app.getController(controllerName, true).prototype[actionName].middleware
+      if (!middleware) middleware = app.getController(controllerName, true).defaultMiddleware
+      if (middleware) middleware = v(Array.isArray(middleware) ? middleware : [middleware]).flatten()
+
+      //create individual entries for each request method (patchmatching is method-specific)
+      app._pathMatchers[method.toUpperCase()].add(path, {controller: controller, method: controllerMethod, middleware: middleware})
+    }
+  }
 }
+
