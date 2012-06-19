@@ -121,7 +121,6 @@ module.exports.createApp = function (baseDir, configuration, options) {
       }
     , mountPublicDir = function (dir) {
       var directory = dir + '/public'
-      fileExists(directory) && console.log(directory)
       fileExists(directory) && app.use(connect.static(directory))
     }
 
