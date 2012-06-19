@@ -54,7 +54,7 @@ CookieService.prototype.set = function(name, value, options) {
     throw Error('Can not to set secure cookie on unencrypted socket.')
   }
   var cookies = this.res.getHeader('Set-Cookie') || []
-  if (typeof cookies == 'string') {
+  if (typeof cookies === 'string') {
     cookies = [cookies]
   }
   cookies.push(new Cookie(name, value, options).toString())
