@@ -1,5 +1,7 @@
 var fs = require('fs')
-  , express = module.exports = require('express')
+  , CookieService = require('./cookie')
+  , connect = module.exports = require('connect')
+  , http = require('http')
   , path = require('path')
   , hogan = require('hogan.js')
   , soynode = require('soynode')
@@ -46,6 +48,11 @@ var minify = function () {
   }
 }()
 
+/**
+ * Check whether a path exists and is a directory
+ *
+ * @param {string} p the path
+ */
 function isDirectory(p) {
   try {
     return fs.statSync(p).isDirectory()
@@ -76,7 +83,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
       }()).map(function (dir) {
         return appDir + '/modules/' + dir
       }))
-    , app = express.createServer()
+    , app = connect()
     , fileExists = function (filename) {
         // We check for file existence this way so that our lookups are case sensitive regardless of the underlying filesystem.
         var dir = path.dirname(filename)
@@ -108,14 +115,259 @@ module.exports.createApp = function (baseDir, configuration, options) {
           if (subdir === paths.MODELS) app.emit('createModel', localName, objCache[subdir][name])
           else if (subdir === paths.SERVICES) app.emit('createService', localName, objCache[subdir][name])
           else if (subdir === paths.CONTROLLERS) app.emit('createController', localName, objCache[subdir][name])
-          //not emitting an event for helpers here as we never actually instantiate a helper
+          // not emitting an event for helpers here as we never actually instantiate a helper
         }
         return objCache[subdir][name]
       }
     , mountPublicDir = function (dir) {
       var directory = dir + '/public'
-      fileExists(directory) && app.use(express.static(directory))
+      fileExists(directory) && app.use(connect.static(directory))
     }
+
+  var templateEngines = {}
+  /**
+   * Allow registration of template engines
+   */
+  app.register = function (suffix, engine) {
+    if (typeof engine === 'undefined') {
+      engine = suffix
+      suffix = '.html'
+    }
+    templateEngines[suffix] = engine
+    return this
+  }
+
+  /**
+   * Return middleware which will set up a bunch of methods on the request object for convenience
+   */
+  app.requestDecorator = function () {
+    var templateCache = {}
+
+    /**
+     * Take in a template name and options and call a callback with a compiler. This is only temporarily
+     * as we're changing up our template system to be non-file specific (to allow for engines like
+     * soynode)
+     *
+     * @param {string} templateName
+     * @param {Object} options
+     * @param {Function} callback
+     */
+    function getTemplate(templateName, options, callback) {
+      // is the template already cached?
+      if (templateCache[templateName]) return callback(null, templateCache[templateName])
+
+      // check if it has a suffix already applied
+      var matches = templateName.match(/(\.[\w]+)$/)
+      var suffix
+      if (!matches) {
+        suffix = '.html'
+        templateName += '.html'
+      } else {
+        suffix = matches[0]
+      }
+
+      // is there an engine for the provided suffix?
+      var engine = templateEngines[suffix]
+      if (!engine) return callback(Error("No engine found for template type " + suffix))
+
+      // does the template exist?
+      if (!path.existsSync(templateName)) return callback(new Error("Template '" + templateName + "' does not exist"))
+
+      // read the template in, cache, and call the callback
+      fs.readFile(templateName, 'utf8', function (err, data) {
+        if (err) return callback(err)
+        try {
+          templateCache[templateName] = engine.compile(data, options)
+        } catch (e) {
+          return callback(e)
+        }
+        return callback(null, templateCache[templateName])
+      })
+    }
+
+    /**
+     * Shim function to emulate express functionality
+     */
+    return function requestDecorator(req, res, next) {
+      // this is stupid
+      req.res = res
+      req.params = {}
+      res.req = req
+      req.path = req.url
+
+      // emulate the param function in express by returning a path arg
+      req.param = function getRequestParam(key) {
+        return req.params[key]
+      }
+
+      // map res.header to res.setHeader for convenience
+      res.header = res.setHeader
+
+      // cookie service which allows for setting and retrieval of cookies
+      var cookieService = new CookieService(req, res)
+      res.cookie = cookieService.set.bind(cookieService)
+
+      // expire a given cookie
+      res.clearCookie = function clearCookie(key, options) {
+        options.expires = 0
+        cookieService.set(key, '', options)
+      }
+
+      // redirect the current request to a new url
+      res.redirect = function redirectRequest(url) {
+        res.writeHead(302, {
+          'Location': url
+        })
+        res.end()
+      }
+
+      // send output to the request object and close the request
+      res.send = function sendResponse(data, headers, status) {
+        if (headers) {
+          for (var key in headers) res.setHeader(key, headers[key])
+        }
+
+        // optional status code
+        if (status) res.statusCode = status
+
+        // if no content type was set, assume html
+        if (!res._headers['content-type']) res.setHeader('content-type', 'text/html')
+        res.write(data)
+
+        // done
+        res.end()
+      }
+
+      // render a given template to the client
+      res.render = function renderResponse(templateName, options, callback) {
+
+        // get the requested template compiler
+        getTemplate(templateName, options, function (err, compiler) {
+          // no template, exit out
+          if (err) {
+            console.error(err)
+            res.send(err.message)
+          }
+
+          // compile the template
+          var output = compiler(options)
+
+          // no layout specified, return the compiled template
+          if (!options.layout) return callback ? callback(output) : res.send(output)
+
+          // layout was specified, retrieve the layout template
+          getTemplate(options.layout, options, function (err, compiler) {
+            //no layout template, exit out
+            if (err) {
+              console.error(err)
+              res.send(err.message)
+            }
+
+            //set the body in the options to the previous compiled template and compile
+            options.body = output
+            output = compiler(options)
+
+            //return the compiled template
+            callback ? callback(output) : res.send(output)
+          })
+        })
+      }
+
+      next()
+    }
+  }
+
+  /**
+   * Create middleware which will look at where a request is supposed to go and attach
+   * relevant target info to the request
+   *
+   * @returns {Function} middleware
+   */
+   app.preRouter = function preRouter() {
+    return function preRouter (req, res, next) {
+      var matcher = app._pathMatchers[req.method]
+      // check for any handler for the http method first
+      if (!matcher) return next()
+
+      // try and match
+      var handler = matcher.getMatch(req.url.split('?')[0])
+      if (!handler) return next()
+
+      // successful match, attach it to the req obj
+      req.target = handler.object
+      req.params = handler.matches || {}
+      return next()
+    }
+  }
+
+  /**
+   * Create the actual router to route the request to a controller action
+   *
+   * @param {{defaultMiddleware:{Object|Array.<Object>}}} configuration configuration for
+   *     the router. defaultMiddleware will define middleware which will run for any request
+   *     as long as the middleware hasn't been defined at the controller or method level
+   */
+  app.router = function router(config) {
+    config = config || {}
+
+    return function router(req, res, next) {
+      var target = req.target
+      if (!req.target) return next(new Error("Handler not found for " + req.url))
+
+      var middleware = target.middleware || config.defaultMiddleware
+      if (!middleware) return target.method.call(target.controller, req, res, next)
+
+      // call this function when done with a piece of route middleware
+      var doNext = function (idx, err) {
+        if (err) return next(err)
+        if (idx >= middleware.length) return target.method.call(target.controller, req, res, next)
+        middleware[idx].call(null, req, res, doNext.bind(null, idx + 1))
+      }
+
+      doNext(0)
+    }
+  }
+
+  // random arg map for use with app.set()
+  app._vars = {}
+
+  /**
+   * Allow configuration of this application via the current environment. If env is passed in
+   * and the current environment (process.env.NODE_ENV) matches env, then the function is ran.
+   * Any functions passed in without an env will be ran regardless.
+   *
+   * @param {string} env the current environment
+   * @param {Function} fn the function to call if the configuration block should be used
+   */
+  app.configure = function configureApp(env, fn) {
+    if (typeof fn === 'undefined') env()
+    else if (env === process.env.NODE_ENV) fn()
+  }
+
+  /**
+   * create an http server from the app on a given port
+   *
+   * @param {number} port
+   * @returns {Object} app
+   */
+  app.createServer = function createServer(port) {
+    app.use(responseRouter)
+    http.createServer(app).listen(port)
+    return app
+  }
+
+  /**
+   * set/get an arbitrary value on the app object (set if the new value isn't undefined)
+   * (Express shim)
+   *
+   * @param {string} key
+   * @param {Object|string|number} value
+   * @returns {Object|string|number} current value
+   */
+  app.set = function (key, val) {
+    if (typeof (val) !== 'undefined') app._vars[key] = val
+    return app._vars[key]
+  }
 
   app.set('base_dir', appDir)
   app.set('public', appDir + '/public')
@@ -142,11 +394,6 @@ module.exports.createApp = function (baseDir, configuration, options) {
       var filename = dir + '/config/routes.js'
       if (!fileExists(filename)) return
       router.init(self, require(filename)(self))
-    })
-    // static directory server
-
-    router.init(this, {
-      root: [['get', /(.+)/, 'Static']]
     })
   }
 
@@ -270,7 +517,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
   /**
    * Get a service instance or class
    *
-   * @param {String} name the name of the service
+   * @param {string} name the name of the service
    * @param {Boolean} definitionOnly whether to just grab the class or to grab an actual
    *     instance
    * @return {Object} a service class or instance
@@ -282,7 +529,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
   /**
    * Get a controller instance or class
    *
-   * @param {String} name the name of the controller
+   * @param {string} name the name of the controller
    * @param {Boolean} definitionOnly whether to just grab the class or to grab an actual
    *     instance
    * @return {Object} a controller class or instance
@@ -299,7 +546,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
   /**
    * Get a model instance or class
    *
-   * @param {String} name the name of the model
+   * @param {string} name the name of the model
    * @param {Boolean} definitionOnly whether to just grab the class or to grab an actual
    *     instance
    * @return {Object} a model class or instance
@@ -311,7 +558,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
   /**
    * Get a helper
    *
-   * @param {String} name of the helper
+   * @param {string} name of the helper
    * @return {Object} a helper instance
    */
   app.getHelper = function (name) {
@@ -321,7 +568,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
   /**
    * Override the existing cached version of a service
    *
-   * @param {String} name the name of the service
+   * @param {string} name the name of the service
    * @param {Object} instance the service instance
    */
   app.setService = function (name, instance) {
@@ -331,7 +578,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
   /**
    * Override the existing cached version of a controller
    *
-   * @param {String} name the name of the controller
+   * @param {string} name the name of the controller
    * @param {Object} instance the controller instance
    */
   app.setController = function (name, instance) {
@@ -341,7 +588,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
   /**
    * Override the existing cached version of a model
    *
-   * @param {String} name the name of the model
+   * @param {string} name the name of the model
    * @param {Object} instance the model instance
    */
   app.setModel = function (name, instance) {
