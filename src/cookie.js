@@ -14,7 +14,7 @@
  * @author dan@pupi.us (Daniel Pupius)
  */
 
-module.exports = CookieService;
+module.exports = CookieService
 
 
 /**
@@ -25,7 +25,7 @@ module.exports = CookieService;
 function CookieService(req, res) {
   this.req = req
   this.res = res
-  this.parsedCookies_ = null;
+  this.parsedCookies_ = null
 }
 
 
@@ -36,10 +36,10 @@ function CookieService(req, res) {
  * @return {string} The cookie's value.
  */
 CookieService.prototype.get = function(name, opt_default) {
-  var cookies = this.parseCookies_();
-  var cookie = cookies[name];
-  return typeof cookie != 'undefined' ? cookie : opt_default;
-};
+  var cookies = this.parseCookies_()
+  var cookie = cookies[name]
+  return typeof cookie != 'undefined' ? cookie : opt_default
+}
 
 
 /**
@@ -51,36 +51,36 @@ CookieService.prototype.get = function(name, opt_default) {
  */
 CookieService.prototype.set = function(name, value, options) {
   if (options && options.secure && !this.res.socket.encrypted) {
-    throw Error('Can not to set secure cookie on unencrypted socket.');
+    throw Error('Can not to set secure cookie on unencrypted socket.')
   }
-  var cookies = this.res.getHeader('Set-Cookie') || [];
+  var cookies = this.res.getHeader('Set-Cookie') || []
   if (typeof cookies == 'string') {
-    cookies = [cookies];
+    cookies = [cookies]
   }
-  cookies.push(new Cookie(name, value, options).toString());
-  this.res.setHeader('Set-Cookie', cookies);
-};
+  cookies.push(new Cookie(name, value, options).toString())
+  this.res.setHeader('Set-Cookie', cookies)
+}
 
 
 CookieService.prototype.parseCookies_ = function() {
   if (!this.parsedCookies_) {
-    var cookies = this.parsedCookies_ = {};
+    var cookies = this.parsedCookies_ = {}
     if (this.req.headers.cookie) {
       this.req.headers.cookie.split(';').forEach(function(cookie) {
-        var parts = cookie.split('=');
-        var name = parts[0].trim();
+        var parts = cookie.split('=')
+        var name = parts[0].trim()
         // If multiple cookie's path match the client will send all of them. We
         // only consider the first, since it will be most specific. In the rare
         // case someone cares about all values, they can parse the header
         // themselves.
         if (!cookies[name]) {
-          cookies[name] = (parts[1] || '').trim();
+          cookies[name] = (parts[1] || '').trim()
         }
-      });
+      })
     }
   }
-  return this.parsedCookies_;
-};
+  return this.parsedCookies_
+}
 
 
 
@@ -88,31 +88,31 @@ CookieService.prototype.parseCookies_ = function() {
  * @constructor
  */
 function Cookie(name, value, options) {
-  this.name = name;
-  this.value = value;
-  this.options = options || {};
+  this.name = name
+  this.value = value
+  this.options = options || {}
 }
 
 
 Cookie.prototype.toString = function() {
-  var str = this.name + '=' + this.value;
+  var str = this.name + '=' + this.value
   if (this.options.maxAge) {
-    str += '; expires=' + new Date(this.options.maxAge + Date.now()).toUTCString();
+    str += '; expires=' + new Date(this.options.maxAge + Date.now()).toUTCString()
   }
   if (this.options.expires) {
-    str += '; expires=' + new Date(this.options.expires).toUTCString();
+    str += '; expires=' + new Date(this.options.expires).toUTCString()
   }
   if (this.options.path) {
-    str += '; path=' + this.options.path;
+    str += '; path=' + this.options.path
   }
   if (this.options.domain) {
-    str += '; domain=' + this.options.domain;
+    str += '; domain=' + this.options.domain
   }
   if (this.options.secure) {
-    str += '; secure';
+    str += '; secure'
   }
   if (this.options.httpOnly) {
-    str += '; httponly';
+    str += '; httponly'
   }
-  return str;
-};
+  return str
+}
