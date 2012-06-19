@@ -210,7 +210,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
       // expire a given cookie
       res.clearCookie = function clearCookie(key, options) {
         options.date = 0
-        cookieService
+        cookieService.set(key, '', options)
       }
 
       // redirect the current request to a new url
