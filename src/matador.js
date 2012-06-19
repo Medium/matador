@@ -144,7 +144,9 @@ module.exports.createApp = function (baseDir, configuration, options) {
     var templateCache = {}
 
     /**
-     * Take in a template name and options and call a callback with a compiler
+     * Take in a template name and options and call a callback with a compiler. This is only temporarily
+     * as we're changing up our template system to be non-file specific (to allow for engines like
+     * soynode)
      *
      * @param {string} templateName
      * @param {Object} options
@@ -190,7 +192,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
     /**
      * Shim function to emulate express functionality
      */
-    return function expressShim (req, res, next) {
+    return function (req, res, next) {
       // this is stupid
       req.res = res
       req.params = {}
@@ -198,7 +200,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
       req.path = req.url
 
       // emulate the param function in express by returning a path arg
-      req.param = function (key) {
+      req.param = function getRequestParam(key) {
         return req.params[key]
       }
 
@@ -210,13 +212,13 @@ module.exports.createApp = function (baseDir, configuration, options) {
       res.cookie = cookieService.set.bind(cookieService)
 
       // expire a given cookie
-      res.clearCookie = function (key, options) {
+      res.clearCookie = function clearCookie(key, options) {
         options.date = 0
         cookieService
       }
 
       // redirect the current request to a new url
-      res.redirect = function (url) {
+      res.redirect = function redirectRequest(url) {
         res.writeHead(302, {
           'Location': url
         })
@@ -224,7 +226,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
       }
 
       // send output to the request object and close the request
-      res.send = function (data, headers, status) {
+      res.send = function sendResponse(data, headers, status) {
         if (headers) {
           for (var key in headers) res.setHeader(key, headers[key])
         }
@@ -241,7 +243,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
       }
 
       // render a given template to the client
-      res.render = function (templateName, options, callback) {
+      res.render = function renderResponse(templateName, options, callback) {
 
         // get the requested template compiler
         getTemplate(templateName, options, function (err, compiler) {
@@ -286,7 +288,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
    * @param {Object} res http response
    * @param {Function} next
    */
-   app.preRouter = function () {
+   app.preRouter = function preRouter() {
     return function preRouter (req, res, next) {
       var matcher = app._pathMatchers[req.method]
       // check for any handler for the http method first
@@ -310,7 +312,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
    * @param {Object} res http response
    * @param {Function} next
    */
-  app.router = function (config) {
+  app.router = function router(config) {
     config = config || {}
 
     return function router (req, res, next) {
@@ -342,7 +344,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
    * @param {string} env the current environment
    * @param {Function} fn the function to call if the configuration block should be used
    */
-  app.configure = function (env, fn) {
+  app.configure = function configureApp(env, fn) {
     if (typeof fn === 'undefined') env()
     else if (env === process.env.NODE_ENV) fn()
   }
@@ -353,7 +355,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
    * @param {number} port
    * @returns {Object} app
    */
-  app.createServer = function (port) {
+  app.createServer = function createServer(port) {
     app.use(responseRouter)
     http.createServer(app).listen(port)
     return app
