@@ -98,8 +98,7 @@ Cookie.prototype.toString = function() {
   var str = this.name + '=' + this.value
   if (this.options.maxAge) {
     str += '; expires=' + new Date(this.options.maxAge + Date.now()).toUTCString()
-  }
-  if (this.options.expires) {
+  } else if (this.options.expires) {
     str += '; expires=' + new Date(this.options.expires).toUTCString()
   }
   if (this.options.path) {
