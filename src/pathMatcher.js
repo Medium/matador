@@ -4,26 +4,12 @@
  * @fileoverview Class used to match paths against arbitrary objects.
  */
 
-if (typeof goog != 'undefined') {
-  goog.provide('obv.PathMatcher')
-} else {
-  eval('var obv = obv || {}; obv.PathMatcher = {}')
-}
-
-
 /**
  * @constructor
  */
-obv.PathMatcher = function () {
-  this.tree_ = {};
+function PathMatcher() {
+  this.tree_ = {}
 }
-
-
-/**
- * @typedef {Object}
- */
-obv.PathMatcher.Node;
-
 
 /**
  * Adds an object to be matched for the given path.  Paths can contain
@@ -40,7 +26,7 @@ obv.PathMatcher.Node;
  * @return {function (...args) : string} Function that can be used to generate paths.  Arguments
  *    will be inserted into the place holders.
  */
-obv.PathMatcher.prototype.add = function(path, object) {
+PathMatcher.prototype.add = function(path, object) {
   var parts = this.getPathParts_(path)
   var matches = []
   var node = this.tree_
@@ -104,7 +90,7 @@ obv.PathMatcher.prototype.add = function(path, object) {
  * @param {string} path The path to match.
  * @return {Object} An object corresponding to the matched path.
  */
-obv.PathMatcher.prototype.getMatch = function(path) {
+PathMatcher.prototype.getMatch = function(path) {
   var parts = this.getPathParts_(path)
   var node = this.tree_
   var pendingWildcard = null, pendingWildcardMatch = [], matches = []
@@ -172,9 +158,9 @@ obv.PathMatcher.prototype.getMatch = function(path) {
  * @return {!Array.<string>} The path parts.
  * @private
  */
-obv.PathMatcher.prototype.getPathParts_ = function(path) {
+PathMatcher.prototype.getPathParts_ = function(path) {
   return path.replace(/(^\/|\/$)/g, '').split('/')
 }
 
 
-eval('if (typeof module != "undefined" && module.exports) module.exports = obv.PathMatcher')
+module.exports = PathMatcher

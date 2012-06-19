@@ -1,13 +1,13 @@
-var pathMatcher = require('./pathMatcher')
+var PathMatcher = require('./pathMatcher')
 
 module.exports.init = function (app, routes) {
   //set up
   if (!app._routes) {
     app._pathMatchers = {
-        'DELETE': new pathMatcher()
-      , 'GET': new pathMatcher()
-      , 'PUT': new pathMatcher()
-      , 'POST': new pathMatcher()
+        'DELETE': new PathMatcher()
+      , 'GET': new PathMatcher()
+      , 'PUT': new PathMatcher()
+      , 'POST': new PathMatcher()
     }
   }
 
