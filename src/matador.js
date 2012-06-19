@@ -395,14 +395,6 @@ module.exports.createApp = function (baseDir, configuration, options) {
       if (!fileExists(filename)) return
       router.init(self, require(filename)(self))
     })
-    // static directory server
-
-
-    /*
-      router.init(this, {
-        root: [['get', /(.+)/, 'Static']]
-      })
-    */
   }
 
   app.prefetch = function (options) {
