@@ -178,8 +178,8 @@ module.exports.createApp = function (baseDir, configuration, options) {
         if (err) return callback(err)
         try {
           templateCache[templateName] = engine.compile(data, options)
-        } catch (e2) {
-          callback(e2)
+        } catch (e) {
+          callback(e)
         }
         return callback(null, templateCache[templateName])
       })
