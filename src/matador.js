@@ -245,7 +245,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
         getTemplate(templateName, options, function (err, compiler) {
           // no template, exit out
           if (err) {
-            console.log(err)
+            console.error(err)
             res.send(err.message)
           }
 
@@ -259,7 +259,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
           getTemplate(options.layout, options, function (err, compiler) {
             //no layout template, exit out
             if (err) {
-              console.log(err)
+              console.error(err)
               res.send(err.message)
             }
 
