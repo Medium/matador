@@ -38,7 +38,7 @@ function CookieService(req, res) {
 CookieService.prototype.get = function(name, opt_default) {
   var cookies = this.parseCookies_()
   var cookie = cookies[name]
-  return typeof cookie != 'undefined' ? cookie : opt_default
+  return typeof cookie !== 'undefined' ? cookie : opt_default
 }
 
 
