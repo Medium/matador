@@ -51,7 +51,7 @@ var minify = function () {
 /**
  * Check whether a path exists and is a directory
  *
- * @param {String} p the path
+ * @param {string} p the path
  */
 function isDirectory(p) {
   try {
@@ -530,7 +530,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
   /**
    * Get a service instance or class
    *
-   * @param {String} name the name of the service
+   * @param {string} name the name of the service
    * @param {Boolean} definitionOnly whether to just grab the class or to grab an actual
    *     instance
    * @return {Object} a service class or instance
@@ -542,7 +542,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
   /**
    * Get a controller instance or class
    *
-   * @param {String} name the name of the controller
+   * @param {string} name the name of the controller
    * @param {Boolean} definitionOnly whether to just grab the class or to grab an actual
    *     instance
    * @return {Object} a controller class or instance
@@ -559,7 +559,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
   /**
    * Get a model instance or class
    *
-   * @param {String} name the name of the model
+   * @param {string} name the name of the model
    * @param {Boolean} definitionOnly whether to just grab the class or to grab an actual
    *     instance
    * @return {Object} a model class or instance
@@ -571,7 +571,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
   /**
    * Get a helper
    *
-   * @param {String} name of the helper
+   * @param {string} name of the helper
    * @return {Object} a helper instance
    */
   app.getHelper = function (name) {
@@ -581,7 +581,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
   /**
    * Override the existing cached version of a service
    *
-   * @param {String} name the name of the service
+   * @param {string} name the name of the service
    * @param {Object} instance the service instance
    */
   app.setService = function (name, instance) {
@@ -591,7 +591,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
   /**
    * Override the existing cached version of a controller
    *
-   * @param {String} name the name of the controller
+   * @param {string} name the name of the controller
    * @param {Object} instance the controller instance
    */
   app.setController = function (name, instance) {
@@ -601,7 +601,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
   /**
    * Override the existing cached version of a model
    *
-   * @param {String} name the name of the model
+   * @param {string} name the name of the model
    * @param {Object} instance the model instance
    */
   app.setModel = function (name, instance) {
