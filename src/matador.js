@@ -179,7 +179,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
         try {
           templateCache[templateName] = engine.compile(data, options)
         } catch (e) {
-          callback(e)
+          return callback(e)
         }
         return callback(null, templateCache[templateName])
       })
