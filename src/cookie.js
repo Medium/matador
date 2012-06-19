@@ -1,5 +1,5 @@
 /**
- * @fileoverview Module that adds functionality for setting/getting cookies.
+ * @fileoverview Service for setting and getting cookies
  *
  * Once installed a "cookies" service is available that exposes
  * <code>get(name, default)</code> and <code>set(name, value, options)</code>
