@@ -302,16 +302,16 @@ module.exports.createApp = function (baseDir, configuration, options) {
   }
 
   /**
-   * Handle the http request
+   * Create the actual router to route the request to a controller action
    *
-   * @param {Object} req http request
-   * @param {Object} res http response
-   * @param {Function} next
+   * @param {{defaultMiddleware:{Object|Array.<Object>}}} configuration configuration for
+   *     the router. defaultMiddleware will define middleware which will run for any request
+   *     as long as the middleware hasn't been defined at the controller or method level
    */
   app.router = function router(config) {
     config = config || {}
 
-    return function router (req, res, next) {
+    return function router(req, res, next) {
       var target = req.target
       if (!req.target) return next(new Error("Handler not found for " + req.url))
 
