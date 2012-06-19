@@ -278,11 +278,10 @@ module.exports.createApp = function (baseDir, configuration, options) {
   }
 
   /**
-   * Look at where a request is supposed to go and attach relevant target info to the request
+   * Create middleware which will look at where a request is supposed to go and attach
+   * relevant target info to the request
    *
-   * @param {Object} req http request
-   * @param {Object} res http response
-   * @param {Function} next
+   * @returns {Function} middleware
    */
    app.preRouter = function preRouter() {
     return function preRouter (req, res, next) {
