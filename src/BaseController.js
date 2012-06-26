@@ -136,13 +136,12 @@ module.exports = function (app) {
       }
     }
 
-    // TODO(david): Support $ij
+    var ijData = opt_injectedData || {}
     if (!layoutFn) {
-      return templateFn(data)
+      return templateFn(data, null, ijData)
     }
 
-    var ijData = opt_injectedData || {}
-    ijData[CLOSURE_LAYOUT_BODY_HTML_KEY] = templateFn(data)
+    ijData[CLOSURE_LAYOUT_BODY_HTML_KEY] = templateFn(data, null, ijData)
     return layoutFn(data, null, ijData)
   }
 
