@@ -50,7 +50,7 @@ module.exports = function (app) {
         res.send(400)
       }
 
-    , render: function (res, view, data, fn) {
+    , render: function (res, view, data, fn, opt_injectedData) {
         data = data || {}
 
         var prefix = view.substring(0, view.indexOf(':'))
@@ -59,7 +59,8 @@ module.exports = function (app) {
           // are file names, whereas multiple closure templates exist in a single soy file,
           // so we short-circuit the rendering framework altogether. The only loss of functionality
           // is caching, but soynode gives that to us for free.
-          var output = renderClosureTemplate(view.substring(4), data, fn, this.layout)
+          var output = renderClosureTemplate(
+              view.substring(4), data, fn, this.layout, opt_injectedData)
           return fn ? fn(output) : res.send(output)
         }
 
@@ -118,8 +119,9 @@ module.exports = function (app) {
    * @param {string} templateName
    * @param {Object} data
    * @param {*} layout
+   * @param {Object=} opt_injectedData optional injected data for $ij
    */
-  function renderClosureTemplate (templateName, data, layout) {
+  function renderClosureTemplate (templateName, data, layout, opt_injectedData) {
     var templateFn = soynode.get(templateName)
     if (!templateFn) {
       throw new Error('Unable to find template: ' + templateName)
@@ -139,7 +141,7 @@ module.exports = function (app) {
       return templateFn(data)
     }
 
-    var ijData = {}
+    var ijData = opt_injectedData || {}
     ijData[CLOSURE_LAYOUT_BODY_HTML_KEY] = templateFn(data)
     return layoutFn(data, null, ijData)
   }
