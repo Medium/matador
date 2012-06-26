@@ -31,13 +31,24 @@ module.exports.init = function (app, routes) {
       var controllerName = handlers[method].split(/\./)[0]
       var actionName = handlers[method].split(/\./)[1]
       var controller = app.getController(controllerName)
+      var controllerClass = app.getController(controllerName, true)
       var controllerMethod = controller[actionName]
       var middleware = app.getController(controllerName, true).prototype[actionName].middleware
       if (!middleware) middleware = app.getController(controllerName, true).defaultMiddleware
       if (middleware) middleware = v(Array.isArray(middleware) ? middleware : [middleware]).flatten()
 
       //create individual entries for each request method (patchmatching is method-specific)
-      app._pathMatchers[method.toUpperCase()].add(path, {controller: controller, method: controllerMethod, middleware: middleware})
+      app._pathMatchers[method.toUpperCase()].add(
+          path
+        , {
+              controller: controller
+            , controllerName: controllerName
+            , controllerClass: controllerClass
+            , method: controllerMethod
+            , methodName: actionName
+            , middleware: middleware
+          }
+      )
     }
   }
 }
