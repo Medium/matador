@@ -60,7 +60,7 @@ module.exports = function (app) {
           // so we short-circuit the rendering framework altogether. The only loss of functionality
           // is caching, but soynode gives that to us for free.
           var output = renderClosureTemplate(
-              view.substring(4), data, fn, this.layout, opt_injectedData)
+              view.substring(4), data, this.layout, opt_injectedData)
           return fn ? fn(output) : res.send(output)
         }
 
