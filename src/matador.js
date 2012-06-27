@@ -295,7 +295,12 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
       // successful match, attach it to the req obj
       req.target = handler.object
-      req.params = handler.matches || {}
+      req.params = {}
+      if (handler.matches) {
+        for (var key in handler.matches) {
+          req.params[key] = decodeURI(handler.matches[key])
+        }
+      }
       return next()
     }
   }
