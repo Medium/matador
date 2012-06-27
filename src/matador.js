@@ -231,7 +231,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
         if (status) res.statusCode = status
 
         // if no content type was set, assume html
-        if (!res.getHeader['content-type']) res.setHeader('content-type', 'text/html')
+        if (!res.getHeader('content-type') res.setHeader('content-type', 'text/html')
         res.write(data)
 
         // done
