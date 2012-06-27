@@ -13,8 +13,9 @@ app.configure(function () {
   app.use(matador.cookieParser())
   app.use(matador.session({secret: 'boosh'}))
 
-  app.use(matador.bodyParser())
-  app.use(matador.methodOverride())
+  // TODO: Add JSON body parser middleware
+  app.use(app.requestDecorator())
+  app.use(app.preRouter())
 })
 
 app.configure('development', function () {
@@ -27,6 +28,10 @@ app.configure('development', function () {
 
 app.configure('production', function () {
   app.use(matador.errorHandler())
+})
+
+app.configure(function () {
+  app.use(app.router({}))
 })
 
 app.prefetch()

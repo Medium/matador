@@ -1,6 +1,6 @@
 module.exports = function (app) {
   return {
-    '/': 'Home.index'
-  , '/soy': 'Soy.index'
+    '/': {'get': 'Home.index'}
+  , '/soy': {'get': 'Soy.index'}
   }
 }
