@@ -27,12 +27,14 @@ module.exports.init = function (app, routes) {
 
     //for each of the handler methods, figure out which middleware to use
     for (var method in handlers) {
-
       var controllerName = handlers[method].split(/\./)[0]
       var actionName = handlers[method].split(/\./)[1]
       var controller = app.getController(controllerName)
       var controllerClass = app.getController(controllerName, true)
       var controllerMethod = controller[actionName]
+      if (!controller) throw new Error('Couldn\'t find a controller named ' + controllerName)
+      if (!controllerMethod) throw new Error('Couldn\'t find an action called ' + controllerName + '.' + actionName)
+
       var middleware = app.getController(controllerName, true).prototype[actionName].middleware
       if (!middleware) middleware = app.getController(controllerName, true).defaultMiddleware
       if (middleware) middleware = v(Array.isArray(middleware) ? middleware : [middleware]).flatten()
