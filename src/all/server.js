@@ -3,7 +3,7 @@ var matador = require('matador')
   , argv = matador.argv
   , config = require('./app/config/' + env)
   , app = matador.createApp(__dirname, config, {})
-  , port = argv.port || 3000
+  , port = argv.port || process.env.PORT || 3000
 
 app.configure(function () {
 
