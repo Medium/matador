@@ -15,7 +15,7 @@
       , "url": "https://github.com/Obvious/matador.git"
     }
   , "engines": {
-      "node": ">=0.6.0 <0.7.0"
+      "node": ">=0.6.0 <0.8.x"
     }
   , "bin": {
       "matador": "bin/matador.js"
