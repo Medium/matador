@@ -1,5 +1,6 @@
 var fs = require('fs')
   , path = require('path')
+  , existsSync = fs.existsSync || path.existsSync
 
 function Cache() {
   this._ = {}
@@ -24,7 +25,7 @@ module.exports = function (app, config) {
         var index
           , req = request.params[0]
           , place = app.set('public') + req
-        if (!path.existsSync(place)) {
+        if (!existsSync(place)) {
           response.statusCode = 404
           return this.render(response, '404')
         }
