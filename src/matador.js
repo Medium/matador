@@ -22,6 +22,7 @@ var fs = require('fs')
     , MODELS: 'Model'
     , CONTROLLERS: 'Controller'
   }
+  , existsSync = fs.existsSync || path.existsSync
 
 var minify = function () {
   var r = /(<script[^>]*>[\s\S]+?<\/script>)/
@@ -79,7 +80,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
     , listingCache = {}
     , appDirs = [appDir].concat(v(function () {
         var dir = appDir + '/modules'
-        return path.existsSync(dir) ? fs.readdirSync(dir) : []
+        return existsSync(dir) ? fs.readdirSync(dir) : []
       }()).map(function (dir) {
         return appDir + '/modules/' + dir
       }))
@@ -88,7 +89,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
         // We check for file existence this way so that our lookups are case sensitive regardless of the underlying filesystem.
         var dir = path.dirname(filename)
           , base = path.basename(filename)
-        if (!listingCache[dir]) listingCache[dir] = path.existsSync(dir) ? fs.readdirSync(dir) : []
+        if (!listingCache[dir]) listingCache[dir] = existsSync(dir) ? fs.readdirSync(dir) : []
         return listingCache[dir].indexOf(base) !== -1
       }
     , loadFile = function (subdir, name, p) {
@@ -171,7 +172,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
       if (!engine) return callback(Error("No engine found for template type " + suffix))
 
       // does the template exist?
-      if (!path.existsSync(templateName)) return callback(new Error("Template '" + templateName + "' does not exist"))
+      if (!existsSync(templateName)) return callback(new Error("Template '" + templateName + "' does not exist"))
 
       // read the template in, cache, and call the callback
       fs.readFile(templateName, 'utf8', function (err, data) {
