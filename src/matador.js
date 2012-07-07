@@ -22,7 +22,7 @@ var fs = require('fs')
     , MODELS: 'Model'
     , CONTROLLERS: 'Controller'
   }
-  , existsSync = fs.existsSync || path.existsSync
+  , existsSync = fs.existsSync || fs.existsSync
 
 var minify = function () {
   var r = /(<script[^>]*>[\s\S]+?<\/script>)/
