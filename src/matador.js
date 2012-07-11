@@ -98,7 +98,12 @@ module.exports.createApp = function (baseDir, configuration, options) {
         var dir = v.find((p ? [p] : appDirs), function (dir) {
           var filename = dir + '/' + subdir + '/' + pathname + '.js'
           if (!fileExists(filename)) return false
-          fileCache[subdir][name] = require(filename)(app, (configuration[subdir] && configuration[subdir][name] ? configuration[subdir][name] : {}))
+          try {
+            fileCache[subdir][name] = require(filename)(app, (configuration[subdir] && configuration[subdir][name] ? configuration[subdir][name] : {}))
+          } catch (e) {
+            console.error('Error loading file:', subdir, name, p, e.stack)
+            throw e
+          }
           pathCache[subdir][name] = dir === appDir ? [appDir] : [dir, appDir]
           return true
         })
@@ -399,7 +404,12 @@ module.exports.createApp = function (baseDir, configuration, options) {
     v.each(appDirs, function (dir) {
       var filename = dir + '/config/routes.js'
       if (!fileExists(filename)) return
-      router.init(self, require(filename)(self))
+      try {
+        router.init(self, require(filename)(self))
+      } catch (e) {
+        console.log('Error initializing routes', e.stack)
+        throw e
+      }
     })
   }
 
@@ -572,6 +582,20 @@ module.exports.createApp = function (baseDir, configuration, options) {
   }
 
   /**
+   * Registers a helper that has been loaded or defined outside the standard folder structure.
+   * Can be used with off the shelf matador helpers, e.g:
+   *
+   * <pre>
+   *  app.registerHelper('Cache', matador.helpers.CacheHelper)
+   * </pre>
+   * @param {function(Application) : Object} helperFactory A factory method that takes the application
+   *    and returns a helper object.
+   */
+  app.registerHelper = function (name, helperFactory) {
+    fileCache[paths.HELPERS][name + filenameSuffixes.HELPERS] = helperFactory(app)
+  }
+
+  /**
    * Override the existing cached version of a service
    *
    * @param {string} name the name of the service
@@ -625,4 +649,17 @@ module.exports.engine = {
       return hogan.compile(source, options).render(options.locals, options.partials)
     }
   }
+}
+
+
+/**
+ * A selection of off the shelf-helper classes that can be installed by an
+ * application using `app.registerHelper(name, helper)`. e.g:
+ *
+ * <pre>
+ *   app.registerHelper('Cache', matador.helpers.CacheHelper)
+ * </pre>
+ */
+module.exports.helpers = {
+  get CacheHelper() { return require('./helpers/CacheHelper') }
 }
