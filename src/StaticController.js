@@ -1,6 +1,6 @@
 var fs = require('fs')
   , path = require('path')
-  , existsSync = fs.existsSync || fs.existsSync
+  , existsSync = fs.existsSync || path.existsSync
 
 function Cache() {
   this._ = {}
