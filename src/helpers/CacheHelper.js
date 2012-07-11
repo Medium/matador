@@ -76,9 +76,10 @@ module.exports = function (app) {
 
     res.writeHead = function (status, reason, headers) {
       headers = headers || {}
-      if (headers['Set-Cookie'] && !_areCookiesAllowed(req, status, allHeaders)) {
-        _errorHelper(status, headers['Set-Cookie'])
-        delete headers['Set-Cookie']
+      var keyMap = _lowerCaseKeyMap(headers)
+      if (keyMap['set-cookie'] && !_areCookiesAllowed(req, status, allHeaders)) {
+        _errorHelper(status, headers[keyMap['set-cookie']])
+        delete headers[keys['set-cookie']]
       }
 
       v.extend(allHeaders, headers)
@@ -86,7 +87,8 @@ module.exports = function (app) {
     }
 
     res.setHeader = function (name, value) {
-      if (name == 'Set-Cookie' && !_areCookiesAllowed(req, res.statusCode, allHeaders)) {
+      var lowerName = name.toLowerCase()
+      if (lowerName == 'set-cookie' && !_areCookiesAllowed(req, res.statusCode, allHeaders)) {
         _errorHelper(res.statusCode, {name: value})
         return
       }
@@ -103,7 +105,7 @@ module.exports = function (app) {
     }
 
     function _errorHelper(status, misc) {
-      logger.error('Illegal attempt to Set-Cookie, the response does not have correct cache policies.  ' +
+      console.error('Illegal attempt to Set-Cookie, the response does not have correct cache policies.  ' +
           'The header will be stripped and the cookie will not be set.  The calling code should be fixed to ' +
           'not send the cookie or the response should be made private or uncacheable.  The requested resource was "' +
           req.method + ' ' + req.url + ' (' + status + ')".  Callstack was ' + new Error().stack, misc)
@@ -120,14 +122,16 @@ module.exports = function (app) {
    * @private
    */
   function _auditHeaders(req, status, headers) {
+    var keyMap = _lowerCaseKeyMap(headers)
+
     // We always want explicit cache policies, so log a warning if there is no cache-control header.
-    if (!('Cache-Control' in headers)) {
-      logger.warn('Missing Cache-Control policy when requesting "' + req.method + ' ' + req.url + ' (' + status + ')".')
+    if (!('cache-control' in keyMap)) {
+      console.warn('Missing Cache-Control policy when requesting "' + req.method + ' ' + req.url + ' (' + status + ')".')
     }
 
     // Make sure cookies are allowed to be set.  This should already have been logged, but better to be safe than sorry.
-    if (('Set-Cookie' in headers) && !_areCookiesAllowed(req, status, headers)) {
-      logger.warn('Cookies being sent when not allowed when requesting "' + req.method + ' ' + req.url + ' (' + status + ')".')
+    if (('set-cookie' in keyMap) && !_areCookiesAllowed(req, status, headers, keyMap)) {
+      console.warn('Cookies being sent when not allowed when requesting "' + req.method + ' ' + req.url + ' (' + status + ')".')
     }
   }
 
@@ -140,11 +144,13 @@ module.exports = function (app) {
    * @param {Object} req The request object.
    * @param {number} status The response status code.
    * @param {Object} headers Map of response headers.
+   * @param {Object=} opt_keyMap Optional precomputed key map, from lowercase key to original key.
    * @return {boolean} Whether cookies can be set on the response, given its cache policies.
    * @private
    */
-  function _areCookiesAllowed(req, status, headers) {
-    var cacheControl = _parseHeaderDirectives(headers['Cache-Control'])
+  function _areCookiesAllowed(req, status, headers, opt_keyMap) {
+    var keyMap = opt_keyMap || _lowerCaseKeyMap(headers)
+    var cacheControl = _parseHeaderDirectives(headers[keyMap['cache-control']])
 
     // Allow return codes, except the following, but only if the response isn't explicitly public.
     if ([200, 203, 206, 300, 301, 410].indexOf(status) == -1 && !cacheControl['public']) {
@@ -214,6 +220,20 @@ module.exports = function (app) {
     }
 
     return directives
+  }
+
+  /**
+   * Creates a mapping of lowercase key names to their original key.
+   * @param {Object} original
+   * @return {Object}
+   * @private
+   */
+  function _lowerCaseKeyMap(original) {
+    var keys = {}
+    for (var key in original) {
+      keys[key.toLowerCase()] = key
+    }
+    return keys
   }
 
 

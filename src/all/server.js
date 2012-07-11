@@ -14,6 +14,7 @@ app.configure(function () {
   app.register('.html', matador.engine)
 
   // Use the cache helper's no-cache middleware.
+  app.use(app.getHelper('Cache').auditHeadersMiddleware)
   app.use(app.getHelper('Cache').noCacheMiddleware)
 
   app.use(matador.cookieParser())
