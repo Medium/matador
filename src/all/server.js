@@ -5,10 +5,17 @@ var matador = require('matador')
   , app = matador.createApp(__dirname, config, {})
   , port = argv.port || process.env.PORT || 3000
 
+// Register the matador cache helper.
+app.registerHelper('Cache', matador.helpers.CacheHelper)
+
 app.configure(function () {
 
   app.set('view engine', 'html')
   app.register('.html', matador.engine)
+
+  // Use the cache helper's no-cache middleware.
+  app.use(app.getHelper('Cache').auditHeadersMiddleware)
+  app.use(app.getHelper('Cache').noCacheMiddleware)
 
   app.use(matador.cookieParser())
   app.use(matador.session({secret: 'boosh'}))
