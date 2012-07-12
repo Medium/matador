@@ -100,6 +100,9 @@ module.exports.createApp = function (baseDir, configuration, options) {
           if (!fileExists(filename)) return false
           try {
             fileCache[subdir][name] = require(filename)(app, (configuration[subdir] && configuration[subdir][name] ? configuration[subdir][name] : {}))
+            // emit event saying a helper was just created w/ name - Helper
+            if (subdir === paths.HELPERS) app.emit('createHelper', name.substr(0, name.length - 6), fileCache[subdir][name])
+          
           } catch (e) {
             console.error('Error loading file:', subdir, name, p, e.stack)
             throw e
