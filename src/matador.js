@@ -98,6 +98,8 @@ module.exports.createApp = function (baseDir, configuration, options) {
           var filename = dir + '/' + subdir + '/' + pathname + '.js'
           if (!fileExists(filename)) return false
           fileCache[subdir][name] = require(filename)(app, (configuration[subdir] && configuration[subdir][name] ? configuration[subdir][name] : {}))
+          // emit event saying a helper was just created w/ name - Helper
+          if (subdir === paths.HELPERS) app.emit('createHelper', name.substr(0, name.length - 6), fileCache[subdir][name])
           pathCache[subdir][name] = dir === appDir ? [appDir] : [dir, appDir]
           return true
         })
