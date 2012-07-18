@@ -71,6 +71,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
     , fileCache = {}
     , objCache = {}
     , pathCache = {}
+    , templateEngines = {}
     , updateCaches = v(paths).each(function (key, val) {
         fileCache[val] = {}
         objCache[val] = {}
@@ -99,10 +100,9 @@ module.exports.createApp = function (baseDir, configuration, options) {
           var filename = dir + '/' + subdir + '/' + pathname + '.js'
           if (!fileExists(filename)) return false
           try {
-            fileCache[subdir][name] = require(filename)(app, (configuration[subdir] && configuration[subdir][name] ? configuration[subdir][name] : {}))
+            fileCache[subdir][name] = require(filename)(app, getConfig(subdir, name))
             // emit event saying a helper was just created w/ name - Helper
             if (subdir === paths.HELPERS) app.emit('createHelper', name.substr(0, name.length - 6), fileCache[subdir][name])
-          
           } catch (e) {
             console.error('Error loading file:', subdir, name, p, e.stack)
             throw e
@@ -129,11 +129,46 @@ module.exports.createApp = function (baseDir, configuration, options) {
         return objCache[subdir][name]
       }
     , mountPublicDir = function (dir) {
-      var directory = dir + '/public'
-      fileExists(directory) && app.use(connect.static(directory))
-    }
+        var directory = dir + '/public'
+        fileExists(directory) && app.use(connect.static(directory))
+      }
 
-  var templateEngines = {}
+      /**
+       * Gets the configuration by type (e.g. Controller, Service, Helper) and name (e.g. ImageService, 
+       * AuthController, SecurityHelper).  If present, values are taken from the 'base' configuration
+       * and then taken from the specific config, thus a specific config can override a base value.
+       *
+       * A config might look like this:
+       *
+       * var config = {
+       *   base: {baseUrl: '/', name: 'My Project'},
+       *   services: {
+       *     ImageService: {baseUrl: '//cdn.project.com/'}
+       *   },
+       *   controllers: {
+       *     AuthController: {authType: 'basic-auth'}
+       *   }
+       * }
+       */
+    , getConfig = function (type, name) {
+        var config = {}
+        // Copy values from the base configuration.
+        if (configuration.base) {
+          for (var key in configuration.base) {
+            config[key] = configuration.base[key]
+          }
+        }
+        // Copy configuration keys from the specific config, this will override
+        // values in the base configuration.
+        if (configuration[type] && configuration[type][name]) {
+          for (var key in configuration[type][name]) {
+            config[key] = configuration[type][name][key]
+          }
+        }
+        return config
+      }
+
+
   /**
    * Allow registration of template engines
    */
