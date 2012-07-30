@@ -157,8 +157,9 @@ module.exports = function (app) {
       return true
     }
 
-    // Allow responses to POST, but only if the response isn't explicitly public.
-    if (req.method == 'POST' && !cacheControl['public']) {
+    // Allow responses to POST/PUT/DELETE, but only if the response isn't explicitly public.
+    // See section 13.10 of RFC2616.
+    if (!cacheControl['public'] && (req.method == 'POST' || req.method == 'PUT' || req.method == 'DELETE')) {
       return true
     }
 
