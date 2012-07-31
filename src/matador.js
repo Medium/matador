@@ -342,7 +342,12 @@ module.exports.createApp = function (baseDir, configuration, options) {
       req.params = {}
       if (handler.matches) {
         for (var key in handler.matches) {
-          req.params[key] = decodeURI(handler.matches[key])
+          if (key == '*' && Array.isArray(handler.matches['*'])) {
+            // The wildcard param passes an array of path parts.
+            req.params['*'] = handler.matches['*'].map(decodeURI)
+          } else {
+            req.params[key] = decodeURI(handler.matches[key])
+          }
         }
       }
       return next()
