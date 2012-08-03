@@ -6,7 +6,7 @@ var methods = {
   init: function (path) {
     console.log('installing Matador into ' + path)
     fs.mkdirSync('./' + path)
-    exec('cp -r' + __dirname + '/../src/all/ ' + path, function (err, out) {
+    exec('cp -r' + __dirname + '/../src/all/* ' + path, function (err, out) {
       if (err) return console.log('error', err)
       console.log('Success!')
     })
