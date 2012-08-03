@@ -477,7 +477,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
     // Precompile all Closure templates.
     v.each(appDirs, function (dir) {
-      dir = dir + '/views'
+      dir = dir + '/app/views'
       if (!isDirectory(dir)) return
 
       soynode.compileTemplates(dir, function (err) {
