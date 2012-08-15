@@ -134,7 +134,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
       }
 
       /**
-       * Gets the configuration by type (e.g. Controller, Service, Helper) and name (e.g. ImageService, 
+       * Gets the configuration by type (e.g. Controller, Service, Helper) and name (e.g. ImageService,
        * AuthController, SecurityHelper).  If present, values are taken from the 'base' configuration
        * and then taken from the specific config, thus a specific config can override a base value.
        *
@@ -275,7 +275,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
         if (status) res.statusCode = status
 
         // if no content type was set, assume html
-        if (!res.getHeader('content-type')) res.setHeader('content-type', 'text/html')
+        if (!res.getHeader('content-type')) res.setHeader('content-type', 'text/html; charset=utf-8')
         res.write(data)
 
         // done
