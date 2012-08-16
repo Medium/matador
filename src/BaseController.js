@@ -48,7 +48,7 @@ module.exports = function (app) {
       }
 
     , error: function (res) {
-        res.send(400)
+        res.send('An error occurred', {}, 400)
       }
 
     , render: function (res, view, data, fn, opt_injectedData) {
