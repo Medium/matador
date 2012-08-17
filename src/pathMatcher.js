@@ -133,6 +133,12 @@ PathMatcher.prototype.getMatch = function(path) {
     }
   }
 
+  // If we stopped at a node but it doesn't have an object associated with it
+  // then fallback to an open wildcard node.
+  if (!node.object && pendingWildcard) {
+    node = pendingWildcard
+  }
+
   if (node && node.object) {
     var matchObj = {}
     if (pendingWildcard == node) {
