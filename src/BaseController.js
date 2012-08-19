@@ -81,6 +81,32 @@ module.exports = function (app) {
           throw e
         }
       }
+
+    , renderXML: function (res, view, data, fn, opt_injectedData) {
+        data = data || {}
+
+        var prefix = view.substring(0, view.indexOf(':'))
+        if (prefix == 'soy') {
+          var output = renderClosureTemplate(
+              view.substring(4), data, this.layout, opt_injectedData)
+          return fn ? fn(output) : res.send(output)
+        }
+
+        var viewFile = findViewFile(this._paths, view)
+
+        // Start looking for partials in the same directory as the view file.
+        var partialsDir = path.resolve(viewFile, '../')
+
+        try {
+          return res.render(viewFile, {
+              locals: data
+            , partials: app.getPartials(partialsDir)
+            }, fn)
+        } catch (e) {
+          console.error('Rendering error, view:', viewFile, 'error:', e.message, e.stack)
+          throw e
+        }
+      }
     })
 
   /**
