@@ -64,7 +64,13 @@ module.exports = function (app) {
           return fn ? fn(output) : res.send(output)
         }
 
-        var layoutFile = findLayoutFile(this._paths, this.layout)
+        var layoutFile
+        if (typeof data.layout != 'undefined' && data.layout !== true) {
+          layoutFile = data.layout ? findLayoutFile(this._paths, data.layout) : false
+        } else {
+          layoutFile = findLayoutFile(this._paths, this.layout)
+        }
+
         var viewFile = findViewFile(this._paths, view)
 
         // Start looking for partials in the same directory as the view file.
