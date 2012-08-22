@@ -1,6 +1,7 @@
 var fs = require('fs')
   , path = require('path')
   , soynode = require('soynode')
+  , existsSync = fs.existsSync || path.existsSync
 
 module.exports = function (app) {
   var viewCache = {}
@@ -47,7 +48,7 @@ module.exports = function (app) {
       }
 
     , error: function (res) {
-        res.send(400)
+        res.send('An error occurred', {}, 400)
       }
 
     , render: function (res, view, data, fn, opt_injectedData) {
@@ -119,7 +120,7 @@ module.exports = function (app) {
 
     return layout ? maybeStripSoyPrefix(layout) : layout
   }
-  
+
   /**
    * Renders a closure template that has already been compiled.
    * @param {string} templateName
@@ -179,7 +180,7 @@ module.exports = function (app) {
   function findFile(paths, file) {
     for (var i = 0; i < paths.length; i++) {
       var filePath = path.resolve(paths[i], file)
-      if (path.existsSync(filePath)) {
+      if (existsSync(filePath)) {
         return filePath
       }
     }

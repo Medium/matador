@@ -36,6 +36,20 @@ module.exports.init = function (app, routes) {
       if (!controllerMethod) throw new Error('Couldn\'t find an action called ' + controllerName + '.' + actionName)
 
       var middleware = app.getController(controllerName, true).prototype[actionName].middleware
+      var filters = []
+
+      if (controller.beforeFilters['*']) filters = filters.concat(controller.beforeFilters['*'])
+      if (controller.beforeFilters[actionName]) filters = filters.concat(controller.beforeFilters[actionName])
+
+      if (filters.length) {
+        middleware = typeof middleware === 'undefined' ? [] : middleware;
+        middleware = typeof controller.excludeFilters[actionName] === 'undefined' ?
+          filters.concat(middleware) :
+          v(filters).filter(function (filter) {
+            return !v.inArray(controller.excludeFilters[actionName], filter)
+          }).concat(middleware)
+      }
+
       if (!middleware) middleware = app.getController(controllerName, true).defaultMiddleware
       if (middleware) middleware = v(Array.isArray(middleware) ? middleware : [middleware]).flatten()
 
