@@ -276,6 +276,9 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
         // if no content type was set, assume html
         if (!res.getHeader('content-type')) res.setHeader('content-type', 'text/html; charset=utf-8')
+        if (typeof data === 'string') data = new Buffer(data)
+        if (!res.getHeader('content-length') && data instanceof Buffer) res.setHeader('content-length', data.length)
+
         res.write(data)
 
         // done
