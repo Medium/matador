@@ -267,7 +267,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
       // send output to the request object and close the request
       res.send = function sendResponse(data, headers, status) {
-        var bytesWritten = null
+        var bytesWritten
 
         if (headers) {
           for (var key in headers) res.setHeader(key, headers[key])
@@ -279,7 +279,8 @@ module.exports.createApp = function (baseDir, configuration, options) {
         // if no content type was set, assume html
         if (!res.getHeader('content-type')) res.setHeader('content-type', 'text/html; charset=utf-8')
         if (typeof data === 'string') data = new Buffer(data)
-        if (!res.getHeader('content-length') && data instanceof Buffer) res.setHeader('content-length', bytesWritten = data.length)
+        if (data instanceof Buffer) bytesWritten = data.length
+        if (!res.getHeader('content-length') && typeof bytesWritten !== 'undefined') res.setHeader('content-length', bytesWritten)
 
         res.write(data)
 
