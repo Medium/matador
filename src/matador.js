@@ -282,7 +282,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
         if (data instanceof Buffer) bytesWritten = data.length
         if (!res.getHeader('content-length') && typeof bytesWritten !== 'undefined') res.setHeader('content-length', bytesWritten)
 
-        res.write(data)
+        if (req.method !== 'HEAD') res.write(data)
 
         // done
         res.end()
@@ -336,7 +336,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
    */
    app.preRouter = function preRouter() {
     return function preRouter (req, res, next) {
-      var matcher = app._pathMatchers[req.method]
+      var matcher = app._pathMatchers[req.method === 'HEAD' ? 'GET' : req.method]
       // check for any handler for the http method first
       if (!matcher) return next()
 
