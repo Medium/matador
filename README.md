@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/Obvious/matador.png)](http://travis-ci.org/Obvious/matador)
 # Matador
 Sane defaults and a simple structure, scaling as your application grows.
 
