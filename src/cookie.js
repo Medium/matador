@@ -57,8 +57,8 @@ CookieService.prototype.set = function(name, value, options) {
   if (typeof cookies === 'string') {
     cookies = [cookies]
   }
-  cookies.push(new Cookie(name, value, options).toString())
-  this.res.setHeader('Set-Cookie', cookies)
+  //cookies.push(new Cookie(name, value, options).toString())
+  this.res.setHeader('Set-Cookie', new Cookie(name, value, options).toString())
 }
 
 
