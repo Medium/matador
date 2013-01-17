@@ -54,17 +54,17 @@ module.exports.init = function (app, routes) {
       if (middleware) middleware = v(Array.isArray(middleware) ? middleware : [middleware]).flatten()
 
       //create individual entries for each request method (patchmatching is method-specific)
-      app._pathMatchers[method.toUpperCase()].add(
-          path
-        , {
-              controller: controller
-            , controllerName: controllerName
-            , controllerClass: controllerClass
-            , method: controllerMethod
-            , methodName: actionName
-            , middleware: middleware
-          }
-      )
+      var routeData = {
+          controller: controller
+        , controllerName: controllerName
+        , controllerClass: controllerClass
+        , method: controllerMethod
+        , methodName: actionName
+        , middleware: middleware
+      }
+
+      app._pathMatchers[method.toUpperCase()].add(path, routeData)
+      app.emit('createRoute', path, routeData)
     }
   }
 }
