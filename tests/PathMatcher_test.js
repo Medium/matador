@@ -49,6 +49,9 @@ exports.testRegExpPathMatching = function(test) {
   pm.add('/@re2:aaa|bbb', 'regexp2');
   pm.add('/@re2:aaa|bbb/kkk', 'regexp3');
 
+  pm.add('/@twittername:@.*', 'regexp4');
+
+
   assertMatch(test, pm, '/one/', 'regexp1', {'re1': 'one'});
   assertMatch(test, pm, '/two/', 'regexp1', {'re1': 'two'});
   assertMatch(test, pm, '/three/', 'regexp1', {'re1': 'three'});
@@ -58,6 +61,8 @@ exports.testRegExpPathMatching = function(test) {
 
   assertMatch(test, pm, '/aaa/kkk/', 'regexp3', {'re2': 'aaa'});
   assertMatch(test, pm, '/bbb/kkk/', 'regexp3', {'re2': 'bbb'});
+
+  assertMatch(test, pm, '/@dpup', 'regexp4', {'twittername': '@dpup'});
 
   test.equals(null, pm.getMatch('/four/'));
 
