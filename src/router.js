@@ -64,7 +64,7 @@ module.exports.init = function (app, routes) {
       }
 
       app._pathMatchers[method.toUpperCase()].add(path, routeData)
-      app.emit('createRoute', path, routeData)
+      app.emit('createRoute', method.toUpperCase(), path, routeData)
     }
   }
 }
