@@ -8,6 +8,7 @@ module.exports.init = function (app, routes) {
       , 'GET': new PathMatcher()
       , 'PUT': new PathMatcher()
       , 'POST': new PathMatcher()
+      , 'PATCH': new PathMatcher()
     }
   }
 
@@ -22,6 +23,7 @@ module.exports.init = function (app, routes) {
         , 'GET': handlers
         , 'PUT': handlers
         , 'POST': handlers
+        , 'PATCH': handlers
       }
     }
 
