@@ -23,6 +23,8 @@ app.configure(function () {
   // TODO: Add JSON body parser middleware
   app.use(app.requestDecorator())
   app.use(app.preRouter())
+
+  app.use(matador.bodyParser())
 })
 
 app.configure('development', function () {
