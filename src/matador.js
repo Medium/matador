@@ -463,7 +463,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
     })
   }
 
-  app.prefetch = function (options) {
+  app.prefetch = function (options, callback) {
     var self = this
 
     v(paths).each(function (key, type) {
@@ -487,7 +487,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
       dir = dir + '/views'
       if (!isDirectory(dir)) return
 
-      soynode.compileTemplates(dir, function (err) {
+      soynode.compileTemplates(dir, callback || function (err) {
         if (err) {
           throw err
         }
