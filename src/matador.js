@@ -340,8 +340,12 @@ module.exports.createApp = function (baseDir, configuration, options) {
       // check for any handler for the http method first
       if (!matcher) return next()
 
+      // Strip querystring and fragment.  Fragment should never be seen but we've seen it sent by
+      // scrapers and other tools (e.g. Kindle).
+      var url = req.url.replace(/[?#].*$/, '')
+
       // try and match
-      var handler = matcher.getMatch(req.url.split('?')[0])
+      var handler = matcher.getMatch(url)
       if (!handler) return next()
 
       // successful match, attach it to the req obj
