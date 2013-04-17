@@ -11,10 +11,17 @@ var methods = {
     }
 
     console.log('installing Matador into ' + path)
-    fs.mkdirSync('./' + path)
-    exec('cp -R ' + __dirname + '/../src/all/ ' + path, function (err, out) {
-      if (err) return console.log('error', err)
-      console.log('Success!')
+
+    fs.exists(path, function (exists) {
+      if (exists) {
+        console.log(path + " already exists")
+      } else {
+        fs.mkdirSync('./' + path)
+        exec('cp -R ' + __dirname + '/../src/all/ ' + path, function (err, out) {
+          if (err) return console.log('error', err)
+          console.log('Success!')
+        })
+      }
     })
   }
 , controller: function (name) {
@@ -39,8 +46,15 @@ var methods = {
       }) + 'Controller.js'
       console.log('generating controller ' + destinationFile)
       var stub = __dirname + '/../src/StubController.js'
-      exec('cp ' + stub + ' ' + destinationFile, function (er, out) {
-        console.log('Successfully created ' + destinationFile)
+
+      fs.exists(destinationFile, function(exists) {
+        if (exists) {
+          console.log(destinationFile + " already exists")
+        } else {
+          exec('cp ' + stub + ' ' + destinationFile, function (er, out) {
+            console.log('Successfully created ' + destinationFile)
+          })
+        }
       })
     }
   }
@@ -56,8 +70,15 @@ var methods = {
       return l.toUpperCase()
     }) + 'Model.js'
     var stub = __dirname + '/../src/StubModel.js'
-    exec('cp ' + stub + ' ' + destinationFile, function (er, out) {
-      console.log('Successfully created ' + destinationFile)
+
+    fs.exists(destinationFile, function(exists) {
+      if (exists) {
+        console.log(destinationFile + " already exists")
+      } else {
+        exec('cp ' + stub + ' ' + destinationFile, function (er, out) {
+          console.log('Successfully created ' + destinationFile)
+        })
+      }
     })
   }
 , help: function () {
