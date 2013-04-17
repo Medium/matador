@@ -41,8 +41,16 @@ var methods = {
       console.log('Successfully created ' + destinationFile)
     })
   }
+, help: function () {
+    console.log("Matador - a clean, organized framework for Node.js\n")
+    console.log("usage:")
+    console.log("\tinit <name> - Generate a new app called <name>")
+    console.log("\tcontroller <name> - Generate a new controller called <name>")
+    console.log("\tmodel <name> - Generate a new model called <name>\n")
+  }
 }
+
 !function (args) {
   var command = args.shift()
-  methods[command] && methods[command].apply(methods, args)
+  methods[command] && methods[command].apply(methods, args))
 }(process.argv.slice(2))
