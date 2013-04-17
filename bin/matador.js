@@ -52,5 +52,5 @@ var methods = {
 
 !function (args) {
   var command = args.shift()
-  methods[command] && methods[command].apply(methods, args)
+  ;(methods[command] && methods[command].apply(methods, args)) || methods.help.apply(methods, args)
 }(process.argv.slice(2))
