@@ -1,10 +1,18 @@
+var util = require('util')
+
 module.exports = function (app, config) {
+  var ApplicationController = app.getController('Application', true)
 
-  return app.getController("Application", true).extend()
-  .methods({
-    index: function (req, res) {
+  /** @constructor */
+  function StubController() {
+    ApplicationController.call(this)
+  }
 
-    }
-  })
+  util.inherits(StubController, ApplicationController)
 
+  StubController.prototype.index = function (req, res) {
+
+  }
+
+  return StubController
 }
