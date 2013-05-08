@@ -1,5 +1,14 @@
+var util = require('util')
+
 module.exports = function (app, config) {
-  var HomeController = app.getController('Application', true).extend()
+  var ApplicationController = app.getController('Application', true)
+
+  /** @constructor */
+  function HomeController() {
+    ApplicationController.call(this)
+  }
+
+  util.inherits(HomeController, ApplicationController)
 
   HomeController.prototype.index = function (req, res) {
     var data = {title: 'The Matador Framework'}
