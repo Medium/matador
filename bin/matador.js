@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 var fs = require('fs')
   , exec = require('child_process').exec
+  , path = require('path')
 
 var methods = {
   init: function (path) {
@@ -19,15 +20,20 @@ var methods = {
       copyContents()
     }
     function copyContents() {
-      var destinationFile = './app/controllers/' + name.replace(/(?:[^\/]+)$/, function (m) {
+      var className = name.replace(/(?:[^\/]+)$/, function (m) {
         return m.replace(/(.{1})/, function (m, l) {
           return l.toUpperCase()
         })
-      }) + 'Controller.js'
+      })
+
+      var destinationFile = './app/controllers/' + className + 'Controller.js'
       console.log('generating controller ' + destinationFile)
       var stub = __dirname + '/../src/StubController.js'
-      exec('cp ' + stub + ' ' + destinationFile, function (er, out) {
-        console.log('Successfully created ' + destinationFile)
+      fs.readFile(stub, function (er, stubContent) {
+        var content = stubContent.toString().replace(/Stub/g, className)
+        fs.writeFile(destinationFile, content, function (er) {
+          console.log('Successfully created ' + destinationFile)
+        })
       })
     }
   }
@@ -44,5 +50,11 @@ var methods = {
 }
 !function (args) {
   var command = args.shift()
+  if (!command) {
+    console.log('Usage: ')
+    console.log('   ' + path.basename(process.argv[1]) + ' init <app-name>')
+    console.log('   ' + path.basename(process.argv[1]) + ' controller <controller-name>')
+    return
+  }
   methods[command] && methods[command].apply(methods, args)
 }(process.argv.slice(2))

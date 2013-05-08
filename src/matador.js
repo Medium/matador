@@ -397,19 +397,6 @@ module.exports.createApp = function (baseDir, configuration, options) {
   app._vars = {}
 
   /**
-   * Allow configuration of this application via the current environment. If env is passed in
-   * and the current environment (process.env.NODE_ENV) matches env, then the function is ran.
-   * Any functions passed in without an env will be ran regardless.
-   *
-   * @param {string} env the current environment
-   * @param {Function} fn the function to call if the configuration block should be used
-   */
-  app.configure = function configureApp(env, fn) {
-    if (typeof fn === 'undefined') env()
-    else if (env === process.env.NODE_ENV) fn()
-  }
-
-  /**
    * create an http server from the app on a given port
    *
    * @param {number} port
