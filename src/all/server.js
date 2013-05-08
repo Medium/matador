@@ -8,23 +8,40 @@ var matador = require('matador')
 // Register the matador cache helper.
 app.registerHelper('Cache', matador.helpers.CacheHelper)
 
-app.set('view engine', 'html')
-app.register('.html', matador.engine)
+app.configure(function () {
 
-// Use the cache helper's no-cache middleware.
-app.use(app.getHelper('Cache').auditHeadersMiddleware)
-app.use(app.getHelper('Cache').noCacheMiddleware)
+  app.set('view engine', 'html')
+  app.register('.html', matador.engine)
 
-app.use(matador.cookieParser())
-app.use(matador.session({secret: 'boosh'}))
+  // Use the cache helper's no-cache middleware.
+  app.use(app.getHelper('Cache').auditHeadersMiddleware)
+  app.use(app.getHelper('Cache').noCacheMiddleware)
 
-// TODO: Add JSON body parser middleware
-app.use(app.requestDecorator())
-app.use(app.preRouter())
+  app.use(matador.cookieParser())
+  app.use(matador.session({secret: 'boosh'}))
 
-app.use(matador.bodyParser())
+  // TODO: Add JSON body parser middleware
+  app.use(app.requestDecorator())
+  app.use(app.preRouter())
 
-app.use(app.router({}))
+  app.use(matador.bodyParser())
+})
+
+app.configure('development', function () {
+  app.use(matador.errorHandler({ dumpExceptions: true, showStack: true }))
+  app.set('soy options', {
+    eraseTemporaryFiles: true
+    , allowDynamicRecompile: true
+  })
+})
+
+app.configure('production', function () {
+  app.use(matador.errorHandler())
+})
+
+app.configure(function () {
+  app.use(app.router({}))
+})
 
 app.prefetch()
 app.mount()
