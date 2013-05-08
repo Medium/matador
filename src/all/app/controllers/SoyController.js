@@ -1,10 +1,11 @@
 module.exports = function (app, config) {
-  return app.getController("Application", true).extend()
-  .methods({
-    index: function (req, res) {
+  var SoyController = app.getController('Application', true).extend()
+
+  SoyController.prototype.index = function (req, res) {
       this.render(res, 'soy:views.index.welcome', {
         title: 'The Matador Framework'
       })
-    }
-  })
+  }
+
+  return SoyController
 }
