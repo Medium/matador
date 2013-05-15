@@ -79,7 +79,7 @@ module.exports = function (app) {
       var keyMap = _lowerCaseKeyMap(headers)
       if (keyMap['set-cookie'] && !_areCookiesAllowed(req, status, allHeaders)) {
         _errorHelper(status, headers[keyMap['set-cookie']])
-        delete headers[keys['set-cookie']]
+        delete headers[keyMap['set-cookie']]
       }
 
       v.extend(allHeaders, headers)
