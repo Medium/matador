@@ -50,7 +50,7 @@ var methods = {
       console.log('generating controller ' + destinationFile)
       var stub = __dirname + '/../src/StubController.js'
 
-      fs.exists(destinationFile, function(exists) {
+      fs.exists(destinationFile, function (exists) {
         if (exists) {
           console.log(destinationFile + " already exists")
         } else {
@@ -77,7 +77,7 @@ var methods = {
     }) + 'Model.js'
     var stub = __dirname + '/../src/StubModel.js'
 
-    fs.exists(destinationFile, function(exists) {
+    fs.exists(destinationFile, function (exists) {
       if (exists) {
         console.log(destinationFile + " already exists")
       } else {
@@ -99,9 +99,9 @@ var methods = {
   }
 }
 
-!function (args) {
+!(function (args) {
   var command = args.shift()
 
   if (!command) methods.help()
   else methods[command] && methods[command].apply(methods, args)
-}(process.argv.slice(2))
+})(process.argv.slice(2))

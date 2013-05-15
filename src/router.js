@@ -9,7 +9,7 @@ module.exports.init = function (app, routes) {
       , 'PUT': new PathMatcher()
       , 'POST': new PathMatcher()
       , 'PATCH': new PathMatcher()
-    }
+      }
   }
 
   //loop through all of the paths and set up middleware as well as handlers
@@ -24,7 +24,7 @@ module.exports.init = function (app, routes) {
         , 'PUT': handlers
         , 'POST': handlers
         , 'PATCH': handlers
-      }
+        }
     }
 
     //for each of the handler methods, figure out which middleware to use
@@ -63,7 +63,7 @@ module.exports.init = function (app, routes) {
         , method: controllerMethod
         , methodName: actionName
         , middleware: middleware
-      }
+        }
 
       app._pathMatchers[method.toUpperCase()].add(path, routeData)
       app.emit('createRoute', method.toUpperCase(), path, routeData)
