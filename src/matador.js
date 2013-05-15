@@ -413,18 +413,6 @@ module.exports.createApp = function (baseDir, configuration, options) {
   }
 
   /**
-   * create an http server from the app on a given port
-   *
-   * @param {number} port
-   * @returns {Object} app
-   */
-  app.createServer = function createServer(port) {
-    app.use(responseRouter)
-    http.createServer(app).listen(port)
-    return app
-  }
-
-  /**
    * set/get an arbitrary value on the app object (set if the new value isn't undefined)
    * (Express shim)
    *
