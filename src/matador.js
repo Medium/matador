@@ -215,10 +215,10 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
       // is there an engine for the provided suffix?
       var engine = templateEngines[suffix]
-      if (!engine) return callback(new Error("No engine found for template type " + suffix))
+      if (!engine) return callback(new Error('No engine found for template type ' + suffix))
 
       // does the template exist?
-      if (!existsSync(templateName)) return callback(new Error("Template '" + templateName + "' does not exist"))
+      if (!existsSync(templateName)) return callback(new Error('Template \'' + templateName + '\' does not exist'))
 
       // read the template in, cache, and call the callback
       fs.readFile(templateName, 'utf8', function (err, data) {
@@ -380,7 +380,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
     return function router(req, res, next) {
       var target = req.target
-      if (!req.target) return next(new Error("Handler not found for " + req.url))
+      if (!req.target) return next(new Error('Handler not found for ' + req.url))
 
       var middleware = target.middleware || config.defaultMiddleware
       if (!middleware) return target.method.call(target.controller, req, res, next)
@@ -466,7 +466,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
         var d = dir + '/' + type
         if (!isDirectory(d)) return
         v.each(fs.readdirSync(d), function (file) {
-          if (isDirectory(d + "/" + file)) return
+          if (isDirectory(d + '/' + file)) return
           if (file.charAt(0) == '.') return
           if (file.substr(file.length - 3) === '.js') file = file.substr(0, file.length - 3)
           loadFile(type, file, dir)
@@ -688,7 +688,7 @@ module.exports.engine = {
         try {
           options.partials[i] = hogan.compile(options.partials[i])
         } catch (e) {
-          console.log("Unable to compile partial", i, e)
+          console.log('Unable to compile partial', i, e)
         }
       }
       return hogan.compile(source, options).render(options.locals, options.partials)

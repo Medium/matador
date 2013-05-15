@@ -13,7 +13,7 @@ module.exports = {
     })
 
     if (str) {
-      process.stdout.write(str + "\n" + len + ' error' + ((len === 1) ? '' : 's') + "\n")
+      process.stdout.write(str + '\n' + len + ' error' + ((len === 1) ? '' : 's') + '\n')
     }
     else {
       process.stdout.write('Rock on. No Errors!\n')

@@ -6,7 +6,7 @@ var fs = require('fs')
 var methods = {
   init: function (path) {
     if (!path) {
-      console.log("No app name given\n")
+      console.log('No app name given\n')
       this.usage()
       return 0
     }
@@ -15,7 +15,7 @@ var methods = {
 
     fs.exists(path, function (exists) {
       if (exists) {
-        console.log(path + " already exists")
+        console.log(path + ' already exists')
       } else {
         fs.mkdirSync('./' + path)
         exec('cp -R ' + __dirname + '/../src/all/ ' + path, function (err, out) {
@@ -27,7 +27,7 @@ var methods = {
   }
 , controller: function (name) {
     if (!name) {
-      console.log("No controller name given\n")
+      console.log('No controller name given\n')
       this.usage()
       return 0
     }
@@ -52,7 +52,7 @@ var methods = {
 
       fs.exists(destinationFile, function (exists) {
         if (exists) {
-          console.log(destinationFile + " already exists")
+          console.log(destinationFile + ' already exists')
         } else {
           fs.readFile(stub, function (er, stubContent) {
             var content = stubContent.toString().replace(/Stub/g, className)
@@ -66,7 +66,7 @@ var methods = {
   }
 , model: function (name) {
     if (!name) {
-      console.log("No model name given\n")
+      console.log('No model name given\n')
       this.usage()
       return 0
     }
@@ -79,7 +79,7 @@ var methods = {
 
     fs.exists(destinationFile, function (exists) {
       if (exists) {
-        console.log(destinationFile + " already exists")
+        console.log(destinationFile + ' already exists')
       } else {
         exec('cp ' + stub + ' ' + destinationFile, function (er, out) {
           console.log('Successfully created ' + destinationFile)
@@ -88,14 +88,14 @@ var methods = {
     })
   }
 , help: function () {
-    console.log("Matador - a clean, organized framework for Node.js\n")
+    console.log('Matador - a clean, organized framework for Node.js\n')
     this.usage()
   }
 , usage: function () {
-    console.log("usage:")
-    console.log("\tinit <name> - Generate a new app called <name>")
-    console.log("\tcontroller <name> - Generate a new controller called <name>")
-    console.log("\tmodel <name> - Generate a new model called <name>\n")
+    console.log('usage:')
+    console.log('\tinit <name> - Generate a new app called <name>')
+    console.log('\tcontroller <name> - Generate a new controller called <name>')
+    console.log('\tmodel <name> - Generate a new model called <name>\n')
   }
 }
 
