@@ -43,6 +43,5 @@
   , "trailing": true // Prohibit trailing whitespaces.
   , "white": true // Check against strict whitespace and indentation rules.
   , "indent": 2 // Specify indentation spacing
-  , "whitespace": true
   , "smarttabs": false // no mixed tabs and spaces! use spaces!
 }
