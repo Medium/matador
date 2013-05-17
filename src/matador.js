@@ -5,24 +5,27 @@ var fs = require('fs')
   , path = require('path')
   , hogan = require('hogan.js')
   , soynode = require('soynode')
-  , klass = global.klass = require('klass')
-  , v = global.v = require('valentine')
   , router = require('./router')
   , argv = module.exports.argv = require('optimist').argv
   , minifyViews = process.env.minify || false
-  , paths = {
-      SERVICES: 'services'
-    , HELPERS: 'helpers'
-    , MODELS: 'models'
-    , CONTROLLERS: 'controllers'
-  }
-  , filenameSuffixes = {
-      SERVICES: 'Service'
-    , HELPERS: 'Helper'
-    , MODELS: 'Model'
-    , CONTROLLERS: 'Controller'
-  }
   , existsSync = fs.existsSync || path.existsSync
+
+var paths = {
+  SERVICES: 'services'
+, HELPERS: 'helpers'
+, MODELS: 'models'
+, CONTROLLERS: 'controllers'
+}
+
+var filenameSuffixes = {
+  SERVICES: 'Service'
+, HELPERS: 'Helper'
+, MODELS: 'Model'
+, CONTROLLERS: 'Controller'
+}
+
+global.klass = require('klass')
+global.v = require('valentine')
 
 var minify = function () {
   var r = /(<script[^>]*>[\s\S]+?<\/script>)/
@@ -154,8 +157,8 @@ module.exports.createApp = function (baseDir, configuration, options) {
         var config = {}
         // Copy values from the base configuration.
         if (configuration.base) {
-          for (var key in configuration.base) {
-            config[key] = configuration.base[key]
+          for (var baseKey in configuration.base) {
+            config[baseKey] = configuration.base[baseKey]
           }
         }
         // Copy configuration keys from the specific config, this will override
@@ -212,10 +215,10 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
       // is there an engine for the provided suffix?
       var engine = templateEngines[suffix]
-      if (!engine) return callback(Error("No engine found for template type " + suffix))
+      if (!engine) return callback(new Error('No engine found for template type ' + suffix))
 
       // does the template exist?
-      if (!existsSync(templateName)) return callback(new Error("Template '" + templateName + "' does not exist"))
+      if (!existsSync(templateName)) return callback(new Error('Template \'' + templateName + '\' does not exist'))
 
       // read the template in, cache, and call the callback
       fs.readFile(templateName, 'utf8', function (err, data) {
@@ -334,8 +337,8 @@ module.exports.createApp = function (baseDir, configuration, options) {
    *
    * @returns {Function} middleware
    */
-   app.preRouter = function preRouter() {
-    return function preRouter (req, res, next) {
+  app.preRouter = function preRouter() {
+    return function preRouter(req, res, next) {
       var matcher = app._pathMatchers[req.method === 'HEAD' ? 'GET' : req.method]
       // check for any handler for the http method first
       if (!matcher) return next()
@@ -377,7 +380,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
     return function router(req, res, next) {
       var target = req.target
-      if (!req.target) return next(new Error("Handler not found for " + req.url))
+      if (!req.target) return next(new Error('Handler not found for ' + req.url))
 
       var middleware = target.middleware || config.defaultMiddleware
       if (!middleware) return target.method.call(target.controller, req, res, next)
@@ -407,18 +410,6 @@ module.exports.createApp = function (baseDir, configuration, options) {
   app.configure = function configureApp(env, fn) {
     if (typeof fn === 'undefined') env()
     else if (env === process.env.NODE_ENV) fn()
-  }
-
-  /**
-   * create an http server from the app on a given port
-   *
-   * @param {number} port
-   * @returns {Object} app
-   */
-  app.createServer = function createServer(port) {
-    app.use(responseRouter)
-    http.createServer(app).listen(port)
-    return app
   }
 
   /**
@@ -475,7 +466,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
         var d = dir + '/' + type
         if (!isDirectory(d)) return
         v.each(fs.readdirSync(d), function (file) {
-          if (isDirectory(d + "/" + file)) return
+          if (isDirectory(d + '/' + file)) return
           if (file.charAt(0) == '.') return
           if (file.substr(file.length - 3) === '.js') file = file.substr(0, file.length - 3)
           loadFile(type, file, dir)
@@ -697,7 +688,7 @@ module.exports.engine = {
         try {
           options.partials[i] = hogan.compile(options.partials[i])
         } catch (e) {
-          console.log("Unable to compile partial", i, e)
+          console.log('Unable to compile partial', i, e)
         }
       }
       return hogan.compile(source, options).render(options.locals, options.partials)

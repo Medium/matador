@@ -79,7 +79,7 @@ module.exports = function (app) {
       var keyMap = _lowerCaseKeyMap(headers)
       if (keyMap['set-cookie'] && !_areCookiesAllowed(req, status, allHeaders)) {
         _errorHelper(status, headers[keyMap['set-cookie']])
-        delete headers[keys['set-cookie']]
+        delete headers[keyMap['set-cookie']]
       }
 
       v.extend(allHeaders, headers)
@@ -239,13 +239,13 @@ module.exports = function (app) {
 
 
   return {
-      // General helpers for setting cache headers.
-      setNoCache: setNoCache
-    , setPrivate: setPrivate
-    , setPublic: setPublic
+    // General helpers for setting cache headers.
+    setNoCache: setNoCache
+  , setPrivate: setPrivate
+  , setPublic: setPublic
 
-      // Middleware methods.
-    , noCacheMiddleware: noCacheMiddleware
-    , auditHeadersMiddleware: auditHeadersMiddleware
+    // Middleware methods.
+  , noCacheMiddleware: noCacheMiddleware
+  , auditHeadersMiddleware: auditHeadersMiddleware
   }
 }

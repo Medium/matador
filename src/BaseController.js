@@ -128,7 +128,7 @@ module.exports = function (app) {
    * @param {*} layout
    * @param {Object=} opt_injectedData optional injected data for $ij
    */
-  function renderClosureTemplate (templateName, data, layout, opt_injectedData) {
+  function renderClosureTemplate(templateName, data, layout, opt_injectedData) {
     var templateFn = soynode.get(templateName)
     if (!templateFn) {
       throw new Error('Unable to find template: ' + templateName)

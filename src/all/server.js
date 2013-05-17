@@ -31,7 +31,7 @@ app.configure('development', function () {
   app.use(matador.errorHandler({ dumpExceptions: true, showStack: true }))
   app.set('soy options', {
     eraseTemporaryFiles: true
-    , allowDynamicRecompile: true
+  , allowDynamicRecompile: true
   })
 })
 

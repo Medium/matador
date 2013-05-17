@@ -1,6 +1,6 @@
 var PathMatcher = require('../src/pathmatcher');
 
-exports.testPathMatcher = function(test) {
+exports.testPathMatcher = function (test) {
   var pm = new PathMatcher();
   pm.add('/', 'root');
   pm.add('/about/', 'about');
@@ -12,10 +12,10 @@ exports.testPathMatcher = function(test) {
   pm.add('/dir/tools/*', 'dir-tools-wc');
   pm.add('/dir/tools/:tool/', 'dir-screw');
 
-  test.throws(function() { pm.add('/dir/*/dir/'); }, Error,
+  test.throws(function () { pm.add('/dir/*/dir/'); }, Error,
       '* should not be allowed in the middle of a pattern.');
 
-  test.throws(function() { pm.add('/:test/'); }, Error,
+  test.throws(function () { pm.add('/:test/'); }, Error,
       'Ambiguous patterns should throw.');
 
   assertMatch(test, pm, '/', 'root');
@@ -43,7 +43,7 @@ exports.testPathMatcher = function(test) {
 };
 
 
-exports.testRegExpPathMatching = function(test) {
+exports.testRegExpPathMatching = function (test) {
   var pm = new PathMatcher();
   pm.add('/@re1:one|two|three/', 'regexp1');
   pm.add('/@re2:aaa|bbb', 'regexp2');
@@ -70,7 +70,7 @@ exports.testRegExpPathMatching = function(test) {
 };
 
 
-exports.testDisambiguation = function(test) {
+exports.testDisambiguation = function (test) {
   var pm = new PathMatcher();
   pm.add('/one/', 'one');
   pm.add('/:two/', 'two');
@@ -87,7 +87,7 @@ exports.testDisambiguation = function(test) {
 };
 
 
-exports.testWildcardFallback = function(test) {
+exports.testWildcardFallback = function (test) {
   var pm = new PathMatcher();
   pm.add('/foo/bar/baz/', 'one')
   pm.add('/foo/*', 'two')
@@ -100,7 +100,7 @@ exports.testWildcardFallback = function(test) {
 };
 
 
-exports.testNestedWildcards = function(test) {
+exports.testNestedWildcards = function (test) {
   var pm = new PathMatcher();
   pm.add('/foo/bar/baz/', 'one')
   pm.add('/foo/*', 'two')

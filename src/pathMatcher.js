@@ -26,15 +26,18 @@ function PathMatcher() {
  * @return {function (...args) : string} Function that can be used to generate paths.  Arguments
  *    will be inserted into the place holders.
  */
-PathMatcher.prototype.add = function(path, object) {
+PathMatcher.prototype.add = function (path, object) {
   var parts = this.getPathParts_(path)
   var matches = []
   var node = this.tree_
   var template = []
   for (var i = 0; i < parts.length; i++) {
-    var name = part = parts[i]
+    var name, part
+
+    name = part = parts[i]
+
     if (part == '*' && i != parts.length - 1) {
-      throw Error('Invalid path [' + path + '], * must only be at the end.')
+      throw new Error('Invalid path [' + path + '], * must only be at the end.')
     }
     if (part[0] == ':') {
       name = ':'
@@ -64,7 +67,7 @@ PathMatcher.prototype.add = function(path, object) {
     node = node[name]
   }
   if (node.object) {
-    throw Error('Can not register [' + path + '], path is ambiguous. [' +
+    throw new Error('Can not register [' + path + '], path is ambiguous. [' +
         node.fullPath + '] previously registered.')
   }
   node.matches = matches
@@ -72,7 +75,7 @@ PathMatcher.prototype.add = function(path, object) {
   node.object = object
 
   // Return a function that knows how to reconstruct URLs for this path, given a set of arguments.
-  return function(var_args) {
+  return function (var_args) {
     // TODO(dan): This does not validate regexp rules.
     var path = [], n = 0
     for (var i = 0; i < template.length; i++) {
@@ -90,7 +93,7 @@ PathMatcher.prototype.add = function(path, object) {
  * @param {string} path The path to match.
  * @return {Object} An object corresponding to the matched path.
  */
-PathMatcher.prototype.getMatch = function(path) {
+PathMatcher.prototype.getMatch = function (path) {
   var parts = this.getPathParts_(path)
   var node = this.tree_
   var pendingWildcard = null, pendingWildcardMatch = [], matches = []
@@ -164,7 +167,7 @@ PathMatcher.prototype.getMatch = function(path) {
  * @return {!Array.<string>} The path parts.
  * @private
  */
-PathMatcher.prototype.getPathParts_ = function(path) {
+PathMatcher.prototype.getPathParts_ = function (path) {
   return path.replace(/(^\/|\/$)/g, '').split('/')
 }
 

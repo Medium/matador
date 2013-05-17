@@ -35,7 +35,7 @@ function CookieService(req, res) {
  * @param {string} opt_default Default value to return if the cookie is not set.
  * @return {string} The cookie's value.
  */
-CookieService.prototype.get = function(name, opt_default) {
+CookieService.prototype.get = function (name, opt_default) {
   var cookies = this.parseCookies_()
   var cookie = cookies[name]
   return typeof cookie !== 'undefined' ? cookie : opt_default
@@ -49,9 +49,9 @@ CookieService.prototype.get = function(name, opt_default) {
  * @param {Object=} options Optional options object containing some of the
  *    following: expires, path, domain, secure, httpOnly.
  */
-CookieService.prototype.set = function(name, value, options) {
+CookieService.prototype.set = function (name, value, options) {
   if (options && options.secure && !this.res.socket.encrypted) {
-    throw Error('Can not to set secure cookie on unencrypted socket.')
+    throw new Error('Can not to set secure cookie on unencrypted socket.')
   }
   var cookies = this.res.getHeader('Set-Cookie') || []
   if (typeof cookies === 'string') {
@@ -62,11 +62,11 @@ CookieService.prototype.set = function(name, value, options) {
 }
 
 
-CookieService.prototype.parseCookies_ = function() {
+CookieService.prototype.parseCookies_ = function () {
   if (!this.parsedCookies_) {
     var cookies = this.parsedCookies_ = {}
     if (this.req.headers.cookie) {
-      this.req.headers.cookie.split(';').forEach(function(cookie) {
+      this.req.headers.cookie.split(';').forEach(function (cookie) {
         var parts = cookie.split('=')
         var name = parts[0].trim()
         // If multiple cookie's path match the client will send all of them. We
@@ -94,7 +94,7 @@ function Cookie(name, value, options) {
 }
 
 
-Cookie.prototype.toString = function() {
+Cookie.prototype.toString = function () {
   var str = this.name + '=' + this.value
   if (this.options.maxAge) {
     str += '; expires=' + new Date(this.options.maxAge + Date.now()).toUTCString()

@@ -31,7 +31,7 @@
       , "soynode": "~0.2.0"
     }
   , "devDependencies": {
-      "jshint": "0.5.8"
+      "jshint": "2.0.1"
     }
   , "scripts": {
       "lint": "node_modules/jshint/bin/hint src/ --reporter dev/reporter.js"
