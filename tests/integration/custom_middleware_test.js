@@ -21,7 +21,7 @@ exports.testCustomMiddlewareInMethod = falkor.fetch('http://localhost:' + port +
 exports.testCustomMiddlewareInMethodFails = falkor.fetch('http://localhost:' + port + '/post-middleware')
   .withMethod('PUT')
   .expectStatusCode(500)
-  .expectBodyMatches(/Error: Handler not found for \/post-middleware/)
+  .expectBodyMatches(/Error: Handler not found for PUT \/post-middleware/)
 
 exports.testNormalRoutesWork = falkor.fetch('http://localhost:' + port + '/normal')
   .expectStatusCode(200)
@@ -35,4 +35,4 @@ exports.testSpecificMethodsWork = falkor.fetch('http://localhost:' + port + '/po
 exports.testSpecificMethodFailsToRoute = falkor.fetch('http://localhost:' + port + '/post')
   .withMethod('GET')
   .expectStatusCode(500)
-  .expectBodyMatches(/Error: Handler not found for \/post/)
+  .expectBodyMatches(/Error: Handler not found for GET \/post/)
