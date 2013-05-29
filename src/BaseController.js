@@ -1,15 +1,11 @@
-var fs = require('fs')
-  , path = require('path')
-  , existsSync = fs.existsSync || path.existsSync
-  , SoyNodeTemplateEngine = require('template_engines/SoyNodeTemplateEngine')
+var SoyNodeTemplateEngine = require('template_engines/SoyNodeTemplateEngine')
+  , HoganTemplateEngine = require('template_engines/HoganTemplateEngine')
 
 module.exports = function (app) {
   var viewCache = {}
-    , layoutCache = {}
     , DEFAULT_LAYOUT = 'layout'
 
   return klass(function () {
-    this._paths = [app.set('base_dir')]
     this.beforeFilters = {}
     this.excludeFilters = {}
     var viewOptions = app.set('view options')
@@ -59,68 +55,12 @@ module.exports = function (app) {
           )
 
           return fn ? fn(output) : res.send(output)
-        }
-
-        var layoutFile
-        if (typeof data.layout != 'undefined' && data.layout !== true) {
-          layoutFile = data.layout ? findLayoutFile(this._paths, data.layout) : false
         } else {
-          layoutFile = findLayoutFile(this._paths, this.layout)
-        }
-
-        var viewFile = findViewFile(this._paths, view)
-
-        // Start looking for partials in the same directory as the view file.
-        var partialsDir = path.resolve(viewFile, '../')
-
-        try {
-          return res.render(viewFile, {
-              layout: layoutFile
-            , locals: data
-            , partials: app.getPartials(partialsDir)
-            }, fn)
-        } catch (e) {
-          console.error('Rendering error, view:', viewFile, 'layout:', layoutFile, 'error:', e.message, e.stack)
-          throw e
+          var hoganTemplateEngine = new HoganTemplateEngine(app)
+          hoganTemplateEngine.renderTemplate(
+            res, fn, view, data, this.layout, opt_injectedData
+          )
         }
       }
     })
-
-  /**
-   * Searches through a set of paths for a matching view file.
-   */
-  function findViewFile(paths, view) {
-    if (!viewCache[view]) {
-      viewCache[view] = findFile(paths, 'views/' + view + '.' + app.set('view engine'))
-    }
-    return viewCache[view]
-  }
-
-  /**
-   * Searches through a set of paths for a matching layout file.
-   */
-  function findLayoutFile(paths, layout) {
-    if (!layoutCache[layout]) {
-      var suffix = '.' + app.set('view engine')
-      var layoutPath = findFile(paths, 'views/' + layout + suffix)
-      layoutCache[layout] = layoutPath ? layoutPath.substr(0, layoutPath.length - suffix.length) : layout
-    }
-    return layoutCache[layout]
-  }
-
-  /**
-   * Searches a set of paths for a given file, returning the full path if it is found.
-   */
-  function findFile(paths, file) {
-    for (var i = 0; i < paths.length; i++) {
-      var filePath = path.resolve(paths[i], file)
-      if (existsSync(filePath)) {
-        return filePath
-      }
-    }
-    return null
-  }
-
 }
-
-
