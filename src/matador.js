@@ -380,7 +380,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
     return function router(req, res, next) {
       var target = req.target
-      if (!req.target) return next(new Error('Handler not found for ' + req.url))
+      if (!req.target) return next(new Error('Handler not found for ' + req.method + ' ' + req.url))
 
       var middleware = target.middleware || config.defaultMiddleware
       if (!middleware) return target.method.call(target.controller, req, res, next)
