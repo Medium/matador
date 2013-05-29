@@ -289,7 +289,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
           if (target.controller) {
             return target.method.call(target.controller, req, res, next)
           } else {
-            next()
+            return next()
           }
         }
         middleware[idx].call(null, req, res, doNext.bind(null, idx + 1))
