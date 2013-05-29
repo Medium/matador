@@ -285,7 +285,13 @@ module.exports.createApp = function (baseDir, configuration, options) {
       // call this function when done with a piece of route middleware
       var doNext = function (idx, err) {
         if (err) return next(err)
-        if (idx >= middleware.length) return target.method.call(target.controller, req, res, next)
+        if (idx >= middleware.length) {
+          if (target.controller) {
+            return target.method.call(target.controller, req, res, next)
+          } else {
+            return next()
+          }
+        }
         middleware[idx].call(null, req, res, doNext.bind(null, idx + 1))
       }
 
