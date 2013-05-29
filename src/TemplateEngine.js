@@ -1,12 +1,18 @@
 var soynode = require('soynode')
   , isDirectory = require('./fsutils').isDirectory
   , DEFAULT_LAYOUT = 'layout'
-  , DEFAULT_CLOSURE_LAYOUT = 'soy:views.layout.layout'
+  , DEFAULT_CLOSURE_LAYOUT = 'views.layout.layout'
   , CLOSURE_LAYOUT_BODY_HTML_KEY = 'bodyHtml'
 
 function TemplateEngine() {
 }
 
+/**
+ * Precompile templates and setup soynode options
+ * @param {Array} searchPaths path to loog for views
+ * @param {Object} options soynode options
+ * @param {Function} callback called after compilation finishes
+ */
 TemplateEngine.prototype.precompileTemplates = function (searchPaths, options, callback) {
   soynode.setOptions(options)
 
@@ -24,6 +30,14 @@ TemplateEngine.prototype.precompileTemplates = function (searchPaths, options, c
   })
 }
 
+/**
+ * Renders a SoyNode template based on a name. Supports both
+ * soy:views.template.name and views.template.name template names.
+ * @param {string} templateName the template name to be rendered
+ * @param {Object} data data to be passed to the template
+ * @param {string} layout layout to render templateName in
+ * @return {string} HTML output
+ */
 TemplateEngine.prototype.renderTemplate = function (templateName, data, layout, injectedData) {
   // NOTE: The Express template rendering system assumes that all template names
   // are file names, whereas multiple closure templates exist in a single soy file,
