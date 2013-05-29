@@ -246,39 +246,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
       }
 
       // render a given template to the client
-      res.render = function renderResponse(templateName, options, callback) {
-
-        // get the requested template compiler
-        templateEngine.getTemplate(templateName, options, function (err, compiler) {
-          // no template, exit out
-          if (err) {
-            console.error(err)
-            res.send(err.message)
-          }
-
-          // compile the template
-          var output = compiler(options)
-
-          // no layout specified, return the compiled template
-          if (!options.layout) return callback ? callback(output) : res.send(output)
-
-          // layout was specified, retrieve the layout template
-          templateEngine.getTemplate(options.layout, options, function (err, compiler) {
-            //no layout template, exit out
-            if (err) {
-              console.error(err)
-              res.send(err.message)
-            }
-
-            //set the body in the options to the previous compiled template and compile
-            options.body = output
-            output = compiler(options)
-
-            //return the compiled template
-            callback ? callback(output) : res.send(output)
-          })
-        })
-      }
+      res.render = templateEngine.createRenderer(res)
 
       next()
     }

@@ -1,6 +1,8 @@
 /**
  * @fileoverview
  * This class is responsible for finding and rendering templates.
+ * 
+ * TODO: Move the logic from BaseController into Template engines.
  */
 var fs = require('fs')
   , path = require('path')
@@ -66,4 +68,46 @@ TemplateEngine.prototype.getTemplate = function (templateName, options, callback
   }.bind(this))
 }
 
+/**
+ * Creates a function that is capable of rendering templates in a response
+ * object.
+ * @param {http.HttpResponse} response HTTP response object that will render
+ * the resulted template.
+ * @return {Function} A function that renders templateName on the response
+ * object.
+ */
+TemplateEngine.prototype.createRenderer = function (response) {
+  return function renderResponse(templateName, options, callback) {
+    // get the requested template compiler
+    this.getTemplate(templateName, options, function (err, compiler) {
+      // no template, exit out
+      if (err) {
+        console.error(err)
+        response.send(err.message)
+      }
+
+      // compile the template
+      var output = compiler(options)
+
+      // no layout specified, return the compiled template
+      if (!options.layout) return callback ? callback(output) : response.send(output)
+
+      // layout was specified, retrieve the layout template
+      this.getTemplate(options.layout, options, function (err, compiler) {
+        //no layout template, exit out
+        if (err) {
+          console.error(err)
+          response.send(err.message)
+        }
+
+        //set the body in the options to the previous compiled template and compile
+        options.body = output
+        output = compiler(options)
+
+        //return the compiled template
+        callback ? callback(output) : response.send(output)
+      }.bind(this))
+    }.bind(this))
+  }.bind(this)
+}
 module.exports = TemplateEngine
