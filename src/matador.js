@@ -7,6 +7,7 @@ var fs = require('fs')
   , soynode = require('soynode')
   , router = require('./router')
   , argv = module.exports.argv = require('optimist').argv
+  , TemplateEngine = require('./TemplateEngine')
   , minifyViews = process.env.minify || false
   , existsSync = fs.existsSync || path.existsSync
 
@@ -74,7 +75,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
     , fileCache = {}
     , objCache = {}
     , pathCache = {}
-    , templateEngines = {}
+    , templateEngine = new TemplateEngine()
     , updateCaches = v(paths).each(function (key, val) {
         fileCache[val] = {}
         objCache[val] = {}
@@ -176,11 +177,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
    * Allow registration of template engines
    */
   app.register = function (suffix, engine) {
-    if (typeof engine === 'undefined') {
-      engine = suffix
-      suffix = '.html'
-    }
-    templateEngines[suffix] = engine
+    templateEngine.addEngine(suffix, engine)
     return this
   }
 
@@ -188,50 +185,6 @@ module.exports.createApp = function (baseDir, configuration, options) {
    * Return middleware which will set up a bunch of methods on the request object for convenience
    */
   app.requestDecorator = function () {
-    var templateCache = {}
-
-    /**
-     * Take in a template name and options and call a callback with a compiler. This is only temporarily
-     * as we're changing up our template system to be non-file specific (to allow for engines like
-     * soynode)
-     *
-     * @param {string} templateName
-     * @param {Object} options
-     * @param {Function} callback
-     */
-    function getTemplate(templateName, options, callback) {
-      // is the template already cached?
-      if (templateCache[templateName]) return callback(null, templateCache[templateName])
-
-      // check if it has a suffix already applied
-      var matches = templateName.match(/(\.[\w]+)$/)
-      var suffix
-      if (!matches) {
-        suffix = '.html'
-        templateName += '.html'
-      } else {
-        suffix = matches[0]
-      }
-
-      // is there an engine for the provided suffix?
-      var engine = templateEngines[suffix]
-      if (!engine) return callback(new Error('No engine found for template type ' + suffix))
-
-      // does the template exist?
-      if (!existsSync(templateName)) return callback(new Error('Template \'' + templateName + '\' does not exist'))
-
-      // read the template in, cache, and call the callback
-      fs.readFile(templateName, 'utf8', function (err, data) {
-        if (err) return callback(err)
-        try {
-          templateCache[templateName] = engine.compile(data, options)
-        } catch (e) {
-          return callback(e)
-        }
-        return callback(null, templateCache[templateName])
-      })
-    }
-
     /**
      * Shim function to emulate express functionality
      */
@@ -296,7 +249,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
       res.render = function renderResponse(templateName, options, callback) {
 
         // get the requested template compiler
-        getTemplate(templateName, options, function (err, compiler) {
+        templateEngine.getTemplate(templateName, options, function (err, compiler) {
           // no template, exit out
           if (err) {
             console.error(err)
@@ -310,7 +263,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
           if (!options.layout) return callback ? callback(output) : res.send(output)
 
           // layout was specified, retrieve the layout template
-          getTemplate(options.layout, options, function (err, compiler) {
+          templateEngine.getTemplate(options.layout, options, function (err, compiler) {
             //no layout template, exit out
             if (err) {
               console.error(err)

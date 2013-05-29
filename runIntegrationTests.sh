@@ -22,6 +22,10 @@ for entry in `find tests/integration -maxdepth 1`; do
 
     sleep 1
 
+    if [[ -f ${entry}/afterBoot.sh ]]; then
+      sh ${entry}/afterBoot.sh
+    fi
+
     echo "Running $test_name integration tests..."
     $test_runner_bin $nodeunit_opts ${entry}_test.js
     integration_test_exit_code=$?
