@@ -1,39 +1,41 @@
 {
-    "name": "matador"
-  , "description": "an MVC framework for Node"
-  , "version": "1.1.26-beta"
-  , "homepage": "https://github.com/Obvious/matador"
-  , "main": "src/matador.js"
-  , "authors": [
-        "Dustin Diaz <dustin@obvious.com> (https://github.com/ded)"
-      , "Dustin Senos <ds@obvious.com> (https://github.com/dustinsenos)"
-      , "Jeremy Stanley <jeremy@obvious.com> (https://github.com/azulus)"
-      , "Rael Dornfest <rael@obvious.com> (https://github.com/raelity)"
-    ]
-  , "repository": {
-        "type": "git"
-      , "url": "https://github.com/Obvious/matador.git"
-    }
-  , "engines": {
-      "node": ">=0.6.0 <0.9"
-    }
-  , "bin": {
-      "matador": "bin/matador.js"
-    }
-  , "dependencies": {
-        "connect": "2.3.3"
-      , "valentine": "*"
-      , "klass": "*"
-      , "colors": "*"
-      , "hogan.js": "*"
-      , "optimist": "*"
-      , "uglify-js": "2.2.1"
-      , "soynode": "~0.2.0"
-    }
-  , "devDependencies": {
-      "jshint": "2.0.1"
-    }
-  , "scripts": {
-      "lint": "node_modules/jshint/bin/hint src/ --reporter dev/reporter.js"
-    }
+  "name": "matador",
+  "description": "an MVC framework for Node",
+  "version": "1.1.26-beta",
+  "homepage": "https://github.com/Obvious/matador",
+  "main": "src/matador.js",
+  "authors": [
+    "Dustin Diaz <dustin@obvious.com> (https://github.com/ded)",
+    "Dustin Senos <ds@obvious.com> (https://github.com/dustinsenos)",
+    "Jeremy Stanley <jeremy@obvious.com> (https://github.com/azulus)",
+    "Rael Dornfest <rael@obvious.com> (https://github.com/raelity)"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Obvious/matador.git"
+  },
+  "engines": {
+    "node": ">=0.6.0 <0.9"
+  },
+  "bin": {
+    "matador": "bin/matador.js"
+  },
+  "dependencies": {
+    "connect": "2.3.3",
+    "valentine": "*",
+    "klass": "*",
+    "colors": "*",
+    "hogan.js": "*",
+    "optimist": "*",
+    "uglify-js": "2.2.1",
+    "soynode": "~0.2.0",
+    "nodeunit": "~0.8.0"
+  },
+  "devDependencies": {
+    "jshint": "2.0.1",
+    "falkor": "~1.2.9"
+  },
+  "scripts": {
+    "lint": "node_modules/jshint/bin/hint src/ --reporter dev/reporter.js"
+  }
 }
