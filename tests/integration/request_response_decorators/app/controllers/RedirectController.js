@@ -10,14 +10,13 @@ module.exports = function (app, config) {
 
   util.inherits(HomeController, ApplicationController)
 
-  HomeController.prototype.success = function (req, res) {
-    res.statusCode = 200
-    res.end('Success!')
+  HomeController.prototype.redirect = function (req, res) {
+    res.redirect('/target')
   }
 
-  HomeController.prototype.post_success = function (req, res) {
+  HomeController.prototype.target = function (req, res) {
     res.statusCode = 200
-    res.end('POST Success!')
+    res.end('Success!')
   }
 
   return HomeController
