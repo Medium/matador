@@ -1,6 +1,3 @@
-var SoyNodeTemplateEngine = require('template_engines/SoyNodeTemplateEngine')
-  , HoganTemplateEngine = require('template_engines/HoganTemplateEngine')
-
 module.exports = function (app) {
   var viewCache = {}
     , DEFAULT_LAYOUT = 'layout'
@@ -48,19 +45,11 @@ module.exports = function (app) {
     , render: function (res, view, data, fn, opt_injectedData) {
         data = data || {}
 
-        var soyNodeTemplateEngine = new SoyNodeTemplateEngine()
-        if (soyNodeTemplateEngine.appliesToTemplate(view)) {
-          var output = soyNodeTemplateEngine.renderTemplate(
-            view, data, this.layout, opt_injectedData
-          )
+        var output = app.templateEngine.renderTemplate(
+          view, data, this.layout, opt_injectedData
+        )
 
-          return fn ? fn(output) : res.send(output)
-        } else {
-          var hoganTemplateEngine = new HoganTemplateEngine(app)
-          hoganTemplateEngine.renderTemplate(
-            res, fn, view, data, this.layout, opt_injectedData
-          )
-        }
+        return fn ? fn(output) : res.send(output)
       }
     })
 }

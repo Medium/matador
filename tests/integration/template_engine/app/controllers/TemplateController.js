@@ -11,14 +11,15 @@ module.exports = function (app, config) {
   util.inherits(TemplateController, ApplicationController)
 
   TemplateController.prototype.soy = function (req, res) {
-    this.render(res, 'soy:views.template.hello', {
+    this.render(res, 'views.template.hello', {
       title: 'The Matador Framework'
     })
   }
 
-  TemplateController.prototype.hogan = function (req, res) {
-    var data = {title: 'The Matador Framework'}
-    this.render(res, 'hogan', data)
+  TemplateController.prototype.old = function (req, res) {
+    this.render(res, 'soy:views.template.hello', {
+      title: 'The Matador Framework'
+    })
   }
 
   return TemplateController

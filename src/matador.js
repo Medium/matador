@@ -3,13 +3,13 @@ var fs = require('fs')
   , connect = module.exports = require('connect')
   , http = require('http')
   , path = require('path')
-  , soynode = require('soynode')
-  , hogan = require('hogan.js')
   , router = require('./router')
   , argv = module.exports.argv = require('optimist').argv
   , TemplateEngine = require('./TemplateEngine')
+  , fsutils = require('./fsutils')
+  , isDirectory = fsutils.isDirectory
+  , existsSync = fsutils.existsSync
   , minifyViews = process.env.minify || false
-  , existsSync = fs.existsSync || path.existsSync
 
 var paths = {
   SERVICES: 'services'
@@ -53,20 +53,6 @@ var minify = function () {
   }
 }()
 
-/**
- * Check whether a path exists and is a directory
- *
- * @param {string} p the path
- */
-function isDirectory(p) {
-  try {
-    return fs.statSync(p).isDirectory()
-  }
-  catch (ex) {
-    return false
-  }
-}
-
 module.exports.createApp = function (baseDir, configuration, options) {
   configuration = configuration || {}
   options = options || {}
@@ -75,7 +61,6 @@ module.exports.createApp = function (baseDir, configuration, options) {
     , fileCache = {}
     , objCache = {}
     , pathCache = {}
-    , templateEngine = new TemplateEngine()
     , updateCaches = v(paths).each(function (key, val) {
         fileCache[val] = {}
         objCache[val] = {}
@@ -174,14 +159,6 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
 
   /**
-   * Allow registration of template engines
-   */
-  app.register = function (suffix, engine) {
-    templateEngine.addEngine(suffix, engine)
-    return this
-  }
-
-  /**
    * Return middleware which will set up a bunch of methods on the request object for convenience
    */
   app.requestDecorator = function () {
@@ -245,12 +222,11 @@ module.exports.createApp = function (baseDir, configuration, options) {
         return bytesWritten
       }
 
-      // render a given template to the client
-      res.render = templateEngine.createRenderer(res)
-
       next()
     }
   }
+
+  app.templateEngine = new TemplateEngine()
 
   /**
    * Create middleware which will look at where a request is supposed to go and attach
@@ -395,20 +371,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
       })
     })
 
-    var soyOptions = app.set('soy options') || {}
-    soynode.setOptions(soyOptions)
-
-    // Precompile all Closure templates.
-    v.each(appDirs, function (dir) {
-      dir = dir + '/views'
-      if (!isDirectory(dir)) return
-
-      soynode.compileTemplates(dir, callback || function (err) {
-        if (err) {
-          throw err
-        }
-      })
-    })
+    self.templateEngine.precompileTemplates(appDirs, app.set('soy options') || {}, callback)
   }
 
   /**
@@ -510,28 +473,6 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
   return app
 }
-
-module.exports.engine = {
-  compile: function (source, options) {
-    if (typeof source !== 'string') return source
-    source = minify(source)
-    return function (options) {
-      options.locals = options.locals || {}
-      options.partials = options.partials || {}
-      if (options.body) options.locals.body = options.body
-      for (var i in options.partials) {
-        if (v.is.fun(options.partials[i].r)) continue
-        try {
-          options.partials[i] = hogan.compile(options.partials[i])
-        } catch (e) {
-          console.log('Unable to compile partial', i, e)
-        }
-      }
-      return hogan.compile(source, options).render(options.locals, options.partials)
-    }
-  }
-}
-
 
 /**
  * A selection of off the shelf-helper classes that can be installed by an
