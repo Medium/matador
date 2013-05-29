@@ -29,11 +29,7 @@ function _addControllerRoutes(app, path, handler, method) {
 
   if (filters.length) {
     middleware = typeof middleware === 'undefined' ? [] : middleware;
-    middleware = typeof controller.excludeFilters[actionName] === 'undefined' ?
-      filters.concat(middleware) :
-      v(filters).filter(function (filter) {
-      return !v.inArray(controller.excludeFilters[actionName], filter)
-    }).concat(middleware)
+    middleware = filters.concat(middleware)
   }
 
   if (!middleware) middleware = controllerClass.defaultMiddleware

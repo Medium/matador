@@ -4,7 +4,6 @@ module.exports = function (app) {
 
   return klass(function () {
     this.beforeFilters = {}
-    this.excludeFilters = {}
     var viewOptions = app.set('view options')
     this.layout = (viewOptions && typeof viewOptions.layout !== 'undefined') ? viewOptions.layout : DEFAULT_LAYOUT
   })
@@ -17,13 +16,6 @@ module.exports = function (app) {
         v(v.is.arr(actions) ? actions : [actions]).each(function (action) {
           if (typeof this.beforeFilters[action] === 'undefined') this.beforeFilters[action] = []
           this.beforeFilters[action].push(fn)
-        }, this)
-      }
-
-    , addExcludeFilter: function (actions, fn) {
-        v(v.is.arr(actions) ? actions : [actions]).each(function (action) {
-          if (typeof this.excludeFilters[action] === 'undefined') this.excludeFilters[action] = []
-          this.excludeFilters[action].push(fn)
         }, this)
       }
 
