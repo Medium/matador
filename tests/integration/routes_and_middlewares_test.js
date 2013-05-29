@@ -36,3 +36,17 @@ exports.testSpecificMethodFailsToRoute = falkor.fetch('http://localhost:' + port
   .withMethod('GET')
   .expectStatusCode(500)
   .expectBodyMatches(/Error: Handler not found for GET \/post/)
+
+/** Filters **/
+
+exports.testGlobalFilters = falkor.fetch('http://localhost:' + port)
+  .expectStatusCode(200)
+  .expectHeader('X-GlobalBeforeFilter', 'Works')
+  .evaluate(function (test, res) {
+    test.equals(res.headers['X-LocalBeforeFilter'], undefined)
+  })
+
+exports.testLocalFilters = falkor.fetch('http://localhost:' + port + '/normal')
+  .expectStatusCode(200)
+  .expectHeader('X-GlobalBeforeFilter', 'Works')
+  .expectHeader('X-LocalBeforeFilter', 'Works')
