@@ -14,7 +14,7 @@ module.exports = function (app, config) {
     var data = {title: 'The Matador Framework'}
     var query = require('url').parse(req.path, true).query
     if (query.fragment) data.layout = false
-    this.render(res, 'index', data)
+    this.render(res, 'views.index.welcome', data)
   }
 
   return HomeController

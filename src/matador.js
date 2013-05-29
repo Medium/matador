@@ -3,12 +3,13 @@ var fs = require('fs')
   , connect = module.exports = require('connect')
   , http = require('http')
   , path = require('path')
-  , hogan = require('hogan.js')
-  , soynode = require('soynode')
   , router = require('./router')
   , argv = module.exports.argv = require('optimist').argv
+  , TemplateEngine = require('./TemplateEngine')
+  , fsutils = require('./fsutils')
+  , isDirectory = fsutils.isDirectory
+  , existsSync = fsutils.existsSync
   , minifyViews = process.env.minify || false
-  , existsSync = fs.existsSync || path.existsSync
 
 var paths = {
   SERVICES: 'services'
@@ -52,20 +53,6 @@ var minify = function () {
   }
 }()
 
-/**
- * Check whether a path exists and is a directory
- *
- * @param {string} p the path
- */
-function isDirectory(p) {
-  try {
-    return fs.statSync(p).isDirectory()
-  }
-  catch (ex) {
-    return false
-  }
-}
-
 module.exports.createApp = function (baseDir, configuration, options) {
   configuration = configuration || {}
   options = options || {}
@@ -74,7 +61,6 @@ module.exports.createApp = function (baseDir, configuration, options) {
     , fileCache = {}
     , objCache = {}
     , pathCache = {}
-    , templateEngines = {}
     , updateCaches = v(paths).each(function (key, val) {
         fileCache[val] = {}
         objCache[val] = {}
@@ -173,65 +159,9 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
 
   /**
-   * Allow registration of template engines
-   */
-  app.register = function (suffix, engine) {
-    if (typeof engine === 'undefined') {
-      engine = suffix
-      suffix = '.html'
-    }
-    templateEngines[suffix] = engine
-    return this
-  }
-
-  /**
    * Return middleware which will set up a bunch of methods on the request object for convenience
    */
   app.requestDecorator = function () {
-    var templateCache = {}
-
-    /**
-     * Take in a template name and options and call a callback with a compiler. This is only temporarily
-     * as we're changing up our template system to be non-file specific (to allow for engines like
-     * soynode)
-     *
-     * @param {string} templateName
-     * @param {Object} options
-     * @param {Function} callback
-     */
-    function getTemplate(templateName, options, callback) {
-      // is the template already cached?
-      if (templateCache[templateName]) return callback(null, templateCache[templateName])
-
-      // check if it has a suffix already applied
-      var matches = templateName.match(/(\.[\w]+)$/)
-      var suffix
-      if (!matches) {
-        suffix = '.html'
-        templateName += '.html'
-      } else {
-        suffix = matches[0]
-      }
-
-      // is there an engine for the provided suffix?
-      var engine = templateEngines[suffix]
-      if (!engine) return callback(new Error('No engine found for template type ' + suffix))
-
-      // does the template exist?
-      if (!existsSync(templateName)) return callback(new Error('Template \'' + templateName + '\' does not exist'))
-
-      // read the template in, cache, and call the callback
-      fs.readFile(templateName, 'utf8', function (err, data) {
-        if (err) return callback(err)
-        try {
-          templateCache[templateName] = engine.compile(data, options)
-        } catch (e) {
-          return callback(e)
-        }
-        return callback(null, templateCache[templateName])
-      })
-    }
-
     /**
      * Shim function to emulate express functionality
      */
@@ -292,44 +222,11 @@ module.exports.createApp = function (baseDir, configuration, options) {
         return bytesWritten
       }
 
-      // render a given template to the client
-      res.render = function renderResponse(templateName, options, callback) {
-
-        // get the requested template compiler
-        getTemplate(templateName, options, function (err, compiler) {
-          // no template, exit out
-          if (err) {
-            console.error(err)
-            res.send(err.message)
-          }
-
-          // compile the template
-          var output = compiler(options)
-
-          // no layout specified, return the compiled template
-          if (!options.layout) return callback ? callback(output) : res.send(output)
-
-          // layout was specified, retrieve the layout template
-          getTemplate(options.layout, options, function (err, compiler) {
-            //no layout template, exit out
-            if (err) {
-              console.error(err)
-              res.send(err.message)
-            }
-
-            //set the body in the options to the previous compiled template and compile
-            options.body = output
-            output = compiler(options)
-
-            //return the compiled template
-            callback ? callback(output) : res.send(output)
-          })
-        })
-      }
-
       next()
     }
   }
+
+  app.templateEngine = new TemplateEngine()
 
   /**
    * Create middleware which will look at where a request is supposed to go and attach
@@ -474,105 +371,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
       })
     })
 
-    var soyOptions = app.set('soy options') || {}
-    soynode.setOptions(soyOptions)
-
-    // Precompile all Closure templates.
-    v.each(appDirs, function (dir) {
-      dir = dir + '/views'
-      if (!isDirectory(dir)) return
-
-      soynode.compileTemplates(dir, callback || function (err) {
-        if (err) {
-          throw err
-        }
-      })
-    })
-  }
-
-  /**
-   * Finds all partial templates relative to the provided view directory, stopping once the root
-   * directory has been reached.
-   *
-   * All templates are added from the /partials/ folder within the current view directory.  We then
-   * move to the parent directory and add any partials from it's /partials/ folder that don't conflict
-   * with ones already added. We then move to the next parent directory and so on until we reach the
-   * application root.
-   *
-   * This allows views to use common templates, and be able to override sub-templates.
-   *
-   * Example: consider the following directory structure:
-   *   app/
-   *       views/
-   *           partials/
-   *               user-details.html  - contains {{> user-link}})
-   *               user-link.html
-   *           search/
-   *               results.html - contains {{> user-details}}
-   *               partials/
-   *                   user-link.html
-   *           post/
-   *               post.html  - contains {{> user-details}}
-   *
-   * The partials for app/views/search will contain:
-   *   app/views/search/partial/user-link.html
-   *   app/views/partial/user-details.html
-   *
-   * The partials for app/views/post will only contain app/views/partials/%
-   *
-   *
-   * TODO: This uses synchronous filesystem APIs. It should either be performed at start up
-   * for all controllers or else switched to use async APIs.
-   */
-  app.getPartials = function (viewDir) {
-    var rootDir = app.set('base_dir')
-    var viewSuffix = '.' + app.set('view engine')
-
-    if (!partialCache[viewDir]) {
-
-      if (path.relative(rootDir, viewDir).indexOf('../') != -1) {
-        throw new Error('View directories must live beneath the application root.')
-      }
-
-      var partials = {}
-      while (viewDir != rootDir) {
-        var partialDir = path.resolve(viewDir, 'partials')
-        try {
-          fs.readdirSync(partialDir).forEach(function (file) {
-            // Ignore hidden files and files that don't have the right extension.
-            if (file.charAt(0) == '.') return
-            if (file.substr(-viewSuffix.length) != viewSuffix) return
-
-            // Remove the suffix, such that /partials/something.html can be used as {{> something}}
-            var partialName = file.substr(0, file.length - viewSuffix.length)
-
-            // If the map already contains this partial it means it has already been specified higher
-            // up the view hierarchy.
-            if (!partials[partialName]) {
-              var partialFilename = path.resolve(partialDir, file)
-              try {
-                var partialContent = fs.readFileSync(partialFilename, 'utf8')
-                partials[partialName] = hogan.compile(minify(partialContent))
-              } catch (e) {
-                console.log('Unable to compile partial', partialFilename, e)
-              }
-            }
-          })
-        } catch (e) {
-          // Only log errors if they are not a "no such file or directory" error, since we expect
-          // those to happen. (Saves us an fs.statSync.)
-          if (e.code != 'ENOENT') console.log('Unable to read partials directory', partialDir, e)
-        }
-        viewDir = path.resolve(viewDir, '../')
-      }
-      partialCache[viewDir] = partials
-    }
-
-    // Note: This does more work than is necessary, since common parents of views will
-    // be hit once for each view. If this turns out to be problematic we can cache at
-    // intermediate folders as well.
-
-    return partialCache[viewDir]
+    self.templateEngine.precompileTemplates(appDirs, app.set('soy options') || {}, callback)
   }
 
   /**
@@ -674,28 +473,6 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
   return app
 }
-
-module.exports.engine = {
-  compile: function (source, options) {
-    if (typeof source !== 'string') return source
-    source = minify(source)
-    return function (options) {
-      options.locals = options.locals || {}
-      options.partials = options.partials || {}
-      if (options.body) options.locals.body = options.body
-      for (var i in options.partials) {
-        if (v.is.fun(options.partials[i].r)) continue
-        try {
-          options.partials[i] = hogan.compile(options.partials[i])
-        } catch (e) {
-          console.log('Unable to compile partial', i, e)
-        }
-      }
-      return hogan.compile(source, options).render(options.locals, options.partials)
-    }
-  }
-}
-
 
 /**
  * A selection of off the shelf-helper classes that can be installed by an

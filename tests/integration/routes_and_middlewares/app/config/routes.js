@@ -10,6 +10,7 @@ function postMiddleware(req, res, next) {
 
 module.exports = function (app) {
   return {
+    '/': 'Home.index',
     '/middleware': customMiddleware,
     '/post-middleware': {
       'post': postMiddleware

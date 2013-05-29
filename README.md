@@ -2,7 +2,7 @@
 Sane defaults and a simple structure, scaling as your application grows.
 
 Matador is a clean, organized framework for [Node.js](http://nodejs.org) architected to suit MVC enthusiasts. It gives you a well-defined development environment with flexible routing, easy controller mappings, and basic request filtering.
-It&#8217;s built on open source libraries such as [Hogan.js](http://twitter.github.com/hogan.js) for view rendering, [Klass](https://github.com/ded/klass) for its inheritance model, [Valentine](https://github.com/ded/valentine)
+It&#8217;s built on open source libraries such as [SoyNode](https://github.com/Obvious/soynode) for view rendering, [Klass](https://github.com/ded/klass) for its inheritance model, [Valentine](https://github.com/ded/valentine)
 for functional development, and [Express](http://expressjs.com) to give a bundle of other Node server related helpers.
 
 # Installation
@@ -30,7 +30,7 @@ hello: function (request, response, name) {
 ```
 
 ### View Rendering
-Uses Twitter's [Hogan.js](http://twitter.github.com/hogan.js/) with layouts, partials, and i18n support.
+Uses [SoyNode](https://github.com/Obvious/soynode) to render Closure Templates.
 
 ``` js
 // app/controllers/HomeController.js
@@ -39,146 +39,59 @@ this.render(response, 'index', {
 })
 ```
 
-``` html
-<!-- app/views/layout.html -->
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-    <title>{{title}}</title>
-  </head>
-  <body>
-    {{{body}}}
-  </body>
-</html>
+```
+<!-- app/views/layout.soy -->
+
+{namespace views.layout}
+
+/**
+ * Renders the index page.
+ * @param title Title of the page.
+ */
+{template .layout autoescape="contextual"}
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta http-equiv='Content-type' content='text/html; charset=utf-8'>
+      <title>{$title}</title>
+      <link rel='stylesheet' href='/css/main.css' type='text/css'>
+    </head>
+    <body>
+      {$ij.bodyHtml |noAutoescape}
+    </body>
+  </html>
+{/template}
+
 ```
 
 ``` html
-<!-- app/views/index.html -->
-<h1>{{title}}</h1>
+{namespace views.index}
+
+/**
+ * Renders a welcome message.
+ * @param title Title of the page
+ */
+{template .welcome}
+  <h1>Welcome to {$title}</h1>
+  (rendered with Closure Templates)
+{/template}
+
 ```
-
-### View Partials
-
-**To Be Updated**
-
-Matador looks for view partials in a folder named partials in the views directory: ```app/views/partials/```
-
-``` js
-// app/controllers/HomeController.js
-module.exports = function (app, config) {
-  return app.controllers.Base.extend()
-  .methods({
-    index: function (req, res) {
-      this.render(res, 'index', {
-          user: {
-              first: "John"
-            , last: "Smith"
-          }
-        , todo: [{ name: 'dishes', id: 0 }, { name: 'mow lawn', id: 1 }]
-      })
-    }
-  })
-}
-```
-
-```html
-<!-- app/views/partials/fullname.html -->
-{{first}} {{last}}
-```
-
-```html
-<!-- app/views/partials/tasks.html -->
-<ul>
-  {{#todo}}
-  <li>{{name}}</li>
-  {{/todo}}
-</ul>
-```
-
-```html
-<!-- app/views/index.html -->
-<h1>Hello {{#user}}{{> fullname}}{{/user}} welcome to Matador!</h1>
-{{> tasks}}
-```
-
-Produces the following HTML:
-
-```html
-<h1>Hello John Smith welcome to Matador!</h1>
-<ul>
-  <li>dishes</li>
-  <li>mow lawn</li>
-</ul>
-```
-
-### Overriding View Partials
-
-Matador allows you to easily override view partials on a per-directory basis.
-To override a partial create a new folder named 'partials' in the folder your controller is using as its ```viewFolder```.
-Matador will look first in this folder for partials, if no matching partial exists it will traverse up the directory tree until it finds a matching partial.
-
-``` js
-// app/controllers/admin/AdminController.js
-module.exports = function (app, config) {
-  return app.getController('Application', true).extend(function () {
-    this.viewFolder = "admin" // we've set the view folder to "admin"
-  })
-  .methods({
-    index: function (req, res) {
-      this.render(res, 'index', {
-          user: {
-              first: "John"
-            , last: "Smith"
-          }
-        , todo: [{ name: 'dishes', id: 0 }, { name: 'mow lawn', id: 1 }]
-      })
-    }
-  })
-}
-```
-
-```html
-<!-- app/views/admin/partials/tasks.html -->
-<!-- This file will override the tasks.html partial found in app/views/partials -->
-<ul>
-{{#todo}}
-<li><a href="/edit/{{id}}">Edit the "{{name}}" task </a> or <a href="/delete/{{id}}">delete it</a></li>
-{{/todo}}
-</ul>
-```
-
-```html
-<!-- app/views/admin/index.html -->
-<!-- 'app/views/admin/partials/fullname.html' Does not exist, so 'app/views/partials/fullname.html' will be used -->
-<h1>Welcome {{#user}}{{> fullname}}{{/user}} to the Admin Area</h1>
-{{> tasks}}
-```
-
-Produces the following HTML:
-
-```html
-<h1>Welcome John Smith to the Admin Area</h1>
-<ul>
-  <li><a href="/edit/0">Edit the "dishes" task</a> or <a href="/delete/0">delete it</a></li>
-  <li><a href="/edit/1">Edit the "mow lawn" task</a> or <a href="/delete/1">delete it</a></li>
-</ul>
-```
-
-**Note:** For performance reasons, partials are fetched when the application starts. You must restart your application for changes in partials to be reflected.
 
 ### Request Filtering
 ``` js
 // app/controllers/ApplicationController.js
 module.exports = function (app, config) {
   return app.controllers.Base.extend(function () {
-    this.addBeforeFilter(this.requireAuth)
-    this.addExcludeFilter(['welcome'], this.requireAuth)
+    this.addBeforeFilter('private', this.requireAuth)
   })
   .methods({
     requireAuth: function (callback) {
       if (this.request.cookies.authed) return callback(null)
       this.response.redirect('/welcome')
+    }
+  , private: function () {
+      this.render('This is private')
     }
   , welcome: function () {
       this.render('welcome')
@@ -198,6 +111,30 @@ module.exports = function (app) {
   }
 }
 ```
+
+You can also specify method names to routes:
+
+``` js
+module.exports = function (app) {
+  return {
+    '/posts': {
+      'get': 'Posts.index', // maps to PostsController.js => #index
+      'post': 'Posts.create' // maps to PostsController.js => #create
+    }
+  }
+}
+```
+
+Matador has support for anonymous controllers or other endpoints. This is
+useful when mounting third-party apps, such as [Passport.js](http://passportjs.org):
+``` js
+module.exports = function (app) {
+  return {
+    '/hello': function (req, res) {
+       res.send('Hello')
+     }
+  }
+}
 
 ### How can I organize my Models?
 By default, Models are thin with just a Base and Application Model in place. You can give them some meat, for example, and embed [Mongo](http://mongoosejs.com) Schemas. See the following as a brief illustration:
@@ -245,6 +182,8 @@ Take special note that models do not have access to requests or responses, as th
 
 ### Model & Controller Inheritance
 The inheritance model Matador uses is built with [Klass](https://github.com/ded/klass), and is exposed via a global `Class` variable (not all globals are bad). Class comes in two flavors where by constructors can be set via an `initialize` method, or a function reference, and by default (in the scaffold), Matador uses the function reference style so that you may benefit from the auto-initialization of super classes, and there is no need to call `this.supr()` in your constructors.
+
+It is also possible to use Node.js's own inheritance via the 'util' module.
 
 ### Valentine
 The Valentine module is included as a simple tool giving you type checking, functional iterators, and some other nice utilities that often get used in applications of any size. It is exposed globally as `v`. It is used liberally in the Matador router, thus feel free to take advantage of its existence as well.
