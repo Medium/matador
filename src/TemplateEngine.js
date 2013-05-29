@@ -1,3 +1,5 @@
+// Copyright The Obvious Corporation 2013
+
 var soynode = require('soynode')
   , isDirectory = require('./fsutils').isDirectory
   , DEFAULT_LAYOUT = 'layout'
