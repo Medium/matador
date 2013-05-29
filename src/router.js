@@ -41,12 +41,12 @@ function _addControllerRoutes(app, path, handler, method) {
 
   //create individual entries for each request method (patchmatching is method-specific)
   var routeData = {
-    controller: controller
-    , controllerName: controllerName
-    , controllerClass: controllerClass
-    , method: controllerMethod
-    , methodName: actionName
-    , middleware: middleware
+    controller: controller,
+    controllerName: controllerName,
+    controllerClass: controllerClass,
+    method: controllerMethod,
+    methodName: actionName,
+    middleware: middleware
   }
 
   _addRouteData(app, method, path, routeData)
@@ -56,11 +56,11 @@ module.exports.init = function (app, routes) {
   //set up
   if (!app._routes) {
     app._pathMatchers = {
-      'DELETE': new PathMatcher()
-      , 'GET': new PathMatcher()
-      , 'PUT': new PathMatcher()
-      , 'POST': new PathMatcher()
-      , 'PATCH': new PathMatcher()
+      'DELETE': new PathMatcher(),
+      'GET': new PathMatcher(),
+      'PUT': new PathMatcher(),
+      'POST': new PathMatcher(),
+      'PATCH': new PathMatcher()
     }
   }
 
@@ -71,11 +71,11 @@ module.exports.init = function (app, routes) {
     //if the handler is a string, use it for delete, get, put, and post
     if (typeof handlers === 'string' || typeof handlers === 'function') {
       handlers = {
-        'DELETE': handlers
-        , 'GET': handlers
-        , 'PUT': handlers
-        , 'POST': handlers
-        , 'PATCH': handlers
+        'DELETE': handlers,
+        'GET': handlers,
+        'PUT': handlers,
+        'POST': handlers,
+        'PATCH': handlers
       }
     }
 
