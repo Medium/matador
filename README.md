@@ -11,7 +11,7 @@ for functional development, and [Express](http://expressjs.com) to give a bundle
 
 ### Create an app
     $ matador init my-app
-    $ cd !$ && npm install matador
+    $ cd my-app && npm install matador
 
 ### Start your app
     $ node server.js
@@ -91,7 +91,7 @@ module.exports = function (app, config) {
       this.response.redirect('/welcome')
     }
   , private: function () {
-      this.render('This is private')
+      this.end('This is private')
     }
   , welcome: function () {
       this.render('welcome')
