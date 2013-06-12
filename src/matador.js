@@ -7,6 +7,7 @@ var fs = require('fs')
   , argv = module.exports.argv = require('optimist').argv
   , TemplateEngine = require('./TemplateEngine')
   , fsutils = require('./fsutils')
+  , CacheHelper = require('./helpers/CacheHelper')
   , isDirectory = fsutils.isDirectory
   , existsSync = fsutils.existsSync
   , minifyViews = process.env.minify || false
@@ -475,19 +476,42 @@ module.exports.createApp = function (baseDir, configuration, options) {
     objCache[paths.MODELS][name + filenameSuffixes.MODELS] = instance
   }
 
+  app.boot = function (port) {
+    // Register the matador cache helper.
+    app.registerHelper('Cache', CacheHelper)
+
+    // Use the cache helper's no-cache middleware.
+    app.use(app.getHelper('Cache').auditHeadersMiddleware)
+    app.use(app.getHelper('Cache').noCacheMiddleware)
+
+    app.use(connect.query())
+    app.use(connect.cookieParser())
+    app.use(connect.session({secret: 'boosh'}))
+
+    app.use(app.requestDecorator())
+    app.use(app.preRouter())
+
+    app.use(connect.bodyParser())
+    app.use(app.router({}))
+    app.prefetch()
+    app.mount()
+
+    app.configure('development', function () {
+      app.use(matador.errorHandler({ dumpExceptions: true, showStack: true }))
+      app.set('soy options', {
+        eraseTemporaryFiles: true
+  , allowDynamicRecompile: true
+      })
+    })
+
+    app.configure('production', function () {
+      app.use(matador.errorHandler())
+    })
+
+    app.listen(port)
+  }
+
   app.controllers.Static = require('./StaticController')(app)
 
   return app
-}
-
-/**
- * A selection of off the shelf-helper classes that can be installed by an
- * application using `app.registerHelper(name, helper)`. e.g:
- *
- * <pre>
- *   app.registerHelper('Cache', matador.helpers.CacheHelper)
- * </pre>
- */
-module.exports.helpers = {
-  get CacheHelper() { return require('./helpers/CacheHelper') }
 }
