@@ -11,6 +11,10 @@ var fs = require('fs')
   , ClassLoader = require('./ClassLoader')
   , isDirectory = fsutils.isDirectory
 
+// DEPRECATED: Some old apps rely on argv being parsed by
+// Matador
+module.exports.argv = require('optimist').argv
+
 var paths = {
   SERVICES: 'services'
 , HELPERS: 'helpers'
@@ -438,6 +442,8 @@ module.exports.createApp = function (baseDir, configuration, options) {
 }
 
 /**
+ * DEPRECATED: Old apps may still load CacheHelper manually.
+ *
  * A selection of off the shelf-helper classes that can be installed by an
  * application using `app.registerHelper(name, helper)`. e.g:
  *
