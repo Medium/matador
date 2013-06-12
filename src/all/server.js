@@ -4,5 +4,7 @@ var matador = require('matador')
   , app = matador.createApp(__dirname, config, {})
   , port = process.env.PORT || 3000
 
-app.boot(port)
+app.boot()
+app.listen(port)
+
 console.log('matador running on port ' + port)

@@ -1,9 +1,9 @@
+// Copyright The Obvious Corporation 2013
+
 var fs = require('fs')
   , path = require('path')
 
-// TODO Move listingCache to its own thing
-var listingCache = {}
-  , existsSync = fs.existsSync || path.existsSync
+exports.existsSync = fs.existsSync || path.existsSync
  
 /**
  * Check whether a path exists and is a directory
@@ -19,16 +19,7 @@ exports.isDirectory = function (path) {
   }
 }
 
-exports.fileExists = function (filename) {
-  // We check for file existence this way so that our lookups are case sensitive regardless of the underlying filesystem.
-  var dir = path.dirname(filename)
-    , base = path.basename(filename)
-
-  if (!listingCache[dir]) {
-    listingCache[dir] = existsSync(dir) ? fs.readdirSync(dir) : []
-  }
-
-  return listingCache[dir].indexOf(base) !== -1
+exports.readDir = function (dir) {
+  return exports.existsSync(dir) ? fs.readdirSync(dir) : []
 }
 
-exports.existsSync = existsSync
