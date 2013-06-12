@@ -25,9 +25,7 @@
     "valentine": "*",
     "klass": "*",
     "colors": "*",
-    "hogan.js": "*",
     "optimist": "*",
-    "uglify-js": "2.2.1",
     "soynode": "~0.2.0",
     "nodeunit": "~0.8.0"
   },
