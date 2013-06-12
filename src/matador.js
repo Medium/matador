@@ -4,7 +4,6 @@ var fs = require('fs')
   , http = require('http')
   , path = require('path')
   , router = require('./router')
-  , argv = module.exports.argv = require('optimist').argv
   , TemplateEngine = require('./TemplateEngine')
   , fsutils = require('./fsutils')
   , CacheHelper = require('./helpers/CacheHelper')
