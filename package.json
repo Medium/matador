@@ -34,7 +34,7 @@
     "falkor": "~1.2.9"
   },
   "scripts": {
-    "test": "./runIntegrationTests.sh",
+    "test": "node_modules/nodeunit/bin/nodeunit tests/functional/ tests/unit/ && ./runIntegrationTests.sh",
     "lint": "node_modules/jshint/bin/hint src/ --reporter dev/reporter.js"
   }
 }
