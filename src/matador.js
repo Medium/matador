@@ -9,7 +9,6 @@ var fs = require('fs')
   , CacheHelper = require('./helpers/CacheHelper')
   , isDirectory = fsutils.isDirectory
   , existsSync = fsutils.existsSync
-  , minifyViews = process.env.minify || false
 
 var paths = {
   SERVICES: 'services'
@@ -27,31 +26,6 @@ var filenameSuffixes = {
 
 global.klass = require('klass')
 global.v = require('valentine')
-
-var minify = function () {
-  var r = /(<script[^>]*>[\s\S]+?<\/script>)/
-    , scr = /^<script([^>]*)>([\s\S]+?)<\/script>/
-    , white = /\s+/g
-    , closeTags = />\s+</g
-    , jsp = require('uglify-js').parser
-    , pro = require('uglify-js').uglify
-    , uglify = function (src) {
-        try {
-          var ast = jsp.parse(src)
-          ast = pro.ast_squeeze(ast)
-          return pro.gen_code(ast)
-        }
-        catch (ex) {
-          return src
-        }
-      }
-  return function (doc) {
-    if (!minifyViews) return doc
-    return doc.trim().replace(/ +/g, ' ').split(r).map(function (p, i, m) {
-      return (m = p.match(scr)) ? '<script' + m[1] + '>' + uglify(m[2]) + '</script>' : p.replace(white, ' ')
-    }).join('').replace(closeTags, '><')
-  }
-}()
 
 module.exports.createApp = function (baseDir, configuration, options) {
   configuration = configuration || {}
