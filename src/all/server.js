@@ -12,6 +12,7 @@ app.registerHelper('Cache', matador.helpers.CacheHelper)
 app.use(app.getHelper('Cache').auditHeadersMiddleware)
 app.use(app.getHelper('Cache').noCacheMiddleware)
 
+app.use(matador.query())
 app.use(matador.cookieParser())
 app.use(matador.session({secret: 'boosh'}))
 
