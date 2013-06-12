@@ -436,6 +436,14 @@ module.exports.createApp = function (baseDir, configuration, options) {
     })
   }
 
+  /**
+   * Warn old apps that registering new template handlers is not supported
+   * for now
+   */
+  app.register = function () {
+    console.log('DEPRECATION WARNING: Only SoyNode templates are now supported')
+  }
+
   app.controllers.Static = require('./StaticController')(app)
 
   return app
