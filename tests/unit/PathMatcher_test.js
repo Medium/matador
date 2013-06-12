@@ -1,4 +1,4 @@
-var PathMatcher = require('../src/pathmatcher');
+var PathMatcher = require('../../src/pathmatcher');
 
 exports.testPathMatcher = function (test) {
   var pm = new PathMatcher();

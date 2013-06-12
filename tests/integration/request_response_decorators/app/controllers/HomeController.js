@@ -19,5 +19,10 @@ module.exports = function (app, config) {
     res.end('Success!')
   }
 
+  HomeController.prototype.queryStrings = function (req, res) {
+    res.statusCode = 200
+    res.end(JSON.stringify(req.query))
+  }
+
   return HomeController
 }
