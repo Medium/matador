@@ -1,5 +1,10 @@
 // Copyright The Obvious Corporation 2013
 
+/**
+ * @fileoverview
+ * Loads javascript classes (such as controllers, models, services)
+ * and cache them.
+ */
 function ClassLoader(fileLoader) {
   this._fileLoader = fileLoader
 
