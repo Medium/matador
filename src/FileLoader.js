@@ -54,7 +54,8 @@ FileLoader.prototype.fileExists = function (filename) {
  * trigger a 'createHelper' event.
  */
 FileLoader.prototype.loadFile = function (subdir, name, p) {
-  if (typeof(this._fileCache[subdir][name]) !== 'undefined') return this._fileCache[subdir][name]
+  if (this._fileCache[subdir][name]) return this._fileCache[subdir][name]
+
   var pathname = name.replace(/\./g, '/')
   var dir = v.find((p ? [p] : this.appDirs), function (dir) {
     var filename = dir + '/' + subdir + '/' + pathname + '.js'
