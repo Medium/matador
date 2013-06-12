@@ -34,6 +34,7 @@
     "falkor": "~1.2.9"
   },
   "scripts": {
+    "test": "./runIntegrationTests.sh",
     "lint": "node_modules/jshint/bin/hint src/ --reporter dev/reporter.js"
   }
 }
