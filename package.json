@@ -15,7 +15,7 @@
     "url": "https://github.com/Obvious/matador.git"
   },
   "engines": {
-    "node": ">=0.6.0 <0.9"
+    "node": ">=0.10"
   },
   "bin": {
     "matador": "bin/matador.js"
@@ -25,9 +25,7 @@
     "valentine": "*",
     "klass": "*",
     "colors": "*",
-    "hogan.js": "*",
     "optimist": "*",
-    "uglify-js": "2.2.1",
     "soynode": "~0.2.0",
     "nodeunit": "~0.8.0"
   },
@@ -36,6 +34,7 @@
     "falkor": "~1.2.9"
   },
   "scripts": {
+    "test": "node_modules/nodeunit/bin/nodeunit tests/functional/ tests/unit/ && ./runIntegrationTests.sh",
     "lint": "node_modules/jshint/bin/hint src/ --reporter dev/reporter.js"
   }
 }

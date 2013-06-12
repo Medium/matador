@@ -1,6 +1,7 @@
 module.exports = function (app) {
   return {
-    '/redirect': 'Redirect.redirect',
-    '/target': 'Redirect.target'
+    '/redirect': 'Home.redirect',
+    '/target': 'Home.target',
+    '/queryStrings': 'Home.queryStrings'
   }
 }

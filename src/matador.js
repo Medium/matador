@@ -4,12 +4,16 @@ var fs = require('fs')
   , http = require('http')
   , path = require('path')
   , router = require('./router')
-  , argv = module.exports.argv = require('optimist').argv
   , TemplateEngine = require('./TemplateEngine')
   , fsutils = require('./fsutils')
+  , CacheHelper = require('./helpers/CacheHelper')
+  , FileLoader = require('./FileLoader')
+  , ClassLoader = require('./ClassLoader')
   , isDirectory = fsutils.isDirectory
-  , existsSync = fsutils.existsSync
-  , minifyViews = process.env.minify || false
+
+// DEPRECATED: Some old apps rely on argv being parsed by
+// Matador
+module.exports.argv = require('optimist').argv
 
 var paths = {
   SERVICES: 'services'
@@ -28,135 +32,55 @@ var filenameSuffixes = {
 global.klass = require('klass')
 global.v = require('valentine')
 
-var minify = function () {
-  var r = /(<script[^>]*>[\s\S]+?<\/script>)/
-    , scr = /^<script([^>]*)>([\s\S]+?)<\/script>/
-    , white = /\s+/g
-    , closeTags = />\s+</g
-    , jsp = require('uglify-js').parser
-    , pro = require('uglify-js').uglify
-    , uglify = function (src) {
-        try {
-          var ast = jsp.parse(src)
-          ast = pro.ast_squeeze(ast)
-          return pro.gen_code(ast)
-        }
-        catch (ex) {
-          return src
-        }
-      }
-  return function (doc) {
-    if (!minifyViews) return doc
-    return doc.trim().replace(/ +/g, ' ').split(r).map(function (p, i, m) {
-      return (m = p.match(scr)) ? '<script' + m[1] + '>' + uglify(m[2]) + '</script>' : p.replace(white, ' ')
-    }).join('').replace(closeTags, '><')
-  }
-}()
-
 module.exports.createApp = function (baseDir, configuration, options) {
   configuration = configuration || {}
   options = options || {}
 
   var appDir = path.join(baseDir, '/app')
-    , fileCache = {}
     , objCache = {}
-    , pathCache = {}
-    , updateCaches = v(paths).each(function (key, val) {
-        fileCache[val] = {}
-        objCache[val] = {}
-        pathCache[val] = {}
-      })
-    , partialCache = {}
-    , listingCache = {}
-    , appDirs = [appDir].concat(v(function () {
-        var dir = appDir + '/modules'
-        return existsSync(dir) ? fs.readdirSync(dir) : []
-      }()).map(function (dir) {
-        return appDir + '/modules/' + dir
-      }))
+    , customHelpers = {}
     , app = connect()
-    , fileExists = function (filename) {
-        // We check for file existence this way so that our lookups are case sensitive regardless of the underlying filesystem.
-        var dir = path.dirname(filename)
-          , base = path.basename(filename)
-        if (!listingCache[dir]) listingCache[dir] = existsSync(dir) ? fs.readdirSync(dir) : []
-        return listingCache[dir].indexOf(base) !== -1
-      }
-    , loadFile = function (subdir, name, p) {
-        if (typeof(fileCache[subdir][name]) !== 'undefined') return fileCache[subdir][name]
-        var pathname = name.replace(/\./g, '/')
-        var dir = v.find((p ? [p] : appDirs), function (dir) {
-          var filename = dir + '/' + subdir + '/' + pathname + '.js'
-          if (!fileExists(filename)) return false
-          try {
-            fileCache[subdir][name] = require(filename)(app, getConfig(subdir, name))
-            // emit event saying a helper was just created w/ name - Helper
-            if (subdir === paths.HELPERS) app.emit('createHelper', name.substr(0, name.length - 6), fileCache[subdir][name])
-          } catch (e) {
-            console.error('Error loading file:', subdir, name, p, e.stack)
-            throw e
-          }
-          pathCache[subdir][name] = dir === appDir ? [appDir] : [dir, appDir]
-          return true
-        })
-        if (!dir) throw new Error('Unable to find ' + subdir + '/' + pathname)
-
-        return fileCache[subdir][name]
-      }
-    , loadClass = function (subdir, name, localName, definitionOnly) {
-        if (definitionOnly) return loadFile(subdir, name)
-        if (!objCache[subdir][name]) {
-          var File = loadFile(subdir, name)
-          objCache[subdir][name] = new File(localName, pathCache[subdir][name])
-          objCache[subdir][name]._paths = pathCache[subdir][name]
-
-          if (subdir === paths.MODELS) app.emit('createModel', localName, objCache[subdir][name])
-          else if (subdir === paths.SERVICES) app.emit('createService', localName, objCache[subdir][name])
-          else if (subdir === paths.CONTROLLERS) app.emit('createController', localName, objCache[subdir][name])
-          // not emitting an event for helpers here as we never actually instantiate a helper
-        }
-        return objCache[subdir][name]
-      }
+    , fileLoader = new FileLoader(app, appDir, paths)
+    , classLoader = new ClassLoader(fileLoader)
     , mountPublicDir = function (dir) {
         var directory = dir + '/public'
-        fileExists(directory) && app.use(connect.static(directory))
+        fileLoader.fileExists(directory) && app.use(connect.static(directory))
       }
 
-      /**
-       * Gets the configuration by type (e.g. Controller, Service, Helper) and name (e.g. ImageService,
-       * AuthController, SecurityHelper).  If present, values are taken from the 'base' configuration
-       * and then taken from the specific config, thus a specific config can override a base value.
-       *
-       * A config might look like this:
-       *
-       * var config = {
-       *   base: {baseUrl: '/', name: 'My Project'},
-       *   services: {
-       *     ImageService: {baseUrl: '//cdn.project.com/'}
-       *   },
-       *   controllers: {
-       *     AuthController: {authType: 'basic-auth'}
-       *   }
-       * }
-       */
-    , getConfig = function (type, name) {
-        var config = {}
-        // Copy values from the base configuration.
-        if (configuration.base) {
-          for (var baseKey in configuration.base) {
-            config[baseKey] = configuration.base[baseKey]
-          }
-        }
-        // Copy configuration keys from the specific config, this will override
-        // values in the base configuration.
-        if (configuration[type] && configuration[type][name]) {
-          for (var key in configuration[type][name]) {
-            config[key] = configuration[type][name][key]
-          }
-        }
-        return config
+  /**
+   * Gets the configuration by type (e.g. Controller, Service, Helper) and name (e.g. ImageService,
+   * AuthController, SecurityHelper).  If present, values are taken from the 'base' configuration
+   * and then taken from the specific config, thus a specific config can override a base value.
+   *
+   * A config might look like this:
+   *
+   * var config = {
+   *   base: {baseUrl: '/', name: 'My Project'},
+   *   services: {
+   *     ImageService: {baseUrl: '//cdn.project.com/'}
+   *   },
+   *   controllers: {
+   *     AuthController: {authType: 'basic-auth'}
+   *   }
+   * }
+   */
+  app.getConfig = function (type, name) {
+    var config = {}
+    // Copy values from the base configuration.
+    if (configuration.base) {
+      for (var baseKey in configuration.base) {
+        config[baseKey] = configuration.base[baseKey]
       }
-
+    }
+    // Copy configuration keys from the specific config, this will override
+    // values in the base configuration.
+    if (configuration[type] && configuration[type][name]) {
+      for (var key in configuration[type][name]) {
+        config[key] = configuration[type][name][key]
+      }
+    }
+    return config
+  }
 
   /**
    * Return middleware which will set up a bunch of methods on the request object for convenience
@@ -330,28 +254,28 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
   app.set('base_dir', appDir)
   app.set('public', appDir + '/public')
-  v(appDirs).each(mountPublicDir)
+  fileLoader.appDirs.forEach(mountPublicDir)
 
   app.controllers = {
     Base: require('./BaseController')(app)
   }
 
   app.addModulePath = function (dir) {
-    appDirs.push(dir)
+    fileLoader.appDirs.push(dir)
     mountPublicDir(dir)
   }
 
   app.getModulePaths = function () {
-    return appDirs
+    return fileLoader.appDirs
   }
 
   app.mount = function () {
     var router = require('./router')
       , self = this
 
-    v.each(appDirs, function (dir) {
+    fileLoader.appDirs.forEach(function (dir) {
       var filename = dir + '/config/routes.js'
-      if (!fileExists(filename)) return
+      if (!fileLoader.fileExists(filename)) return
       try {
         router.init(self, require(filename)(self))
       } catch (e) {
@@ -365,19 +289,19 @@ module.exports.createApp = function (baseDir, configuration, options) {
     var self = this
 
     v(paths).each(function (key, type) {
-      v.each(appDirs, function (dir) {
+      fileLoader.appDirs.forEach(function (dir) {
         var d = dir + '/' + type
         if (!isDirectory(d)) return
         v.each(fs.readdirSync(d), function (file) {
           if (isDirectory(d + '/' + file)) return
           if (file.charAt(0) == '.') return
           if (file.substr(file.length - 3) === '.js') file = file.substr(0, file.length - 3)
-          loadFile(type, file, dir)
+          fileLoader.loadFile(type, file, dir)
         })
       })
     })
 
-    self.templateEngine.precompileTemplates(appDirs, app.set('soy options') || {}, callback)
+    self.templateEngine.precompileTemplates(fileLoader.appDirs, app.set('soy options') || {}, callback)
   }
 
   /**
@@ -389,7 +313,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
    * @return {Object} a service class or instance
    */
   app.getService = function (name, definitionOnly) {
-    return loadClass(paths.SERVICES, name + filenameSuffixes.SERVICES, name, definitionOnly)
+    return classLoader.loadClass(paths.SERVICES, name + filenameSuffixes.SERVICES, name, definitionOnly)
   }
 
   /**
@@ -405,7 +329,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
       return definitionOnly ? app.controllers[name] : new app.controllers[name](name, [])
     }
     else {
-      return loadClass(paths.CONTROLLERS, name + filenameSuffixes.CONTROLLERS, name, definitionOnly)
+      return classLoader.loadClass(paths.CONTROLLERS, name + filenameSuffixes.CONTROLLERS, name, definitionOnly)
     }
   }
 
@@ -428,7 +352,11 @@ module.exports.createApp = function (baseDir, configuration, options) {
    * @return {Object} a helper instance
    */
   app.getHelper = function (name) {
-    return loadFile(paths.HELPERS, name + filenameSuffixes.HELPERS)
+    if (customHelpers[name]) {
+      return customHelpers[name]
+    } else {
+      return fileLoader.loadFile(paths.HELPERS, name + filenameSuffixes.HELPERS)
+    }
   }
 
   /**
@@ -442,7 +370,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
    *    and returns a helper object.
    */
   app.registerHelper = function (name, helperFactory) {
-    fileCache[paths.HELPERS][name + filenameSuffixes.HELPERS] = helperFactory(app)
+    customHelpers[name] = helperFactory(app)
   }
 
   /**
@@ -475,12 +403,55 @@ module.exports.createApp = function (baseDir, configuration, options) {
     objCache[paths.MODELS][name + filenameSuffixes.MODELS] = instance
   }
 
+  app.boot = function () {
+    // Register the matador cache helper.
+    app.registerHelper('Cache', CacheHelper)
+
+    // Use the cache helper's no-cache middleware.
+    app.use(app.getHelper('Cache').auditHeadersMiddleware)
+    app.use(app.getHelper('Cache').noCacheMiddleware)
+
+    app.use(connect.query())
+    app.use(connect.cookieParser())
+    app.use(connect.session({secret: 'boosh'}))
+
+    app.use(app.requestDecorator())
+    app.use(app.preRouter())
+
+    app.use(connect.bodyParser())
+    app.use(app.router({}))
+    app.prefetch()
+    app.mount()
+
+    app.configure('development', function () {
+      app.use(matador.errorHandler({ dumpExceptions: true, showStack: true }))
+      app.set('soy options', {
+        eraseTemporaryFiles: true
+  , allowDynamicRecompile: true
+      })
+    })
+
+    app.configure('production', function () {
+      app.use(matador.errorHandler())
+    })
+  }
+
+  /**
+   * Warn old apps that registering new template handlers is not supported
+   * for now
+   */
+  app.register = function () {
+    console.log('DEPRECATION WARNING: Only SoyNode templates are now supported')
+  }
+
   app.controllers.Static = require('./StaticController')(app)
 
   return app
 }
 
 /**
+ * DEPRECATED: Old apps may still load CacheHelper manually.
+ *
  * A selection of off the shelf-helper classes that can be installed by an
  * application using `app.registerHelper(name, helper)`. e.g:
  *
