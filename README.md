@@ -135,6 +135,7 @@ module.exports = function (app) {
      }
   }
 }
+```
 
 ### How can I organize my Models?
 By default, Models are thin with just a Base and Application Model in place. You can give them some meat, for example, and embed [Mongo](http://mongoosejs.com) Schemas. See the following as a brief illustration:
