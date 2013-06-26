@@ -9,6 +9,7 @@ var fs = require('fs')
   , CacheHelper = require('./helpers/CacheHelper')
   , FileLoader = require('./FileLoader')
   , ClassLoader = require('./ClassLoader')
+  , PathMatcher = require('./PathMatcher')
   , isDirectory = fsutils.isDirectory
 
 // DEPRECATED: Some old apps rely on argv being parsed by
@@ -448,6 +449,9 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
   return app
 }
+
+// Export Matador's path matcher for potential client-side use
+module.exports.PathMatcher = PathMatcher
 
 /**
  * DEPRECATED: Old apps may still load CacheHelper manually.
