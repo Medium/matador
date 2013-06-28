@@ -23,7 +23,7 @@ function PathMatcher() {
  *   /search/*
  * @param {string} path The path to match.
  * @param {Object} object The object to associate with the path.
- * @return {function (...args) : string} Function that can be used to generate paths.  Arguments
+ * @return {function (...) : string} Function that can be used to generate paths.  Arguments
  *    will be inserted into the place holders.
  */
 PathMatcher.prototype.add = function (path, object) {
