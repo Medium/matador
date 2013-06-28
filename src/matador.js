@@ -253,6 +253,25 @@ module.exports.createApp = function (baseDir, configuration, options) {
     return app._vars[key]
   }
 
+  /**
+   * Get a value on the app object.
+   * @param {string} key
+   * @param {*=} defaultVal A default value if the key doesn't exist.
+   *     If we pass 'undefined', and the key isn't set, then we throw an error.
+   * @return {*} The current value.
+   */
+  app.get = function (key, defaultVal) {
+    if (key in app._vars) {
+      return app._vars[key]
+    }
+
+    if (typeof defaultVal === 'undefined') {
+      throw new Error('Missing key: ' + key)
+    } else {
+      return defaultVal
+    }
+  }
+
   app.set('base_dir', appDir)
   app.set('public', appDir + '/public')
   fileLoader.appDirs.forEach(mountPublicDir)
