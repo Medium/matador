@@ -9,7 +9,7 @@ var fs = require('fs')
   , CacheHelper = require('./helpers/CacheHelper')
   , FileLoader = require('./FileLoader')
   , ClassLoader = require('./ClassLoader')
-  , PathMatcher = require('./PathMatcher')
+  , PathMatcher = require('./pathMatcher')
   , isDirectory = fsutils.isDirectory
 
 // DEPRECATED: Some old apps rely on argv being parsed by
