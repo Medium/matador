@@ -91,7 +91,8 @@ PathMatcher.prototype.add = function (path, object) {
 /**
  * Gets the matching node for the given path.  If no path matches, then null.
  * @param {string} path The path to match.
- * @return {Object} An object corresponding to the matched path.
+ * @return {?{object: Object, matches: Object.<string>}} An object
+ *     corresponding to the matched path.
  */
 PathMatcher.prototype.getMatch = function (path) {
   var parts = this.getPathParts_(path)
