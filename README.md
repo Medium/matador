@@ -3,7 +3,7 @@ Sane defaults and a simple structure, scaling as your application grows.
 
 Matador is a clean, organized framework for [Node.js](http://nodejs.org) architected to suit MVC enthusiasts. It gives you a well-defined development environment with flexible routing, easy controller mappings, and basic request filtering.
 It&#8217;s built on open source libraries such as [SoyNode](https://github.com/Obvious/soynode) for view rendering, [Klass](https://github.com/ded/klass) for its inheritance model, [Valentine](https://github.com/ded/valentine)
-for functional development, and [Express](http://expressjs.com) to give a bundle of other Node server related helpers.
+for functional development, and [connect.js](http://www.senchalabs.org/connect/) to give a bundle of other Node server related helpers.
 
 # Installation
 ### Get the CLI
