@@ -28,21 +28,56 @@ function RequestMessage() {
 RequestMessage.buildDefaultMessage = function () {
   var message = new RequestMessage()
 
-  message.addMessageSection('Parameters', function (req, res) {
+  message.addParameterSection()
+  message.addQuerySection()
+  message.addControllerSection()
+  message.addResponseSection()
+
+  return message
+}
+
+/**
+ * Adds a section to the request message that logs the URI
+ * parameters.
+ */
+RequestMessage.prototype.addParameterSection = function () {
+  this.addMessageSection('Parameters', function (req, res) {
     return JSON.stringify(req.params)
   })
+}
 
-  message.addMessageSection('Query', function (req, res) {
+/**
+ * Adds a section to the request message that logs the query string
+ * parameters.
+ */
+RequestMessage.prototype.addQuerySection = function() {
+  this.addMessageSection('Query', function (req, res) {
     return JSON.stringify(req.query)
   })
+}
 
-  message.addMessageSection('Controller', function (req, res) {
+/**
+ * Adds a section to the request message that logs the controller
+ * and action that handled the request.
+ */
+RequestMessage.prototype.addControllerSection = function() {
+  this.addMessageSection('Controller', function (req, res) {
     if (req.target) {
       return req.target.controllerName + '.' + req.target.methodName
     }
   })
+}
 
-  message.addMessageSection('Response', function (req, res) {
+/**
+ * Adds a section to the request message that logs response:
+ *  - status code
+ *  - response time
+ *  - body size
+ *
+ * E.g.: "Response: 200 in 39ms (6441 bytes)"
+ */
+RequestMessage.prototype.addResponseSection = function() {
+  this.addMessageSection('Response', function (req, res) {
     var bodySize = ((res && res.getHeader('content-length')) || 'unknown') + ' bytes'
       , responseTime = this._finishTime - this._startTime
 
@@ -53,8 +88,6 @@ RequestMessage.buildDefaultMessage = function () {
       '(' + bodySize + ')'
     ].join(' ')
   })
-
-  return message
 }
 
 /** Add a new section to the request message. It takes a name and a builder

@@ -424,6 +424,10 @@ module.exports.createApp = function (baseDir, configuration, options) {
     objCache[paths.MODELS][name + filenameSuffixes.MODELS] = instance
   }
 
+  /**
+   * Middleware that calls a request logger every request. Useful
+   * for displaying basic data about a request.
+   */
   app.requestLogger = function (requestMessage, logger) {
     return function (req, res, next) {
       requestMessage.requestStart()
@@ -441,6 +445,10 @@ module.exports.createApp = function (baseDir, configuration, options) {
     }
   }
 
+  /**
+   * Builds a request logger for development purposes: it logs predefined
+   * data onto the console.
+   */
   app.developmentRequestLogger = function () {
     return function (req, res, next) {
       var message = RequestMessage.buildDefaultMessage()
