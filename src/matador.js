@@ -442,8 +442,10 @@ module.exports.createApp = function (baseDir, configuration, options) {
   }
 
   app.developmentRequestLogger = function () {
-    var message = RequestMessage.buildDefaultMessage()
-    return app.requestLogger(message, console)
+    return function (req, res, next) {
+      var message = RequestMessage.buildDefaultMessage()
+      app.requestLogger(message, console)(req, res, next)
+    }
   }
 
   app.boot = function () {
