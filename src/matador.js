@@ -363,7 +363,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
    * @return {Object} a model class or instance
    */
   app.getModel = function (name, definitionOnly) {
-    return loadClass(paths.MODELS, name + filenameSuffixes.MODELS, name, definitionOnly)
+    return classLoader.loadClass(paths.MODELS, name + filenameSuffixes.MODELS, name, definitionOnly)
   }
 
   /**
