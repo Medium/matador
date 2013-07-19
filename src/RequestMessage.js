@@ -11,39 +11,38 @@
  *   Thu, 18 Jul 2013 23:35:28 GMT - GET /people/29 (source 127.0.0.1)
  *     Parameters: {"id":"29"}
  *     Query: {}
- *     Body: {}
  *     Controller: People.show
  *     Response: 200 in 39ms (6441 bytes)
  */
 var useragent = require('useragent')
 
 function RequestMessage() {
-  this._events = []
+  this._sections = []
 }
 
 /**
  * A request message factory that includes the most common
- * request events for logging purposes
- * @return {RequestMessage} a request message with default events
+ * request sections for logging purposes
+ * @return {RequestMessage} a request message with default sections
  */
 RequestMessage.buildDefaultMessage = function () {
   var message = new RequestMessage()
 
-  message.addRequestEvent('Parameters', function (req, res) {
+  message.addMessageSection('Parameters', function (req, res) {
     return JSON.stringify(req.params)
   })
 
-  message.addRequestEvent('Query', function (req, res) {
+  message.addMessageSection('Query', function (req, res) {
     return JSON.stringify(req.query)
   })
 
-  message.addRequestEvent('Controller', function (req, res) {
+  message.addMessageSection('Controller', function (req, res) {
     if (req.target) {
       return req.target.controllerName + '.' + req.target.methodName
     }
   })
 
-  message.addRequestEvent('Response', function (req, res) {
+  message.addMessageSection('Response', function (req, res) {
     var bodySize = ((res && res.getHeader('content-length')) || 'unknown') + ' bytes'
       , responseTime = this._finishTime - this._startTime
 
@@ -58,36 +57,35 @@ RequestMessage.buildDefaultMessage = function () {
   return message
 }
 
-/**
- * Add a new event to the request. It takes a name and a builder function.
- * The builder function receives the request and the response objects
- * for the function to inspect and build appropriate message.
- * See .buildDefaultMessage for examples
- * @param {string} eventName the name of the event to be logged.
- * @param {function} builder function called to build a message for the event
- * eventName
+/** Add a new section to the request message. It takes a name and a builder
+ * function.  The builder function receives the request and the response
+ * objects for the function to inspect and build appropriate message.  See
+ * .buildDefaultMessage for examples
+ * @param {string} section the name of the section to be logged.
+ * @param {function} builder function called to build
+ * a message for the section sectionName
  */
-RequestMessage.prototype.addRequestEvent = function(eventName, builder) {
-  this._events.push({name: eventName, builder: builder})
+RequestMessage.prototype.addMessageSection = function(sectionName, messageBuilder) {
+  this._sections.push({name: sectionName, builder: messageBuilder})
 }
 
 /**
- * Builds a string using the registered request events
+ * Builds a string using the registered request message sections
  * @param {http.Request} req request
  * @param {http.Response} res response
  * @return {string} the request message
  */
 RequestMessage.prototype.buildMessage = function (req, res) {
   var messages = [this._buildHeader(req)]
-    , events = this._events.map(function (event) {
-      return this._buildEventMessage(event, req, res)
+    , sections = this._sections.map(function (section) {
+      return this._buildSectionMessage(section, req, res)
     }.bind(this))
 
-  events = events.filter(function (message) {
+  sections = sections.filter(function (message) {
     return message && message.length > 0
   })
 
-  return messages.concat(events).join('\n') + '\n'
+  return messages.concat(sections).join('\n') + '\n'
 }
 
 /**
@@ -126,15 +124,14 @@ RequestMessage.prototype._buildHeader = function (req) {
 }
 
 /**
- * Goes through all the registered events and build its message.
+ * Goes through all the registered sections and build its message.
  * @private
  */
-RequestMessage.prototype._buildEventMessage = function (event, req, res) {
-  var message = event.builder.bind(this)(req, res)
+RequestMessage.prototype._buildSectionMessage = function (section, req, res) {
+  var message = section.builder.bind(this)(req, res)
   if (message) {
-    return '  ' + event.name + ': ' + message
+    return '  ' + section.name + ': ' + message
   }
 }
 
 module.exports = RequestMessage
-
