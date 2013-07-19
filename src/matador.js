@@ -10,6 +10,7 @@ var fs = require('fs')
   , FileLoader = require('./FileLoader')
   , ClassLoader = require('./ClassLoader')
   , PathMatcher = require('./pathMatcher')
+  , RequestMessage = require('./RequestMessage')
   , isDirectory = fsutils.isDirectory
 
 // DEPRECATED: Some old apps rely on argv being parsed by
@@ -423,6 +424,38 @@ module.exports.createApp = function (baseDir, configuration, options) {
     objCache[paths.MODELS][name + filenameSuffixes.MODELS] = instance
   }
 
+  /**
+   * Middleware that calls a request logger every request. Useful
+   * for displaying basic data about a request.
+   */
+  app.requestLogger = function (requestMessage, logger) {
+    return function (req, res, next) {
+      requestMessage.requestStart()
+
+      var end = res.end
+      res.end = function (chunk, encoding) {
+        end.call(res, chunk, encoding)
+        requestMessage.requestEnd()
+
+        if (!/\.(jpg|png|less|js|soy|otf|ico)$/.test(req.originalUrl) && !/plovr\/proxy/.test(req.originalUrl)) {
+          logger.info(requestMessage.buildMessage(req, res))
+        }
+      }
+      next()
+    }
+  }
+
+  /**
+   * Builds a request logger for development purposes: it logs predefined
+   * data onto the console.
+   */
+  app.developmentRequestLogger = function () {
+    return function (req, res, next) {
+      var message = RequestMessage.buildDefaultMessage()
+      app.requestLogger(message, console)(req, res, next)
+    }
+  }
+
   app.boot = function () {
     // Register the matador cache helper.
     app.registerHelper('Cache', CacheHelper)
@@ -444,6 +477,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
     app.mount()
 
     app.configure('development', function () {
+      app.use(app.developmentRequestLogger())
       app.use(matador.errorHandler({ dumpExceptions: true, showStack: true }))
       app.set('soy options', {
         eraseTemporaryFiles: true
