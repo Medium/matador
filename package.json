@@ -27,7 +27,8 @@
     "colors": "*",
     "optimist": "*",
     "soynode": "~0.2.0",
-    "nodeunit": "~0.8.0"
+    "nodeunit": "~0.8.0",
+    "useragent": "~2.0.6"
   },
   "devDependencies": {
     "jshint": "2.0.1",
