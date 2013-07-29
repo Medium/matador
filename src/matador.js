@@ -238,7 +238,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
    */
   app.configure = function configureApp(env, fn) {
     if (typeof fn === 'undefined') env()
-    else if (env === process.env.NODE_ENV) fn()
+    else if (env === this.getEnv()) fn()
   }
 
   /**
@@ -288,6 +288,10 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
   app.getModulePaths = function () {
     return fileLoader.appDirs
+  }
+
+  app.getEnv = function () {
+    return process.env.NODE_ENV || 'development'
   }
 
   app.mount = function () {
