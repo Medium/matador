@@ -487,7 +487,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
     app.configure('development', function () {
       app.use(app.developmentRequestLogger())
-      app.use(matador.errorHandler({ dumpExceptions: true, showStack: true }))
+      app.use(connect.errorHandler({ dumpExceptions: true, showStack: true }))
       app.set('soy options', {
         eraseTemporaryFiles: true
   , allowDynamicRecompile: true
@@ -495,7 +495,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
     })
 
     app.configure('production', function () {
-      app.use(matador.errorHandler())
+      app.use(connect.errorHandler())
     })
   }
 
