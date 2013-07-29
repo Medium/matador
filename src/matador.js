@@ -230,7 +230,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
   /**
    * Allow configuration of this application via the current environment. If env is passed in
-   * and the current environment (process.env.NODE_ENV) matches env, then the function is ran.
+   * and the current environment matches env, then the function is ran.
    * Any functions passed in without an env will be ran regardless.
    *
    * @param {string} env the current environment
@@ -238,7 +238,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
    */
   app.configure = function configureApp(env, fn) {
     if (typeof fn === 'undefined') env()
-    else if (env === process.env.NODE_ENV) fn()
+    else if (env === this.getEnv()) fn()
   }
 
   /**
@@ -288,6 +288,15 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
   app.getModulePaths = function () {
     return fileLoader.appDirs
+  }
+
+  /**
+   * Get current environment (NODE_ENV environment variable),
+   * falling back to 'development' if it is not set.
+   * @return {string} The current environment
+   */
+  app.getEnv = function () {
+    return process.env.NODE_ENV || 'development'
   }
 
   app.mount = function () {

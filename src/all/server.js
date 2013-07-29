@@ -1,7 +1,6 @@
 var matador = require('matador')
-  , env = process.env.NODE_ENV || 'development'
-  , config = require('./app/config/' + env)
   , app = matador.createApp(__dirname, config, {})
+  , config = require('./app/config/' + app.getEnv())
   , port = process.env.PORT || 3000
 
 app.boot()
