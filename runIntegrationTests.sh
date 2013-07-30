@@ -17,13 +17,18 @@ for entry in `find tests/integration -maxdepth 1`; do
     test_name=`basename $entry`
     echo "Booting $test_name server..."
     cp src/all/server.js $entry/
+
+    if [[ -f ${entry}/beforeBoot.sh ]]; then
+      eval "$(cat ${entry}/beforeBoot.sh)"
+    fi
+
     nohup node $entry/server.js 2>&1 > $test_name-server.out &
     server_pid=$!
 
     sleep 1
 
     if [[ -f ${entry}/afterBoot.sh ]]; then
-      sh ${entry}/afterBoot.sh
+      eval "$(cat ${entry}/afterBoot.sh)"
     fi
 
     echo "Running $test_name integration tests..."
@@ -36,7 +41,6 @@ for entry in `find tests/integration -maxdepth 1`; do
     echo
     rm -f $test_name-server.out
     rm -f $entry/server.js
-
 
     if [ $integration_test_exit_code -ne 0 ]; then
       echo "Test(s) for $test_name failed, stopping"

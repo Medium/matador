@@ -1,6 +1,5 @@
 // Copyright The Obvious Corporation 2013
 
-
 var matador = require('../../src/matador')
 
 exports.testDefaultEnvIsDevelopment = function (test) {
@@ -8,7 +7,7 @@ exports.testDefaultEnvIsDevelopment = function (test) {
 
   var app = matador.createApp(__dirname, {}, {})
 
-  test.equals(app.getEnv(), 'development')
+  test.equals(matador.getEnv(), 'development')
   test.done()
 }
 
@@ -37,7 +36,7 @@ exports.testLoadsConfigurationByEnvironment = function (test) {
     scout = true
   })
 
-  test.equals(app.getEnv(), 'example')
+  test.equals(matador.getEnv(), 'example')
   test.ok(scout)
   test.done()
 }
@@ -53,7 +52,7 @@ exports.testDoesNotRunConfigurationFromOtherEnvs = function (test) {
     scout = true
   })
 
-  test.equals(app.getEnv(), 'example')
+  test.equals(matador.getEnv(), 'example')
   test.ok(scout === false)
   test.done()
 }
