@@ -34,6 +34,15 @@ var filenameSuffixes = {
 global.klass = require('klass')
 global.v = require('valentine')
 
+/**
+ * Get current environment (NODE_ENV environment variable),
+ * falling back to 'development' if it is not set.
+ * @return {string} The current environment
+ */
+module.exports.getEnv = function () {
+  return process.env.NODE_ENV || 'development'
+}
+
 module.exports.createApp = function (baseDir, configuration, options) {
   configuration = configuration || {}
   options = options || {}
@@ -238,7 +247,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
    */
   app.configure = function configureApp(env, fn) {
     if (typeof fn === 'undefined') env()
-    else if (env === this.getEnv()) fn()
+    else if (env === module.exports.getEnv()) fn()
   }
 
   /**
@@ -290,14 +299,6 @@ module.exports.createApp = function (baseDir, configuration, options) {
     return fileLoader.appDirs
   }
 
-  /**
-   * Get current environment (NODE_ENV environment variable),
-   * falling back to 'development' if it is not set.
-   * @return {string} The current environment
-   */
-  app.getEnv = function () {
-    return process.env.NODE_ENV || 'development'
-  }
 
   app.mount = function () {
     var router = require('./router')
