@@ -39,7 +39,7 @@ global.v = require('valentine')
  * falling back to 'development' if it is not set.
  * @return {string} The current environment
  */
-module.exports.getEnv = function () {
+var getEnv = module.exports.getEnv = function () {
   return process.env.NODE_ENV || 'development'
 }
 
@@ -247,7 +247,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
    */
   app.configure = function configureApp(env, fn) {
     if (typeof fn === 'undefined') env()
-    else if (env === module.exports.getEnv()) fn()
+    else if (env === getEnv()) fn()
   }
 
   /**
