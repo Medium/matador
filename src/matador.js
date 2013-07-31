@@ -482,9 +482,6 @@ module.exports.createApp = function (baseDir, configuration, options) {
     app.use(app.preRouter())
 
     app.use(connect.bodyParser())
-    app.use(app.router({}))
-    app.prefetch()
-    app.mount()
 
     app.configure('development', function () {
       app.use(app.developmentRequestLogger())
@@ -498,6 +495,10 @@ module.exports.createApp = function (baseDir, configuration, options) {
     app.configure('production', function () {
       app.use(connect.errorHandler())
     })
+
+    app.use(app.router({}))
+    app.prefetch()
+    app.mount()
   }
 
   /**
