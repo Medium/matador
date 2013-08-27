@@ -284,10 +284,17 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
   app.set('base_dir', appDir)
   app.set('public', appDir + '/public')
-  fileLoader.appDirs.forEach(mountPublicDir)
 
   app.controllers = {
     Base: require('./BaseController')(app)
+  }
+
+  /**
+   * Add routes for all the /public app directories. This will be called on
+   * boot(). If you don't call boot, it should be called manually.
+   */
+  app.addPublicStaticRoutes = function () {
+    fileLoader.appDirs.forEach(mountPublicDir)
   }
 
   app.addModulePath = function (dir) {
@@ -467,6 +474,8 @@ module.exports.createApp = function (baseDir, configuration, options) {
   }
 
   app.boot = function () {
+    app.addPublicStaticRoutes()
+
     // Register the matador cache helper.
     app.registerHelper('Cache', CacheHelper)
 
