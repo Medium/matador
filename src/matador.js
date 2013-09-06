@@ -485,7 +485,6 @@ module.exports.createApp = function (baseDir, configuration, options) {
 
     app.use(connect.query())
     app.use(connect.cookieParser())
-    app.use(connect.session({secret: 'boosh'}))
 
     app.use(app.requestDecorator())
     app.use(app.preRouter())
