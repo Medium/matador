@@ -9,12 +9,14 @@ exports.testAfterBootCallbackRuns = function (test) {
   var app = matador.createApp(__dirname, {}, {})
     , spy = false
 
-  app.boot(function () {
+  app.on('afterBoot', function () {
     app.use(function (req, res, next) {
       spy = true
       next()
     })
   })
+
+  app.boot()
 
   app.request()
   .get('/')

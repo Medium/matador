@@ -473,7 +473,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
     }
   }
 
-  app.boot = function (afterBootCallback) {
+  app.boot = function () {
     app.addPublicStaticRoutes()
 
     // Register the matador cache helper.
@@ -504,9 +504,7 @@ module.exports.createApp = function (baseDir, configuration, options) {
       app.use(connect.errorHandler())
     })
 
-    if (afterBootCallback) {
-      afterBootCallback()
-    }
+    app.emit('afterBoot')
 
     app.use(app.router({}))
     app.prefetch()
