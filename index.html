@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Matador : an MVC framework for Node" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Matador</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/Obvious/matador">View on GitHub</a>
+
+          <h1 id="project_title">Matador</h1>
+          <h2 id="project_tagline">an MVC framework for Node</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/Obvious/matador/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/Obvious/matador/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="matador" class="anchor" href="#matador"><span class="octicon octicon-link"></span></a>Matador</h1>
+
+<p>Sane defaults and a simple structure, scaling as your application grows.</p>
+
+<p>Matador is a clean, organized framework for <a href="http://nodejs.org">Node.js</a> architected to suit MVC enthusiasts. It gives you a well-defined development environment with flexible routing, easy controller mappings, and basic request filtering.
+It’s built on open source libraries such as <a href="https://github.com/Obvious/soynode">SoyNode</a> for view rendering, <a href="https://github.com/ded/klass">Klass</a> for its inheritance model, <a href="https://github.com/ded/valentine">Valentine</a>
+for functional development, and <a href="http://www.senchalabs.org/connect/">connect.js</a> to give a bundle of other Node server related helpers.</p>
+
+<h1>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h1>
+
+<h3>
+<a name="get-the-cli" class="anchor" href="#get-the-cli"><span class="octicon octicon-link"></span></a>Get the CLI</h3>
+
+<pre><code>$ npm install matador -g
+</code></pre>
+
+<h3>
+<a name="create-an-app" class="anchor" href="#create-an-app"><span class="octicon octicon-link"></span></a>Create an app</h3>
+
+<pre><code>$ matador init my-app
+$ cd my-app &amp;&amp; npm install matador
+</code></pre>
+
+<h3>
+<a name="start-your-app" class="anchor" href="#start-your-app"><span class="octicon octicon-link"></span></a>Start your app</h3>
+
+<pre><code>$ node server.js
+</code></pre>
+
+<h1>
+<a name="dancing-with-the-bulls" class="anchor" href="#dancing-with-the-bulls"><span class="octicon octicon-link"></span></a>Dancing with the Bulls</h1>
+
+<h3>
+<a name="build-on-your-app" class="anchor" href="#build-on-your-app"><span class="octicon octicon-link"></span></a>Build on your app</h3>
+
+<div class="highlight"><pre><span class="c1">// app/config/routes.js</span>
+<span class="s1">'/hello/:name'</span><span class="o">:</span> <span class="p">{</span> <span class="s1">'get'</span><span class="o">:</span> <span class="s1">'Home.hello'</span> <span class="p">}</span>
+
+<span class="c1">// app/controllers/HomeController.js</span>
+<span class="nx">hello</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">request</span><span class="p">,</span> <span class="nx">response</span><span class="p">,</span> <span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">response</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="s1">'hello '</span> <span class="o">+</span> <span class="nx">name</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+
+<h3>
+<a name="view-rendering" class="anchor" href="#view-rendering"><span class="octicon octicon-link"></span></a>View Rendering</h3>
+
+<p>Uses <a href="https://github.com/Obvious/soynode">SoyNode</a> to render Closure Templates.</p>
+
+<div class="highlight"><pre><span class="c1">// app/controllers/HomeController.js</span>
+<span class="k">this</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="nx">response</span><span class="p">,</span> <span class="s1">'index'</span><span class="p">,</span> <span class="p">{</span>
+  <span class="nx">title</span><span class="o">:</span> <span class="s1">'Hello Bull Fighters'</span>
+<span class="p">})</span>
+</pre></div>
+
+<pre><code>&lt;!-- app/views/layout.soy --&gt;
+
+{namespace views.layout}
+
+/**
+ * Renders the index page.
+ * @param title Title of the page.
+ */
+{template .layout autoescape="contextual"}
+  &lt;!DOCTYPE html&gt;
+  &lt;html&gt;
+    &lt;head&gt;
+      &lt;meta http-equiv='Content-type' content='text/html; charset=utf-8'&gt;
+      &lt;title&gt;{$title}&lt;/title&gt;
+      &lt;link rel='stylesheet' href='/css/main.css' type='text/css'&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+      {$ij.bodyHtml |noAutoescape}
+    &lt;/body&gt;
+  &lt;/html&gt;
+{/template}
+
+</code></pre>
+
+<div class="highlight"><pre>{namespace views.index}
+
+/**
+ * Renders a welcome message.
+ * @param title Title of the page
+ */
+{template .welcome}
+  <span class="nt">&lt;h1&gt;</span>Welcome to {$title}<span class="nt">&lt;/h1&gt;</span>
+  (rendered with Closure Templates)
+{/template}
+
+</pre></div>
+
+<h3>
+<a name="request-filtering" class="anchor" href="#request-filtering"><span class="octicon octicon-link"></span></a>Request Filtering</h3>
+
+<div class="highlight"><pre><span class="c1">// app/controllers/ApplicationController.js</span>
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">app</span><span class="p">,</span> <span class="nx">config</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">app</span><span class="p">.</span><span class="nx">controllers</span><span class="p">.</span><span class="nx">Base</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">addBeforeFilter</span><span class="p">(</span><span class="s1">'private'</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">requireAuth</span><span class="p">)</span>
+  <span class="p">})</span>
+  <span class="p">.</span><span class="nx">methods</span><span class="p">({</span>
+    <span class="nx">requireAuth</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">request</span><span class="p">.</span><span class="nx">cookies</span><span class="p">.</span><span class="nx">authed</span><span class="p">)</span> <span class="k">return</span> <span class="nx">callback</span><span class="p">(</span><span class="kc">null</span><span class="p">)</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">response</span><span class="p">.</span><span class="nx">redirect</span><span class="p">(</span><span class="s1">'/welcome'</span><span class="p">)</span>
+    <span class="p">}</span>
+  <span class="p">,</span> <span class="kr">private</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">end</span><span class="p">(</span><span class="s1">'This is private'</span><span class="p">)</span>
+    <span class="p">}</span>
+  <span class="p">,</span> <span class="nx">welcome</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">'welcome'</span><span class="p">)</span>
+    <span class="p">}</span>
+  <span class="p">})</span>
+<span class="p">}</span>
+</pre></div>
+
+<h3>
+<a name="routing" class="anchor" href="#routing"><span class="octicon octicon-link"></span></a>Routing</h3>
+
+<p>The <code>app/config/routes.js</code> file is where you specify an array of tuples indicating where incoming requests will map to a <code>controller</code> and the appropriate method. If no action is specified, it defaults to 'index' as illustrated below:</p>
+
+<div class="highlight"><pre><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">app</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="s1">'/'</span><span class="o">:</span> <span class="s1">'Home'</span> <span class="c1">// maps to ./HomeController.js =&gt; index</span>
+  <span class="p">,</span> <span class="s1">'/admin'</span><span class="o">:</span> <span class="s1">'Admin.show'</span> <span class="c1">// maps to ./admin/AdminController.js =&gt; show</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>You can also specify method names to routes:</p>
+
+<div class="highlight"><pre><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">app</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="s1">'/posts'</span><span class="o">:</span> <span class="p">{</span>
+      <span class="s1">'get'</span><span class="o">:</span> <span class="s1">'Posts.index'</span><span class="p">,</span> <span class="c1">// maps to PostsController.js =&gt; #index</span>
+      <span class="s1">'post'</span><span class="o">:</span> <span class="s1">'Posts.create'</span> <span class="c1">// maps to PostsController.js =&gt; #create</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>Matador has support for anonymous controllers or other endpoints. This is
+useful when mounting third-party apps, such as <a href="http://passportjs.org">Passport.js</a>:</p>
+
+<div class="highlight"><pre><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">app</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="s1">'/hello'</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+       <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="s1">'Hello'</span><span class="p">)</span>
+     <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<h3>
+<a name="how-can-i-organize-my-models" class="anchor" href="#how-can-i-organize-my-models"><span class="octicon octicon-link"></span></a>How can I organize my Models?</h3>
+
+<p>By default, Models are thin with just a Base and Application Model in place. You can give them some meat, for example, and embed <a href="http://mongoosejs.com">Mongo</a> Schemas. See the following as a brief illustration:</p>
+
+<div class="highlight"><pre><span class="c1">// app/models/ApplicationModel.js</span>
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">app</span><span class="p">,</span> <span class="nx">config</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">app</span><span class="p">.</span><span class="nx">getModel</span><span class="p">(</span><span class="s1">'Base'</span><span class="p">,</span> <span class="kc">true</span><span class="p">).</span><span class="nx">extend</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">mongo</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'mongodb'</span><span class="p">)</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">mongoose</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'mongoose'</span><span class="p">)</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">Schema</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">mongoose</span><span class="p">.</span><span class="nx">Schema</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">mongoose</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="s1">'mongodb://localhost/myapp'</span><span class="p">)</span>
+  <span class="p">})</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>Then create, for example, a UserModel.js that extended it...</p>
+
+<div class="highlight"><pre><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">app</span><span class="p">,</span> <span class="nx">config</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">app</span><span class="p">.</span><span class="nx">getModel</span><span class="p">(</span><span class="s1">'Application'</span><span class="p">,</span> <span class="kc">true</span><span class="p">).</span><span class="nx">extend</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">DBModel</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">mongoose</span><span class="p">.</span><span class="nx">model</span><span class="p">(</span><span class="s1">'User'</span><span class="p">,</span> <span class="k">new</span> <span class="k">this</span><span class="p">.</span><span class="nx">Schema</span><span class="p">({</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="p">{</span> <span class="nx">type</span><span class="o">:</span> <span class="nb">String</span><span class="p">,</span> <span class="nx">required</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">trim</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span>
+      <span class="p">,</span> <span class="nx">email</span><span class="o">:</span> <span class="p">{</span> <span class="nx">type</span><span class="o">:</span> <span class="nb">String</span><span class="p">,</span> <span class="nx">required</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">lowercase</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">trim</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span>
+    <span class="p">}))</span>
+  <span class="p">})</span>
+  <span class="p">.</span><span class="nx">methods</span><span class="p">({</span>
+    <span class="nx">create</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">email</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">user</span> <span class="o">=</span> <span class="k">new</span> <span class="k">this</span><span class="p">.</span><span class="nx">DBModel</span><span class="p">({</span>
+          <span class="nx">name</span><span class="o">:</span> <span class="nx">name</span>
+        <span class="p">,</span> <span class="nx">email</span><span class="o">:</span> <span class="nx">email</span>
+      <span class="p">})</span>
+      <span class="nx">user</span><span class="p">.</span><span class="nx">save</span><span class="p">(</span><span class="nx">callback</span><span class="p">)</span>
+    <span class="p">}</span>
+  <span class="p">,</span> <span class="nx">find</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">id</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">DBModel</span><span class="p">.</span><span class="nx">findById</span><span class="p">(</span><span class="nx">id</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span>
+    <span class="p">}</span>
+  <span class="p">})</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>This provides a proper abstraction between controller logic and how your models interact with a database then return data back to controllers.</p>
+
+<p>Take special note that models do not have access to requests or responses, as they rightfully shouldn't.</p>
+
+<h3>
+<a name="model--controller-inheritance" class="anchor" href="#model--controller-inheritance"><span class="octicon octicon-link"></span></a>Model &amp; Controller Inheritance</h3>
+
+<p>The inheritance model Matador uses is built with <a href="https://github.com/ded/klass">Klass</a>, and is exposed via a global <code>Class</code> variable (not all globals are bad). Class comes in two flavors where by constructors can be set via an <code>initialize</code> method, or a function reference, and by default (in the scaffold), Matador uses the function reference style so that you may benefit from the auto-initialization of super classes, and there is no need to call <code>this.supr()</code> in your constructors.</p>
+
+<p>It is also possible to use Node.js's own inheritance via the 'util' module.</p>
+
+<h3>
+<a name="valentine" class="anchor" href="#valentine"><span class="octicon octicon-link"></span></a>Valentine</h3>
+
+<p>The Valentine module is included as a simple tool giving you type checking, functional iterators, and some other nice utilities that often get used in applications of any size. It is exposed globally as <code>v</code>. It is used liberally in the Matador router, thus feel free to take advantage of its existence as well.</p>
+
+<h1>
+<a name="scaffolding" class="anchor" href="#scaffolding"><span class="octicon octicon-link"></span></a>Scaffolding</h1>
+
+<pre><code>$ matador controller [name]
+$ matador model [name]
+</code></pre>
+
+<h1>
+<a name="contributing--development" class="anchor" href="#contributing--development"><span class="octicon octicon-link"></span></a>Contributing &amp; Development</h1>
+
+<p>Questions, pull requests, bug reports are all welcome. Submit them here on Github.
+When submitting pull requests, please run through the linter to conform to the framework style</p>
+
+<pre><code>$ npm install -d
+$ npm run-script lint
+</code></pre>
+
+<h1>
+<a name="authors" class="anchor" href="#authors"><span class="octicon octicon-link"></span></a>Authors</h1>
+
+<p>Obviously, <a href="https://github.com/dustinsenos">Dustin Senos</a> &amp; <a href="https://github.com/ded">Dustin Diaz</a></p>
+
+<h1>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h1>
+
+<p>Copyright 2012 <a href="http://obvious.com">Obvious Corporation</a></p>
+
+<p>Licensed under the Apache License, Version 2.0: <a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Matador maintained by <a href="https://github.com/Obvious">Obvious</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
