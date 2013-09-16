@@ -495,8 +495,8 @@ module.exports.createApp = function (baseDir, configuration, options) {
       app.use(app.developmentRequestLogger())
       app.use(connect.errorHandler({ dumpExceptions: true, showStack: true }))
       app.set('soy options', {
-        eraseTemporaryFiles: true
-  , allowDynamicRecompile: true
+        eraseTemporaryFiles: true,
+        allowDynamicRecompile: true
       })
     })
 

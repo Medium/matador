@@ -21,7 +21,7 @@ TemplateEngine.prototype.precompileTemplates = function (searchPaths, options, c
   // Precompile all Closure templates.
   searchPaths.forEach(function (dir) {
     dir = dir + '/views'
-
+    console.log('Compiling Templates in', dir)
     if (!isDirectory(dir)) return
 
     soynode.compileTemplates(dir, callback || function (err) {
