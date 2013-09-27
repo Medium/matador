@@ -52,7 +52,11 @@ PathMatcher.prototype.add = function (path, object) {
         node['@'] = {parent: node}
       }
       if (!node['@'][identifier]) {
-        node['@'][identifier] = {re: new RegExp('(' + regExp + ')'), parent: node['@']}
+        node['@'][identifier] = {
+          re: new RegExp(regExp),
+          parent: node['@'],
+          _reLiteral: regExp
+        }
       }
       matches.push(identifier)
       node = node['@'][identifier]
@@ -95,69 +99,85 @@ PathMatcher.prototype.add = function (path, object) {
  *     corresponding to the matched path.
  */
 PathMatcher.prototype.getMatch = function (path) {
-  var parts = this.getPathParts_(path)
-  var node = this.tree_
-  var pendingWildcard = null, pendingWildcardMatch = [], matches = []
-  for (var i = 0; i < parts.length; i++) {
-    var part = parts[i]
-    var gotMatch = false
+  return this._getMatchRecursive(this.getPathParts_(path), 0, this.tree_, [], null)
+}
 
-    if (node['*']) {
-      pendingWildcard = node['*']
-      pendingWildcardMatch = []
-    }
-    if (node[part]) {
-      node = node[part]
-      gotMatch = true
-    }
-    if (!gotMatch && node['@']) {
-      for (var n in node['@']) {
-        if (n == 'parent') continue
-        var reNode = node['@'][n]
-        if (reNode.re.test(part)) {
-          node = reNode
-          matches.push(part)
-          gotMatch = true
-          break
-        }
+
+/**
+ * @param {Array.<string>} parts The parts to match.
+ * @param {number} index The current part.
+ * @param {Object} node The current node.
+ * @param {Array} matches
+ * @param {Array} wildcardMatch
+ * @return {?{object: Object, matches: Object.<string>}} An object
+ *     corresponding to the matched path.
+ * @private
+ */
+PathMatcher.prototype._getMatchRecursive =
+    function (parts, index, node, matches, wildcardMatch) {
+  // The base case: we can't consume any more parts.
+  if (index >= parts.length) {
+    if (node && node.object) {
+      var matchObj = {}
+      if (wildcardMatch) {
+        matchObj['*'] = wildcardMatch
       }
+      for (var j = 0; j < node.matches.length; j++) {
+        matchObj[node.matches[j]] = matches[j]
+      }
+      return {
+        object: node.object,
+        matches: matchObj
+      }
+    } else {
+      return null
     }
-    if (!gotMatch && node[':']) {
-      node = node[':']
-      gotMatch = true
+  }
+
+  // Match the next part.
+  var part = parts[index]
+  var result = null
+
+  // Direct strings
+  if (node[part]) {
+    result = this._getMatchRecursive(parts, index + 1, node[part], matches, null)
+    if (result) return result
+  }
+
+  // Match regular expressions next.
+  for (var n in node['@']) {
+    if (n == 'parent') continue
+    var reNode = node['@'][n]
+    var tried = {}
+    if (!(reNode._reLiteral in tried)) {
+      tried[reNode._reLiteral] = reNode.re.test(part)
+    }
+
+    if (tried[reNode._reLiteral]) {
       matches.push(part)
-    }
-    if (!gotMatch) {
-      node = node['*'] || pendingWildcard || null
-      pendingWildcardMatch = pendingWildcardMatch.concat(parts.slice(i))
-      break
-    }
-    if (pendingWildcard) {
-      pendingWildcardMatch.push(part)
+      result = this._getMatchRecursive(parts, index + 1, reNode, matches, null)
+      if (result) return result
+
+      matches.pop()
     }
   }
 
-  // If we stopped at a node but it doesn't have an object associated with it
-  // then fallback to an open wildcard node.
-  if (!node || !node.object && pendingWildcard) {
-    node = pendingWildcard
+  // Match named captures next.
+  // All other captures are non-short-circuiting.
+  if (node[':']) {
+    matches.push(part)
+    result = this._getMatchRecursive(parts, index + 1, node[':'], matches, null)
+    if (result) return result
+
+    matches.pop()
   }
 
-  if (node && node.object) {
-    var matchObj = {}
-    if (pendingWildcard == node) {
-      matchObj['*'] = pendingWildcardMatch
-    }
-    for (var j = 0; j < node.matches.length; j++) {
-      matchObj[node.matches[j]] = matches[j]
-    }
-    return {
-      object: node.object,
-      matches: matchObj
-    }
-  } else {
-    return null
+  // Lastly, try to match the wildcard.
+  if (node['*']) {
+    return this._getMatchRecursive(parts, parts.length, node['*'], matches, parts.slice(index))
   }
+
+  return null
 }
 
 
