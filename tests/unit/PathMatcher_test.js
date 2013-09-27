@@ -30,12 +30,12 @@ exports.testPathMatcher = function (test) {
   assertMatch(test, pm, '/dir/tools/screwdriver/', 'dir-screw', {'tool': 'screwdriver'});
   assertMatch(test, pm, '/dir/tools/screwdriver/xxx/', 'dir-tools-wc', {'*': ['screwdriver', 'xxx']});
 
-  // Wildcards only match if there's anything to match the '*' so this
-  // doesn't match anything.
-  test.ok(pm.getMatch('/dir/') == null);
+  assertMatch(test, pm, '/dir/abc', 'dir', {'*': ['abc']});
 
   // No wildcards.
-  test.ok(pm.getMatch('/about/what/') == null);
+  test.equals(null, pm.getMatch('/about/what/'));
+
+  assertMatch(test, pm, '/about/profile/', 'user-profile', {user: 'about'});
 
   test.equals(null, pm.getMatch('/foo/bar/'));
 
@@ -116,12 +116,12 @@ exports.testNestedWildcards = function (test) {
   test.done();
 };
 
-/*
- * This test doesn't pass because pathmatcher does no back tracking.
- *
+/**
+ * Ensure that the matcher will backtrack if the direct strings don't match.
+ */
 exports.testRegExpClash = function(test) {
   var pm = new PathMatcher();
-  pm.add('/one/a/', 'a');
+  pm.add('/one/a', 'a');
   pm.add('/@re:(one|two)/b', 'b');
 
   assertMatch(test, pm, '/one/a', 'a', {});
@@ -129,8 +129,7 @@ exports.testRegExpClash = function(test) {
   assertMatch(test, pm, '/two/b', 'b', {'re': 'two'});
 
   test.done();
-};*/
-
+};
 
 function assertMatch(test, pm, path, expected, matches) {
   var node = pm.getMatch(path);
