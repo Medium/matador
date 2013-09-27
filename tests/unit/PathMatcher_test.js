@@ -117,7 +117,7 @@ exports.testNestedWildcards = function (test) {
 };
 
 /**
- * This test doesn't pass because pathmatcher does no back tracking.
+ * Ensure that the matcher will backtrack if the direct strings don't match.
  */
 exports.testRegExpClash = function(test) {
   var pm = new PathMatcher();
