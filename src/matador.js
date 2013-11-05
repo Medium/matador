@@ -1,6 +1,6 @@
 var fs = require('fs')
   , CookieService = require('./cookie')
-  , connect = module.exports = require('connect')
+  , connect = require('connect')
   , http = require('http')
   , path = require('path')
   , router = require('./router')
@@ -12,10 +12,6 @@ var fs = require('fs')
   , PathMatcher = require('./pathMatcher')
   , RequestMessage = require('./RequestMessage')
   , isDirectory = fsutils.isDirectory
-
-// DEPRECATED: Some old apps rely on argv being parsed by
-// Matador
-module.exports.argv = require('optimist').argv
 
 var paths = {
   SERVICES: 'services'
@@ -39,11 +35,11 @@ global.v = require('valentine')
  * falling back to 'development' if it is not set.
  * @return {string} The current environment
  */
-var getEnv = module.exports.getEnv = function () {
+var getEnv = function () {
   return process.env.NODE_ENV || 'development'
 }
 
-module.exports.createApp = function (baseDir, configuration, options) {
+var createApp = function (baseDir, configuration, options) {
   configuration = configuration || {}
   options = options || {}
 
@@ -524,19 +520,42 @@ module.exports.createApp = function (baseDir, configuration, options) {
   return app
 }
 
-// Export Matador's path matcher for potential client-side use
+/**
+ * Our exports extend connect in-place. This is total fubar
+ */
+module.exports = connect
+
+/** Get the development vs. prod environment. */
+module.exports.getEnv = getEnv
+
+/** Create a new app. */
+module.exports.createApp = createApp
+
+/** Export Matador's path matcher for potential client-side use */
 module.exports.PathMatcher = PathMatcher
 
 /**
- * DEPRECATED: Old apps may still load CacheHelper manually.
- *
- * A selection of off the shelf-helper classes that can be installed by an
- * application using `app.registerHelper(name, helper)`. e.g:
- *
- * <pre>
- *   app.registerHelper('Cache', matador.helpers.CacheHelper)
- * </pre>
+ * @return Matador's instance of soynode.
+ * Due to the way soynode uses global state, it may be important
+ * for Matador and your app to use the same version.
  */
+module.exports.getSoynode = function () {
+  return require('soynode')
+}
+
+/** @deprecated Some old apps rely on argv being parsed by Matador */
+module.exports.argv = require('optimist').argv
+
 module.exports.helpers = {
+  /**
+   * DEPRECATED: Old apps may still load CacheHelper manually.
+   *
+   * A selection of off the shelf-helper classes that can be installed by an
+   * application using `app.registerHelper(name, helper)`. e.g:
+   *
+   * <pre>
+   *   app.registerHelper('Cache', matador.helpers.CacheHelper)
+   * </pre>
+   */
   get CacheHelper() { return require('./helpers/CacheHelper') }
 }
