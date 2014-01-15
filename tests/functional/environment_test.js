@@ -5,7 +5,7 @@ var matador = require('../../src/matador')
 exports.testDefaultEnvIsDevelopment = function (test) {
   delete process.env['NODE_ENV']
 
-  var app = matador.createApp(__dirname, {}, {})
+  var app = matador.createApp(__dirname, {})
 
   test.equals(matador.getEnv(), 'development')
   test.done()
@@ -13,7 +13,7 @@ exports.testDefaultEnvIsDevelopment = function (test) {
 
 exports.testLoadsDevelopmentByDefault = function (test) {
   var scout = false
-  var app = matador.createApp(__dirname, {}, {})
+  var app = matador.createApp(__dirname, {})
 
   delete process.env['NODE_ENV']
 
@@ -30,7 +30,7 @@ exports.testLoadsConfigurationByEnvironment = function (test) {
 
   process.env['NODE_ENV'] = 'example'
 
-  var app = matador.createApp(__dirname, {}, {})
+  var app = matador.createApp(__dirname, {})
 
   app.configure('example', function () {
     scout = true
@@ -46,7 +46,7 @@ exports.testDoesNotRunConfigurationFromOtherEnvs = function (test) {
 
   process.env['NODE_ENV'] = 'example'
 
-  var app = matador.createApp(__dirname, {}, {})
+  var app = matador.createApp(__dirname, {})
 
   app.configure('production', function () {
     scout = true

@@ -5,7 +5,7 @@ require('../support/functional')
 var matador = require('../../src/matador')
 
 exports.testModelsAreLoaded = function (test) {
-  var app = matador.createApp(__dirname, {}, {})
+  var app = matador.createApp(__dirname, {})
     , model = app.getModel('Test', true)
 
   test.ok(model.call && model.apply)

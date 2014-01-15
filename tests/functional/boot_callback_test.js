@@ -6,7 +6,7 @@ var matador = require('../../src/matador')
   , RequestMessage = require('../../src/RequestMessage')
 
 exports.testAfterBootCallbackRuns = function (test) {
-  var app = matador.createApp(__dirname, {}, {})
+  var app = matador.createApp(__dirname, {})
     , spy = false
 
   app.on('afterBoot', function () {
