@@ -3,7 +3,7 @@
 var matador = require('../../src/matador')
 
 exports.testFiresCreateHelper = function (test) {
-  var app = matador.createApp(__dirname, {}, {})
+  var app = matador.createApp(__dirname, {})
 
   app.on('createHelper', function (name) {
     test.equals(name, 'Dummy')

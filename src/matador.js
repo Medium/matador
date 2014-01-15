@@ -39,9 +39,39 @@ var getEnv = function () {
   return process.env.NODE_ENV || 'development'
 }
 
-var createApp = function (baseDir, configuration, options) {
+/**
+ * There are two ways to organize your config object.
+ *
+ * If config.flatConfig is falsey, then the config should look like this:
+ * var config = {
+ *   base: {baseUrl: '/', name: 'My Project'},
+ *   services: {
+ *     ImageService: {baseUrl: '//cdn.project.com/'}
+ *   },
+ *   controllers: {
+ *     AuthController: {authType: 'basic-auth'}
+ *   }
+ * }
+ *
+ * When we instantiate AuthController, we will pass it a config like this:
+ * {baseUrl: '/', name: 'My Project', authType: 'basic-auth'}
+ *
+ * If config.flatConfig is truthy, then the config is just passed to each
+ * service without modification. In a flat config, the 'base' key is forbidden.
+ */
+function validateConfig(config) {
+  if (config.flatConfig) {
+    if ('base' in config) throw new Error('Malformed config: "base" not allowed in a flag config')
+  }}
+
+/**
+ * Create a new app.
+ * @param {string} baseDir The base directory of the server.
+ * @param {Object} configuration A config object, to be passed to each service.
+ */
+var createApp = function (baseDir, configuration) {
   configuration = configuration || {}
-  options = options || {}
+  validateConfig(configuration)
 
   var appDir = path.join(baseDir, '/app')
     , objCache = {}
@@ -56,22 +86,14 @@ var createApp = function (baseDir, configuration, options) {
 
   /**
    * Gets the configuration by type (e.g. Controller, Service, Helper) and name (e.g. ImageService,
-   * AuthController, SecurityHelper).  If present, values are taken from the 'base' configuration
-   * and then taken from the specific config, thus a specific config can override a base value.
+   * AuthController, SecurityHelper).
    *
-   * A config might look like this:
-   *
-   * var config = {
-   *   base: {baseUrl: '/', name: 'My Project'},
-   *   services: {
-   *     ImageService: {baseUrl: '//cdn.project.com/'}
-   *   },
-   *   controllers: {
-   *     AuthController: {authType: 'basic-auth'}
-   *   }
-   * }
+   * @see validateConfig for the config format.
    */
   app.getConfig = function (type, name) {
+    // If the configuration is flat, don't build use keys.
+    if (configuration.flatConfig) return configuration
+
     var config = {}
     // Copy values from the base configuration.
     if (configuration.base) {
@@ -528,7 +550,11 @@ module.exports = connect
 /** Get the development vs. prod environment. */
 module.exports.getEnv = getEnv
 
-/** Create a new app. */
+/**
+ * Create a new app.
+ * @param {string} baseDir The base directory of the server.
+ * @param {Object} config A config object, to be passed to each service.
+ */
 module.exports.createApp = createApp
 
 /** Export Matador's path matcher for potential client-side use */

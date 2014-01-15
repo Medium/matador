@@ -6,7 +6,7 @@ var matador = require('../../src/matador')
   , RequestMessage = require('../../src/RequestMessage')
 
 exports.testLogsRequest = function (test) {
-  var app = matador.createApp(__dirname, {}, {})
+  var app = matador.createApp(__dirname, {})
     , requestMessage = RequestMessage.buildDefaultMessage()
     , messages = []
 
