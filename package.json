@@ -1,7 +1,7 @@
 {
   "name": "matador",
   "description": "an MVC framework for Node",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "homepage": "https://github.com/Obvious/matador",
   "main": "src/matador.js",
   "authors": [
@@ -26,7 +26,7 @@
     "klass": "*",
     "colors": "*",
     "optimist": "*",
-    "soynode": "0.3.2",
+    "soynode": "0.3.3",
     "nodeunit": "~0.8.0",
     "useragent": "~2.0.6"
   },
