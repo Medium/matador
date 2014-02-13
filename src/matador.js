@@ -569,9 +569,6 @@ module.exports.getSoynode = function () {
   return require('soynode')
 }
 
-/** @deprecated Some old apps rely on argv being parsed by Matador */
-module.exports.argv = require('optimist').argv
-
 module.exports.helpers = {
   /**
    * DEPRECATED: Old apps may still load CacheHelper manually.

@@ -1,7 +1,7 @@
 {
   "name": "matador",
   "description": "an MVC framework for Node",
-  "version": "1.2.5",
+  "version": "1.3.0",
   "homepage": "https://github.com/Obvious/matador",
   "main": "src/matador.js",
   "authors": [
@@ -22,17 +22,15 @@
   },
   "dependencies": {
     "connect": "2.3.3",
-    "valentine": "*",
-    "klass": "*",
-    "colors": "*",
-    "optimist": "*",
+    "valentine": "1.8.0",
+    "klass": "1.4.0",
     "soynode": "0.3.3",
-    "nodeunit": "~0.8.0",
     "useragent": "~2.0.6"
   },
   "devDependencies": {
     "jshint": "2.0.1",
-    "falkor": "~1.2.9"
+    "falkor": "~1.2.9",
+    "nodeunit": "~0.8.0"
   },
   "scripts": {
     "test": "node_modules/nodeunit/bin/nodeunit tests/functional/ tests/unit/ && ./runIntegrationTests.sh",
