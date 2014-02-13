@@ -81,7 +81,7 @@ var createApp = function (baseDir, configuration) {
     , classLoader = new ClassLoader(fileLoader)
     , mountPublicDir = function (dir) {
         var directory = dir + '/public'
-        fileLoader.fileExists(directory) && app.use(connect.static(directory))
+        fileLoader.fileExists(directory) && app.use(connect.static(directory, configuration.publicStaticOptions))
       }
 
   /**
