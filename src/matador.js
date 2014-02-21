@@ -139,7 +139,7 @@ var createApp = function (baseDir, configuration) {
 
       // expire a given cookie
       res.clearCookie = function clearCookie(key, options) {
-        options.expires = 0
+        options.maxAge = -1000
         cookieService.set(key, '', options)
       }
 
