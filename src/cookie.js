@@ -20,12 +20,16 @@ module.exports = CookieService
 /**
  * @param {Object} req the http request
  * @param {Object} res the http response
+ * @param {boolean} forceSecureCookies if true force all cookies to be secure.
+ *     This is intended to be used to secure an http server running behind an
+ *     https proxy layer.
  * @constructor
  */
-function CookieService(req, res) {
+function CookieService(req, res, forceSecureCookies) {
   this.req = req
   this.res = res
   this.parsedCookies_ = null
+  this.forceSecureCookies = forceSecureCookies
 }
 
 
@@ -49,10 +53,19 @@ CookieService.prototype.get = function (name, opt_default) {
  * @param {Object=} options Optional options object containing some of the
  *    following: expires, path, domain, secure, httpOnly.
  */
-CookieService.prototype.set = function (name, value, options) {
-  if (options && options.secure && !this.res.socket.encrypted) {
-    throw new Error('Can not to set secure cookie on unencrypted socket.')
+CookieService.prototype.set = function (name, value, opt_options) {
+  var options = {}
+
+  if (opt_options) {
+    for (var key in opt_options) {
+        options[key] = opt_options[key];
+    }
   }
+
+  if (this.forceSecureCookies) {
+    options.secure = true
+  }
+
   var cookies = this.res.getHeader('Set-Cookie') || []
   if (typeof cookies === 'string') {
     cookies = [cookies]
@@ -90,7 +103,7 @@ CookieService.prototype.parseCookies_ = function () {
 function Cookie(name, value, options) {
   this.name = name
   this.value = value
-  this.options = options || {}
+  this.options = options
 }
 
 
