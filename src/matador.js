@@ -134,7 +134,7 @@ var createApp = function (baseDir, configuration) {
       res.header = res.setHeader
 
       // cookie service which allows for setting and retrieval of cookies
-      var cookieService = new CookieService(req, res, app.get('force_secure_cookies'))
+      var cookieService = new CookieService(req, res, app.get('force_secure_cookies', false))
       res.cookie = cookieService.set.bind(cookieService)
 
       // expire a given cookie
