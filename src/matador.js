@@ -1,71 +1,39 @@
 var fs = require('fs')
-  , CookieService = require('./cookie')
-  , connect = require('connect')
-  , http = require('http')
-  , path = require('path')
-  , router = require('./router')
-  , TemplateEngine = require('./TemplateEngine')
-  , fsutils = require('./fsutils')
-  , CacheHelper = require('./helpers/CacheHelper')
-  , FileLoader = require('./FileLoader')
-  , ClassLoader = require('./ClassLoader')
-  , PathMatcher = require('./pathMatcher')
-  , RequestMessage = require('./RequestMessage')
-  , isDirectory = fsutils.isDirectory
+var connect = require('connect')
+var http = require('http')
+var path = require('path')
+
+var CookieService = require('./cookie')
+var router = require('./router')
+var TemplateEngine = require('./TemplateEngine')
+var fsutils = require('./fsutils')
+var CacheHelper = require('./helpers/CacheHelper')
+var FileLoader = require('./FileLoader')
+var ClassLoader = require('./ClassLoader')
+var PathMatcher = require('./pathMatcher')
+var RequestMessage = require('./RequestMessage')
 
 var paths = {
-  SERVICES: 'services'
-, HELPERS: 'helpers'
-, MODELS: 'models'
-, CONTROLLERS: 'controllers'
+  SERVICES: 'services',
+  HELPERS: 'helpers',
+  MODELS: 'models',
+  CONTROLLERS: 'controllers'
 }
 
 var filenameSuffixes = {
-  SERVICES: 'Service'
-, HELPERS: 'Helper'
-, MODELS: 'Model'
-, CONTROLLERS: 'Controller'
+  SERVICES: 'Service',
+  HELPERS: 'Helper',
+  MODELS: 'Model',
+  CONTROLLERS: 'Controller'
 }
 
+// TODO(dan): Remove
 global.klass = require('klass')
 global.v = require('valentine')
 
-/**
- * Get current environment (NODE_ENV environment variable),
- * falling back to 'development' if it is not set.
- * @return {string} The current environment
- */
-var getEnv = function () {
-  return process.env.NODE_ENV || 'development'
-}
 
 /**
- * There are two ways to organize your config object.
- *
- * If config.flatConfig is falsey, then the config should look like this:
- * var config = {
- *   base: {baseUrl: '/', name: 'My Project'},
- *   services: {
- *     ImageService: {baseUrl: '//cdn.project.com/'}
- *   },
- *   controllers: {
- *     AuthController: {authType: 'basic-auth'}
- *   }
- * }
- *
- * When we instantiate AuthController, we will pass it a config like this:
- * {baseUrl: '/', name: 'My Project', authType: 'basic-auth'}
- *
- * If config.flatConfig is truthy, then the config is just passed to each
- * service without modification. In a flat config, the 'base' key is forbidden.
- */
-function validateConfig(config) {
-  if (config.flatConfig) {
-    if ('base' in config) throw new Error('Malformed config: "base" not allowed in a flag config')
-  }}
-
-/**
- * Create a new app.
+ * Creates a new connect app modified with matador functionality.
  * @param {string} baseDir The base directory of the server.
  * @param {Object} configuration A config object, to be passed to each service.
  */
@@ -73,16 +41,19 @@ var createApp = function (baseDir, configuration) {
   configuration = configuration || {}
   validateConfig(configuration)
 
+  // A matador app is an instance of connect with bolted on behavior.
+  var app = connect()
+
   var appDir = path.join(baseDir, '/app')
-    , objCache = {}
-    , customHelpers = {}
-    , app = connect()
-    , fileLoader = new FileLoader(app, appDir, paths)
-    , classLoader = new ClassLoader(fileLoader)
-    , mountPublicDir = function (dir) {
-        var directory = dir + '/public'
-        fileLoader.fileExists(directory) && app.use(connect.static(directory, configuration.publicStaticOptions))
-      }
+  var objCache = {}
+  var customHelpers = {}
+  var fileLoader = new FileLoader(app, appDir, paths)
+  var classLoader = new ClassLoader(fileLoader)
+
+  app.templateEngine = new TemplateEngine()
+
+  // random arg map for use with app.set()
+  app._vars = {}
 
   /**
    * Gets the configuration by type (e.g. Controller, Service, Helper) and name (e.g. ImageService,
@@ -112,158 +83,15 @@ var createApp = function (baseDir, configuration) {
   }
 
   /**
-   * Return middleware which will set up a bunch of methods on the request object for convenience
-   */
-  app.requestDecorator = function () {
-    /**
-     * Shim function to emulate express functionality
-     */
-    return function requestDecorator(req, res, next) {
-      // this is stupid
-      req.res = res
-      req.params = {}
-      res.req = req
-      req.path = req.url
-
-      // emulate the param function in express by returning a path arg
-      req.param = function getRequestParam(key) {
-        return req.params[key]
-      }
-
-      // map res.header to res.setHeader for convenience
-      res.header = res.setHeader
-
-      // cookie service which allows for setting and retrieval of cookies
-      var cookieService = new CookieService(req, res, app.get('force_secure_cookies', false))
-      res.cookie = cookieService.set.bind(cookieService)
-
-      // expire a given cookie
-      res.clearCookie = function clearCookie(key, options) {
-        options.maxAge = -1000
-        cookieService.set(key, '', options)
-      }
-
-      // redirect the current request to a new url
-      res.redirect = function redirectRequest(url) {
-        res.writeHead(302, {
-          'Location': url
-        })
-        res.end()
-      }
-
-      // send output to the request object and close the request
-      res.send = function sendResponse(data, headers, status) {
-        var bytesWritten
-
-        if (headers) {
-          for (var key in headers) res.setHeader(key, headers[key])
-        }
-
-        // optional status code
-        if (status) res.statusCode = status
-
-        // if no content type was set, assume html
-        if (!res.getHeader('content-type')) res.setHeader('content-type', 'text/html; charset=utf-8')
-        if (typeof data === 'string') data = new Buffer(data)
-        if (data instanceof Buffer) bytesWritten = data.length
-        if (!res.getHeader('content-length') && typeof bytesWritten !== 'undefined') res.setHeader('content-length', bytesWritten)
-
-        if (req.method !== 'HEAD') res.write(data)
-
-        // done
-        res.end()
-        return bytesWritten
-      }
-
-      next()
-    }
-  }
-
-  app.templateEngine = new TemplateEngine()
-
-  /**
-   * Create middleware which will look at where a request is supposed to go and attach
-   * relevant target info to the request
-   *
-   * @returns {Function} middleware
-   */
-  app.preRouter = function preRouter() {
-    return function preRouter(req, res, next) {
-      var matcher = app._pathMatchers[req.method === 'HEAD' ? 'GET' : req.method]
-      // check for any handler for the http method first
-      if (!matcher) return next()
-
-      // Strip querystring and fragment.  Fragment should never be seen but we've seen it sent by
-      // scrapers and other tools (e.g. Kindle).
-      var url = req.url.replace(/[?#].*$/, '')
-
-      // try and match
-      var handler = matcher.getMatch(url)
-      if (!handler) return next()
-
-      // successful match, attach it to the req obj
-      req.target = handler.object
-      req.params = {}
-      if (handler.matches) {
-        for (var key in handler.matches) {
-          if (key == '*' && Array.isArray(handler.matches['*'])) {
-            // The wildcard param passes an array of path parts.
-            req.params['*'] = handler.matches['*'].map(decodeURI)
-          } else {
-            req.params[key] = decodeURI(handler.matches[key])
-          }
-        }
-      }
-      return next()
-    }
-  }
-
-  /**
-   * Create the actual router to route the request to a controller action
-   *
-   * @param {{defaultMiddleware:{Object|Array.<Object>}}} configuration configuration for
-   *     the router. defaultMiddleware will define middleware which will run for any request
-   *     as long as the middleware hasn't been defined at the controller or method level
-   */
-  app.router = function router(config) {
-    config = config || {}
-
-    return function router(req, res, next) {
-      var target = req.target
-      if (!req.target) return next(new Error('Handler not found for ' + req.method + ' ' + req.url))
-
-      var middleware = target.middleware || config.defaultMiddleware
-      if (!middleware) return target.method.call(target.controller, req, res, next)
-
-      // call this function when done with a piece of route middleware
-      var doNext = function (idx, err) {
-        if (err) return next(err)
-        if (idx >= middleware.length) {
-          if (target.controller) {
-            return target.method.call(target.controller, req, res, next)
-          } else {
-            return next()
-          }
-        }
-        middleware[idx].call(null, req, res, doNext.bind(null, idx + 1))
-      }
-
-      doNext(0)
-    }
-  }
-
-  // random arg map for use with app.set()
-  app._vars = {}
-
-  /**
    * Allow configuration of this application via the current environment. If env is passed in
    * and the current environment matches env, then the function is ran.
    * Any functions passed in without an env will be ran regardless.
    *
    * @param {string} env the current environment
    * @param {Function} fn the function to call if the configuration block should be used
+   * @deprecated In practice this method is confusing.
    */
-  app.configure = function configureApp(env, fn) {
+  app.configure = function (env, fn) {
     if (typeof fn === 'undefined') env()
     else if (env === getEnv()) fn()
   }
@@ -300,64 +128,17 @@ var createApp = function (baseDir, configuration) {
     }
   }
 
-  app.set('base_dir', appDir)
-  app.set('public', appDir + '/public')
-
-  app.controllers = {
-    Base: require('./BaseController')(app)
-  }
-
   /**
-   * Add routes for all the /public app directories. This will be called on
-   * boot(). If you don't call boot, it should be called manually.
+   * Add routes for all the /public app directories. If you don't call
+   * `useCommonMiddleware()`, it should be called manually.
    */
   app.addPublicStaticRoutes = function () {
-    fileLoader.appDirs.forEach(mountPublicDir)
-  }
-
-  app.addModulePath = function (dir) {
-    fileLoader.appDirs.push(dir)
-    mountPublicDir(dir)
-  }
-
-  app.getModulePaths = function () {
-    return fileLoader.appDirs
-  }
-
-
-  app.mount = function () {
-    var router = require('./router')
-      , self = this
-
     fileLoader.appDirs.forEach(function (dir) {
-      var filename = dir + '/config/routes.js'
-      if (!fileLoader.fileExists(filename)) return
-      try {
-        router.init(self, require(filename)(self))
-      } catch (e) {
-        console.log('Error initializing routes', e.stack)
-        throw e
+      var directory = dir + '/public'
+      if (fileLoader.fileExists(directory)) {
+        app.use(connect.static(directory, configuration.publicStaticOptions))
       }
     })
-  }
-
-  app.prefetch = function (options, callback) {
-    var self = this
-
-    v(paths).each(function (key, type) {
-      fileLoader.appDirs.forEach(function (dir) {
-        var d = dir + '/' + type
-        if (!isDirectory(d)) return
-        v.each(fs.readdirSync(d), function (file) {
-          if (isDirectory(d + '/' + file)) return
-          if (file.charAt(0) == '.') return
-          if (file.substr(file.length - 3) === '.js') file = file.substr(0, file.length - 3)
-          fileLoader.loadFile(type, file, dir)
-        })
-      })
-    })
-
-    self.templateEngine.precompileTemplates(fileLoader.appDirs, app.set('soy options') || {}, callback)
   }
 
   /**
@@ -367,6 +148,7 @@ var createApp = function (baseDir, configuration) {
    * @param {Boolean} definitionOnly whether to just grab the class or to grab an actual
    *     instance
    * @return {Object} a service class or instance
+   * @deprecated: Lets remove this.
    */
   app.getService = function (name, definitionOnly) {
     return classLoader.loadClass(paths.SERVICES, name + filenameSuffixes.SERVICES, name, definitionOnly)
@@ -396,6 +178,7 @@ var createApp = function (baseDir, configuration) {
    * @param {Boolean} definitionOnly whether to just grab the class or to grab an actual
    *     instance
    * @return {Object} a model class or instance
+   * @deprecated: Lets remove this.
    */
   app.getModel = function (name, definitionOnly) {
     return classLoader.loadClass(paths.MODELS, name + filenameSuffixes.MODELS, name, definitionOnly)
@@ -454,9 +237,93 @@ var createApp = function (baseDir, configuration) {
    *
    * @param {string} name the name of the model
    * @param {Object} instance the model instance
+   * @deprecated: Lets remove this.
    */
   app.setModel = function (name, instance) {
     objCache[paths.MODELS][name + filenameSuffixes.MODELS] = instance
+  }
+
+  /**
+   * Adds connect middleware that are required for typical operation.  Most
+   * applications should call this before `start()`.
+   */
+  app.useCommonMiddleware = function () {
+    app.addPublicStaticRoutes()
+
+    // Register the matador cache helper and middleware for auditing cache headers.
+    app.registerHelper('Cache', CacheHelper)
+    app.use(app.getHelper('Cache').auditHeadersMiddleware)
+
+    app.use(requestDecorator.bind(null, app))
+    app.use(connect.query())
+
+    // stupid body parser is stupid (doesn't check for http method in current
+    // connect version, manually create body parser from the 3 child methods)
+    var jsonParser = connect.json({limit: '10mb'})
+    app.use(function (req, res, next) {
+      req.body = {}
+      if (req.method == 'GET' || req.method == 'HEAD') return next()
+      return jsonParser(req, res, next)
+    })
+    app.use(connect.urlencoded({limit: '10mb'}))
+    app.use(connect.multipart())
+
+    app.use(preRouter.bind(null, app))
+
+    app.use(connect.query())
+    app.use(connect.cookieParser())
+
+    app.emit('afterBoot') // Deprecated.
+  }
+
+  /**
+   * Performs final steps before a server will run, no standard middleware can
+   * be added after this.
+   * @param {Function} callback for when templates have loaded.
+   */
+  app.start = function (callback) {
+    // Add the connect middleware that will actually execute the router.
+    app.use(callRouter)
+
+    // Set up the router to listen on for routes.
+    fileLoader.appDirs.forEach(function (dir) {
+      var filename = dir + '/config/routes.js'
+      if (!fileLoader.fileExists(filename)) return
+      try {
+        router.init(app, require(filename)(app))
+      } catch (e) {
+        console.error('Error initializing routes', e.stack)
+        throw e
+      }
+    })
+
+    // Load and precompile all the templates.
+    for (var key in paths) {
+      var type = paths[key]
+      fileLoader.appDirs.forEach(function (dir) {
+        var d = dir + '/' + type
+        if (!fsutils.isDirectory(d)) return
+        v.each(fs.readdirSync(d), function (file) {
+          if (fsutils.isDirectory(d + '/' + file)) return
+          if (file.charAt(0) == '.') return
+          if (file.substr(file.length - 3) === '.js') file = file.substr(0, file.length - 3)
+          fileLoader.loadFile(type, file, dir)
+        })
+      })
+    }
+    app.templateEngine.precompileTemplates(fileLoader.appDirs, app.set('soy options') || {}, callback)
+  }
+
+  /**
+   * Adds basic error handling that is useful for debugging.
+   */
+  app.useDevErrorHandler = function () {
+    app.use(app.developmentRequestLogger())
+    app.use(connect.errorHandler({ dumpExceptions: true, showStack: true }))
+    app.set('soy options', {
+      eraseTemporaryFiles: true,
+      allowDynamicRecompile: true
+    })
   }
 
   /**
@@ -491,64 +358,20 @@ var createApp = function (baseDir, configuration) {
     }
   }
 
-  app.boot = function () {
-    app.addPublicStaticRoutes()
+  app.set('base_dir', appDir)
+  app.set('public', appDir + '/public')
 
-    // Register the matador cache helper.
-    app.registerHelper('Cache', CacheHelper)
-
-    // Use the cache helper's no-cache middleware.
-    app.use(app.getHelper('Cache').auditHeadersMiddleware)
-    app.use(app.getHelper('Cache').noCacheMiddleware)
-
-    app.use(connect.query())
-    app.use(connect.cookieParser())
-
-    app.use(app.requestDecorator())
-    app.use(app.preRouter())
-
-    app.use(connect.bodyParser())
-
-    app.configure('development', function () {
-      app.use(app.developmentRequestLogger())
-      app.use(connect.errorHandler({ dumpExceptions: true, showStack: true }))
-      app.set('soy options', {
-        eraseTemporaryFiles: true,
-        allowDynamicRecompile: true
-      })
-    })
-
-    app.configure('production', function () {
-      app.use(connect.errorHandler())
-    })
-
-    app.emit('afterBoot')
-
-    app.use(app.router({}))
-    app.prefetch()
-    app.mount()
-  }
-
-  /**
-   * Warn old apps that registering new template handlers is not supported
-   * for now
-   */
-  app.register = function () {
-    console.log('DEPRECATION WARNING: Only SoyNode templates are now supported')
-  }
-
+  app.controllers = {}
+  app.controllers.Base = require('./BaseController')(app),
   app.controllers.Static = require('./StaticController')(app)
 
   return app
 }
 
-/**
- * Our exports extend connect in-place. This is total fubar
- */
-module.exports = connect
 
 /** Get the development vs. prod environment. */
 module.exports.getEnv = getEnv
+
 
 /**
  * Create a new app.
@@ -560,25 +383,159 @@ module.exports.createApp = createApp
 /** Export Matador's path matcher for potential client-side use */
 module.exports.PathMatcher = PathMatcher
 
+
 /**
- * @return Matador's instance of soynode.
  * Due to the way soynode uses global state, it may be important
  * for Matador and your app to use the same version.
+ * @return Matador's instance of soynode.
  */
 module.exports.getSoynode = function () {
   return require('soynode')
 }
 
-module.exports.helpers = {
+
+/**
+ * Shim function to emulate express functionality
+ */
+function requestDecorator(app, req, res, next) {
+  // this is stupid
+  req.res = res
+  req.params = {}
+  res.req = req
+  req.path = req.url
+
   /**
-   * DEPRECATED: Old apps may still load CacheHelper manually.
-   *
-   * A selection of off the shelf-helper classes that can be installed by an
-   * application using `app.registerHelper(name, helper)`. e.g:
-   *
-   * <pre>
-   *   app.registerHelper('Cache', matador.helpers.CacheHelper)
-   * </pre>
+   * emulate the param function in express by returning a path arg
+   * @deprecated use `req.params`
    */
-  get CacheHelper() { return require('./helpers/CacheHelper') }
+  req.param = function getRequestParam(key) {
+    return req.params[key]
+  }
+
+  /**
+   * @deprecated: use `res.setHeader`
+   */
+  res.header = res.setHeader
+
+  // cookie service which allows for setting and retrieval of cookies
+  var cookieService = new CookieService(req, res, app.get('force_secure_cookies', false))
+  res.cookie = cookieService.set.bind(cookieService)
+
+  // expire a given cookie
+  res.clearCookie = function clearCookie(key, options) {
+    options.maxAge = -1000
+    cookieService.set(key, '', options)
+  }
+
+  // redirect the current request to a new url
+  res.redirect = function redirectRequest(url) {
+    res.writeHead(302, {'Location': url})
+    res.end()
+  }
+
+  // send output to the request object and close the request. Defaults to HTML.
+  res.send = function sendResponse(data, headers, status) {
+    var bytesWritten
+
+    if (headers) {
+      for (var key in headers) res.setHeader(key, headers[key])
+    }
+
+    // optional status code
+    if (status) res.statusCode = status
+
+    // if no content type was set, assume html
+    if (!res.getHeader('content-type')) res.setHeader('content-type', 'text/html; charset=utf-8')
+    if (typeof data === 'string') data = new Buffer(data)
+    if (data instanceof Buffer) bytesWritten = data.length
+    if (!res.getHeader('content-length') && typeof bytesWritten !== 'undefined') res.setHeader('content-length', bytesWritten)
+
+    if (req.method !== 'HEAD') res.write(data)
+
+    // done
+    res.end()
+    return bytesWritten
+  }
+
+  next()
+}
+
+
+/**
+ * Middleware which will look at where a request is supposed to go and attach
+ * relevant target info to the request
+ */
+function preRouter(app, req, res, next) {
+  var matcher = app._pathMatchers[req.method === 'HEAD' ? 'GET' : req.method]
+  // check for any handler for the http method first
+  if (!matcher) return next()
+
+  // Strip querystring and fragment.  Fragment should never be seen but we've seen it sent by
+  // scrapers and other tools (e.g. Kindle).
+  var url = req.url.replace(/[?#].*$/, '')
+
+  // try and match
+  var handler = matcher.getMatch(url)
+  if (!handler) return next()
+
+  // successful match, attach it to the req obj
+  req.target = handler.object
+  req.params = {}
+  if (handler.matches) {
+    for (var key in handler.matches) {
+      if (key == '*' && Array.isArray(handler.matches['*'])) {
+        // The wildcard param passes an array of path parts.
+        req.params['*'] = handler.matches['*'].map(decodeURI)
+      } else {
+        req.params[key] = decodeURI(handler.matches[key])
+      }
+    }
+  }
+  return next()
+}
+
+
+/**
+ * Middleware that actually routes the request to a controller action
+ */
+function callRouter(req, res, next) {
+  var target = req.target
+  if (target && target.controller) return target.method.call(target.controller, req, res, next)
+  else return next(new Error('Handler not found for ' + req.method + ' ' + req.url))
+}
+
+
+/**
+ * Get current environment (NODE_ENV environment variable), falling back to
+ * 'development' if it is not set.
+ */
+function getEnv() {
+  return process.env.NODE_ENV || 'development'
+}
+
+
+/**
+ * There are two ways to organize your config object.
+ *
+ * If config.flatConfig is falsey, then the config should look like this:
+ * var config = {
+ *   base: {baseUrl: '/', name: 'My Project'},
+ *   services: {
+ *     ImageService: {baseUrl: '//cdn.project.com/'}
+ *   },
+ *   controllers: {
+ *     AuthController: {authType: 'basic-auth'}
+ *   }
+ * }
+ *
+ * When we instantiate AuthController, we will pass it a config like this:
+ * {baseUrl: '/', name: 'My Project', authType: 'basic-auth'}
+ *
+ * If config.flatConfig is truthy, then the config is just passed to each
+ * service without modification. In a flat config, the 'base' key is forbidden.
+ */
+function validateConfig(config) {
+  if (config.flatConfig) {
+    if ('base' in config) throw new Error('Malformed config: "base" not allowed in a flag config')
+  }
 }

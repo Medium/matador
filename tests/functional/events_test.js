@@ -10,5 +10,6 @@ exports.testFiresCreateHelper = function (test) {
     test.done()
   })
 
-  app.boot()
+  app.useCommonMiddleware()
+  app.start()
 }
