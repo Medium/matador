@@ -27,8 +27,6 @@ var filenameSuffixes = {
   CONTROLLERS: 'Controller'
 }
 
-// TODO(dan): Remove
-global.klass = require('klass')
 global.v = require('valentine')
 
 

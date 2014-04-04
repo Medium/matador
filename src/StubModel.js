@@ -1,5 +1,13 @@
 module.exports = function (app, config) {
 
-  return app.getModel('Application', true).extend()
+  var util = require('util')
+  var AppModel = app.getModel('Application', true)
+
+  function StubModel() {
+    AppModel.call(this)
+  }
+  util.inherits(StubModel, AppModel)
+
+  return StubModel
 
 }

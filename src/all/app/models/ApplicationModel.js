@@ -1,3 +1,11 @@
 module.exports = function (app, config) {
-  return app.getModel('Base', true).extend()
+  var util = require('util')
+  var BaseModel = app.getModel('Base', true)
+
+  function ApplicationModel() {
+    BaseModel.call(this)
+  }
+  util.inherits(ApplicationModel, BaseModel)
+
+  return ApplicationModel
 }

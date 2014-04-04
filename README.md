@@ -109,12 +109,17 @@ By default, Models are thin with just a Base and Application Model in place. You
 ``` js
 // app/models/ApplicationModel.js
 module.exports = function (app, config) {
-  return app.getModel('Base', true).extend(function () {
+  var BaseModel = app.getModel('Base', true)
+
+  function ApplicationModel() {
+    BaseModel.call(this)
     this.mongo = require('mongodb')
     this.mongoose = require('mongoose')
     this.Schema = this.mongoose.Schema
     this.mongoose.connect('mongodb://localhost/myapp')
-  })
+  }
+  util.inherits(ApplicationModel, BaseModel)
+  return ApplicationModel
 }
 ```
 
@@ -122,24 +127,30 @@ Then create, for example, a UserModel.js that extended it...
 
 ``` js
 module.exports = function (app, config) {
-  return app.getModel('Application', true).extend(function () {
+  var ApplicationModel = app.getModel('Application', true)
+
+  function UserModel() {
+    ApplicationModel.call(this)
     this.DBModel = this.mongoose.model('User', new this.Schema({
         name: { type: String, required: true, trim: true }
       , email: { type: String, required: true, lowercase: true, trim: true }
     }))
-  })
-  .methods({
-    create: function (name, email, callback) {
-      var user = new this.DBModel({
-          name: name
-        , email: email
-      })
-      user.save(callback)
-    }
-  , find: function (id, callback) {
-      this.DBModel.findById(id, callback)
-    }
-  })
+  }
+  util.inherits(UserModel, ApplicationModel)
+  return DBModel
+
+  UserModel.prototype.create = function (name, email, callback) {
+    var user = new this.DBModel({
+        name: name
+      , email: email
+    })
+    user.save(callback)
+  }
+
+  UserModel.prototype.find = function (id, callback) {
+    this.DBModel.findById(id, callback)
+  }
+
 }
 ```
 
@@ -148,9 +159,7 @@ This provides a proper abstraction between controller logic and how your models 
 Take special note that models do not have access to requests or responses, as they rightfully shouldn't.
 
 ### Model & Controller Inheritance
-The inheritance model Matador uses is built with [Klass](https://github.com/ded/klass), and is exposed via a global `Class` variable (not all globals are bad). Class comes in two flavors where by constructors can be set via an `initialize` method, or a function reference, and by default (in the scaffold), Matador uses the function reference style so that you may benefit from the auto-initialization of super classes, and there is no need to call `this.supr()` in your constructors.
-
-It is also possible to use Node.js's own inheritance via the 'util' module.
+Matador uses the default node inheritance patterns via `util.inherits`.
 
 ### Valentine
 The Valentine module is included as a simple tool giving you type checking, functional iterators, and some other nice utilities that often get used in applications of any size. It is exposed globally as `v`. It is used liberally in the Matador router, thus feel free to take advantage of its existence as well.
