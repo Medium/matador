@@ -2,8 +2,8 @@
 Sane defaults and a simple structure, scaling as your application grows.
 
 Matador is a clean, organized framework for [Node.js](http://nodejs.org) architected to suit MVC enthusiasts. It gives you a well-defined development environment with flexible routing, easy controller mappings, and basic request filtering.
-It&#8217;s built on open source libraries such as [SoyNode](https://github.com/Obvious/soynode) for view rendering, [Klass](https://github.com/ded/klass) for its inheritance model, [Valentine](https://github.com/ded/valentine)
-for functional development, and [connect.js](http://www.senchalabs.org/connect/) to give a bundle of other Node server related helpers.
+It&#8217;s built on open source libraries such as [SoyNode](https://github.com/Obvious/soynode) for view rendering,
+and [connect.js](http://www.senchalabs.org/connect/) to give a bundle of other Node server related helpers.
 
 # Installation
 ### Get the CLI
@@ -160,9 +160,6 @@ Take special note that models do not have access to requests or responses, as th
 
 ### Model & Controller Inheritance
 Matador uses the default node inheritance patterns via `util.inherits`.
-
-### Valentine
-The Valentine module is included as a simple tool giving you type checking, functional iterators, and some other nice utilities that often get used in applications of any size. It is exposed globally as `v`. It is used liberally in the Matador router, thus feel free to take advantage of its existence as well.
 
 # Scaffolding
 

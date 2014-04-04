@@ -82,7 +82,9 @@ module.exports = function (app) {
         delete headers[keyMap['set-cookie']]
       }
 
-      v.extend(allHeaders, headers)
+      for (var key in headers) {
+        allHeaders[key] = headers[key]
+      }
       writeHead.call(res, status, reason, headers)
     }
 

@@ -3,6 +3,11 @@
 We're in the process of cleaning up matador, a lot of functionality will be
 simplified or removed.  It is recommended you do not depend on the 2.0.0 target.
 
+## 2.0.0-alpha.2
+
+- Stopped using klass for inheritance
+- Removed `v` magic global
+
 ## 2.0.0-alpha.1
 
 - Controller specific middleware has been removed.
