@@ -78,28 +78,6 @@ this.render(response, 'index', {
 
 ```
 
-### Request Filtering
-``` js
-// app/controllers/ApplicationController.js
-module.exports = function (app, config) {
-  return app.controllers.Base.extend(function () {
-    this.addBeforeFilter('private', this.requireAuth)
-  })
-  .methods({
-    requireAuth: function (callback) {
-      if (this.request.cookies.authed) return callback(null)
-      this.response.redirect('/welcome')
-    }
-  , private: function () {
-      this.end('This is private')
-    }
-  , welcome: function () {
-      this.render('welcome')
-    }
-  })
-}
-```
-
 ### Routing
 The `app/config/routes.js` file is where you specify an array of tuples indicating where incoming requests will map to a `controller` and the appropriate method. If no action is specified, it defaults to 'index' as illustrated below:
 
@@ -121,18 +99,6 @@ module.exports = function (app) {
       'get': 'Posts.index', // maps to PostsController.js => #index
       'post': 'Posts.create' // maps to PostsController.js => #create
     }
-  }
-}
-```
-
-Matador has support for anonymous controllers or other endpoints. This is
-useful when mounting third-party apps, such as [Passport.js](http://passportjs.org):
-``` js
-module.exports = function (app) {
-  return {
-    '/hello': function (req, res) {
-       res.send('Hello')
-     }
   }
 }
 ```

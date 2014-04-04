@@ -17,7 +17,8 @@ exports.testLogsRequest = function (test) {
   }
 
   app.use(app.requestLogger(requestMessage, fakeLogger))
-  app.boot()
+  app.useCommonMiddleware()
+  app.start()
 
   app.request()
   .get('/?hello=world')

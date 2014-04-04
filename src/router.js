@@ -21,28 +21,13 @@ function _addControllerRoutes(app, path, handler, method) {
   if (!controller) throw new Error('Couldn\'t find a controller named ' + controllerName)
   if (!controllerMethod) throw new Error('Couldn\'t find an action called ' + controllerName + '.' + actionName)
 
-  var middleware = controller[actionName].middleware
-  var filters = []
-
-  if (controller.beforeFilters['*']) filters = filters.concat(controller.beforeFilters['*'])
-  if (controller.beforeFilters[actionName]) filters = filters.concat(controller.beforeFilters[actionName])
-
-  if (filters.length) {
-    middleware = typeof middleware === 'undefined' ? [] : middleware;
-    middleware = filters.concat(middleware)
-  }
-
-  if (!middleware) middleware = controllerClass.defaultMiddleware
-  if (middleware) middleware = v(Array.isArray(middleware) ? middleware : [middleware]).flatten()
-
   //create individual entries for each request method (patchmatching is method-specific)
   var routeData = {
     controller: controller,
     controllerName: controllerName,
     controllerClass: controllerClass,
     method: controllerMethod,
-    methodName: actionName,
-    middleware: middleware
+    methodName: actionName
   }
 
   _addRouteData(app, method, path, routeData)
@@ -75,14 +60,9 @@ module.exports.init = function (app, routes) {
       }
     }
 
-    //for each of the handler methods, figure out which middleware to use
     for (var method in handlers) {
       if (typeof handlers[method] === 'string') {
         _addControllerRoutes(app, path, handlers[method], method)
-      } else if (typeof handlers[method] === 'function') {
-        _addRouteData(app, method, path, {
-          middleware: [handlers[method]]
-        })
       }
     }
   }

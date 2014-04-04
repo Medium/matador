@@ -7,20 +7,24 @@ var matador = require('../../src/matador')
 
 exports.testAfterBootCallbackRuns = function (test) {
   var app = matador.createApp(__dirname, {})
-    , spy = false
+  var booted = false
+  var spy = false
 
   app.on('afterBoot', function () {
+    booted = true
     app.use(function (req, res, next) {
       spy = true
       next()
     })
   })
 
-  app.boot()
+  app.useCommonMiddleware()
+  app.start()
 
   app.request()
   .get('/')
   .end(function (res) {
+    test.ok(booted, 'AfterBoot is not being called')
     test.ok(spy, 'Middleware is not being run')
     test.done()
   })
