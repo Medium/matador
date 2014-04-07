@@ -57,7 +57,7 @@ FileLoader.prototype.loadFile = function (subdir, name, p) {
   if (this._fileCache[subdir][name]) return this._fileCache[subdir][name]
 
   var pathname = name.replace(/\./g, '/')
-  var dir = v.find((p ? [p] : this.appDirs), function (dir) {
+  var found = (p ? [p] : this.appDirs).some(function (dir) {
     var filename = dir + '/' + subdir + '/' + pathname + '.js'
     if (!this.fileExists(filename)) return false
     try {
@@ -71,7 +71,7 @@ FileLoader.prototype.loadFile = function (subdir, name, p) {
     this.pathCache[subdir][name] = dir === this._basePath ? [this._basePath] : [dir, this._basePath]
     return true
   }.bind(this))
-  if (!dir) throw new Error('Unable to find ' + subdir + '/' + pathname)
+  if (!found) throw new Error('Unable to find ' + subdir + '/' + pathname)
   return this._fileCache[subdir][name]
 }
 

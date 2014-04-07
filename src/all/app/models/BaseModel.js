@@ -1,3 +1,3 @@
 module.exports = function (app, config) {
-  return klass()
+  return function () {}
 }

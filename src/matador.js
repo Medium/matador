@@ -13,6 +13,7 @@ var ClassLoader = require('./ClassLoader')
 var PathMatcher = require('./pathMatcher')
 var RequestMessage = require('./RequestMessage')
 
+
 var paths = {
   SERVICES: 'services',
   HELPERS: 'helpers',
@@ -20,16 +21,13 @@ var paths = {
   CONTROLLERS: 'controllers'
 }
 
+
 var filenameSuffixes = {
   SERVICES: 'Service',
   HELPERS: 'Helper',
   MODELS: 'Model',
   CONTROLLERS: 'Controller'
 }
-
-// TODO(dan): Remove
-global.klass = require('klass')
-global.v = require('valentine')
 
 
 /**
@@ -303,7 +301,7 @@ var createApp = function (baseDir, configuration) {
       fileLoader.appDirs.forEach(function (dir) {
         var d = dir + '/' + type
         if (!fsutils.isDirectory(d)) return
-        v.each(fs.readdirSync(d), function (file) {
+        fs.readdirSync(d).forEach(function (file) {
           if (fsutils.isDirectory(d + '/' + file)) return
           if (file.charAt(0) == '.') return
           if (file.substr(file.length - 3) === '.js') file = file.substr(0, file.length - 3)
