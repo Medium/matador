@@ -396,42 +396,23 @@ module.exports.getSoynode = function () {
  * Shim function to emulate express functionality
  */
 function requestDecorator(app, req, res, next) {
-  // this is stupid
-  req.res = res
-  req.params = {}
-  res.req = req
-  req.path = req.url
-
-  /**
-   * emulate the param function in express by returning a path arg
-   * @deprecated use `req.params`
-   */
-  req.param = function getRequestParam(key) {
-    return req.params[key]
-  }
-
-  /**
-   * @deprecated: use `res.setHeader`
-   */
-  res.header = res.setHeader
-
-  // cookie service which allows for setting and retrieval of cookies
+  // Cookie service which allows for setting and retrieval of cookies
   var cookieService = new CookieService(req, res, app.get('force_secure_cookies', false))
   res.cookie = cookieService.set.bind(cookieService)
 
-  // expire a given cookie
+  // Add a method that makes it easy to expire a given cookie.
   res.clearCookie = function clearCookie(key, options) {
     options.maxAge = -1000
     cookieService.set(key, '', options)
   }
 
-  // redirect the current request to a new url
+  // Add a method to redirect the response to a new url.
   res.redirect = function redirectRequest(url) {
     res.writeHead(302, {'Location': url})
     res.end()
   }
 
-  // send output to the request object and close the request. Defaults to HTML.
+  // Add a method for sending output to the response. Defaults to HTML.
   res.send = function sendResponse(data, headers, status) {
     var bytesWritten
 
