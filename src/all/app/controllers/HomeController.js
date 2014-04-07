@@ -12,7 +12,7 @@ module.exports = function (app, config) {
 
   HomeController.prototype.index = function (req, res) {
     var data = {title: 'The Matador Framework'}
-    var query = require('url').parse(req.path, true).query
+    var query = require('url').parse(req.url, true).query
     if (query.fragment) data.layout = false
     this.render(res, 'views.index.welcome', data)
   }

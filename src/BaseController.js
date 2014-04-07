@@ -13,7 +13,7 @@ module.exports = function (app) {
     var xssiPrefix = app.set('xssi prefix')
     if (xssiPrefix) body = xssiPrefix + body
 
-    res.header('Content-Type', 'application/json')
+    res.setHeader('Content-Type', 'application/json')
     res.charset = 'utf-8'
     res.send(body, headers, status)
   }

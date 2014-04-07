@@ -3,6 +3,14 @@
 We're in the process of cleaning up matador, a lot of functionality will be
 simplified or removed.  It is recommended you do not depend on the 2.0.0 target.
 
+## 2.0.0-alpha.3
+
+- Removed `res.req`
+- Removed `req.res`
+- Removed `req.path`, use `req.url` from [http.IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage)
+- Removed `req.param(key)`, use `req.params[key]`
+- Removed `res.header(key, value)`, use `res.setHeader(key, value)`
+
 ## 2.0.0-alpha.2
 
 - Stopped using klass for inheritance
