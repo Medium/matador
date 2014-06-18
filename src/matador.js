@@ -252,7 +252,8 @@ var createApp = function (baseDir, configuration) {
     app.registerHelper('Cache', CacheHelper)
     app.use(app.getHelper('Cache').auditHeadersMiddleware)
 
-    app.use(requestDecorator.bind(null, app))
+    app.use(requestDecorator.bind(null, app)) // error handler
+    app.use(requestDecorator.bind(null, app, undefined)) // normal handler
     app.use(connect.query())
 
     // stupid body parser is stupid (doesn't check for http method in current
@@ -393,9 +394,11 @@ module.exports.getSoynode = function () {
 
 
 /**
- * Shim function to emulate express functionality
+ * Shim function to emulate express functionality.
+ *
+ * Installed as both an error and regular middleware.
  */
-function requestDecorator(app, req, res, next) {
+function requestDecorator(app, err, req, res, next) {
   // Cookie service which allows for setting and retrieval of cookies
   var cookieService = new CookieService(req, res, app.get('force_secure_cookies', false))
   res.cookie = cookieService.set.bind(cookieService)
@@ -436,7 +439,7 @@ function requestDecorator(app, req, res, next) {
     return bytesWritten
   }
 
-  next()
+  next(err)
 }
 
 
