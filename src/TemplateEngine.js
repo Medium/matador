@@ -11,7 +11,7 @@ function TemplateEngine() {
 
 /**
  * Precompile templates and setup soynode options
- * @param {Array} searchPaths path to loog for views
+ * @param {Array} searchPaths path to look for views
  * @param {Object} options soynode options
  * @param {Function} callback called after compilation finishes
  */
