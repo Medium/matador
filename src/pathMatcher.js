@@ -189,7 +189,9 @@ PathMatcher.prototype._getMatchRecursive =
  * @private
  */
 PathMatcher.prototype.getPathParts_ = function (path) {
-  return path.replace(/(^\/|\/$)/g, '').split('/')
+  return path.replace(/(^\/|\/$)/g, '').split('/').map(function (pathPart) {
+    return decodeURIComponent(pathPart)
+  })
 }
 
 

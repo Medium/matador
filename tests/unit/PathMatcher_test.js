@@ -29,6 +29,8 @@ exports.testPathMatcher = function (test) {
   assertMatch(test, pm, '/dir/tools/', 'dir-tools');
   assertMatch(test, pm, '/dir/tools/screwdriver/', 'dir-screw', {'tool': 'screwdriver'});
   assertMatch(test, pm, '/dir/tools/screwdriver/xxx/', 'dir-tools-wc', {'*': ['screwdriver', 'xxx']});
+  assertMatch(test, pm, '/나는이-제목이-사실-로-번역-무엇인지-전혀-모른다/', 'user', {user: '나는이-제목이-사실-로-번역-무엇인지-전혀-모른다'});
+  assertMatch(test, pm, '/%EB%82%98%EB%8A%94%EC%9D%B4-%EC%A0%9C%EB%AA%A9%EC%9D%B4-%EC%82%AC%EC%8B%A4-%EB%A1%9C-%EB%B2%88%EC%97%AD-%EB%AC%B4%EC%97%87%EC%9D%B8%EC%A7%80-%EC%A0%84%ED%98%80-%EB%AA%A8%EB%A5%B8%EB%8B%A4/', 'user', {user: '나는이-제목이-사실-로-번역-무엇인지-전혀-모른다'});
 
   assertMatch(test, pm, '/dir/abc', 'dir', {'*': ['abc']});
 
