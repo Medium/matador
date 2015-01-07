@@ -9,6 +9,13 @@ var soynode = require('soynode')
 function TemplateEngine() {
 }
 
+var nullFunction = function () {}
+var defaultCallback = function (err) {
+  if (err) {
+    throw err
+  }
+}
+
 /**
  * Precompile templates and setup soynode options
  * @param {Array} searchPaths path to look for views
@@ -16,19 +23,35 @@ function TemplateEngine() {
  * @param {Function} callback called after compilation finishes
  */
 TemplateEngine.prototype.precompileTemplates = function (searchPaths, options, callback) {
+  callback = callback || defaultCallback
+
   soynode.setOptions(options)
+
+  var pathsLeft = searchPaths.length
+
+  function onPathDone(err) {
+    pathsLeft--
+
+    if (err) {
+      callback(err)
+      callback = nullFunction
+    } else if (pathsLeft == 0) {
+      callback()
+      callback = nullFunction
+    }
+  }
 
   // Precompile all Closure templates.
   searchPaths.forEach(function (dir) {
     dir = dir + '/views'
-    console.log('Compiling Templates in', dir)
-    if (!isDirectory(dir)) return
 
-    soynode.compileTemplates(dir, callback || function (err) {
-      if (err) {
-        throw err
-      }
-    })
+    if (!isDirectory(dir)) {
+      onPathDone(null)
+      return
+    }
+
+    console.log('Compiling Templates in', dir)
+    soynode.compileTemplates(dir, onPathDone)
   })
 }
 
