@@ -1,4 +1,7 @@
 # Matador
+
+[![Build Status](https://travis-ci.org/Medium/matador.svg)](https://travis-ci.org/Medium/matador)
+
 Sane defaults and a simple structure, scaling as your application grows.
 
 Matador is a clean, organized framework for [Node.js](http://nodejs.org) architected to suit MVC enthusiasts. It gives you a well-defined development environment with flexible routing, easy controller mappings, and basic request filtering.
