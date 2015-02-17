@@ -258,14 +258,14 @@ var createApp = function (baseDir, configuration) {
 
     // stupid body parser is stupid (doesn't check for http method in current
     // connect version, manually create body parser from the 3 child methods)
-    var jsonParser = connect.json({limit: '10mb'})
+    var jsonParser = connect.json(app.get('configMiddlewareJson', {limit: '10mb'}))
     app.use(function (req, res, next) {
       req.body = {}
       if (req.method == 'GET' || req.method == 'HEAD') return next()
       return jsonParser(req, res, next)
     })
-    app.use(connect.urlencoded({limit: '10mb'}))
-    app.use(connect.multipart())
+    app.use(connect.urlencoded(app.get('configMiddlewareUrlEncoded', {limit: '10mb'})))
+    app.use(connect.multipart(app.get('configMiddlewareMultipart', null)))
 
     app.use(preRouter.bind(null, app))
 
