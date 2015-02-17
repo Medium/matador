@@ -29,7 +29,8 @@
   "devDependencies": {
     "jshint": "2.0.1",
     "falkor": "~1.2.9",
-    "nodeunit": "~0.8.0"
+    "nodeunit": "~0.8.0",
+    "semver": "~4.2.0"
   },
   "scripts": {
     "test": "node_modules/nodeunit/bin/nodeunit tests/functional/ tests/unit/ && ./runIntegrationTests.sh",
