@@ -4,6 +4,7 @@ require('../support/functional')
 
 var matador = require('../../src/matador')
   , RequestMessage = require('../../src/RequestMessage')
+  , semver = require('semver')
 
 exports.testLogsRequest = function (test) {
   var app = matador.createApp(__dirname, {})
@@ -24,7 +25,13 @@ exports.testLogsRequest = function (test) {
   .get('/?hello=world')
   .end(function (res) {
     var messageLines = messages[0].split('\n')
-    test.ok(messageLines[0].indexOf('- GET /?hello=world (source 127.0.0.1)') >= 0, 'method not included in log')
+
+    if (semver.gte(process.version, 'v0.12.0')) {
+      // node v0.12 binds to ipv6 and ipv4
+      test.ok(messageLines[0].indexOf('- GET /?hello=world (source ::1') >= 0, 'method not included in log')
+    } else {
+      test.ok(messageLines[0].indexOf('- GET /?hello=world (source 127.0.0.1)') >= 0, 'method not included in log')
+    }
     test.ok(messageLines[1].indexOf('Parameters: {}') >= 0, 'parameters not included in log')
     test.ok(messageLines[2].indexOf('Query: {"hello":"world"}') >= 0, 'query strings not included in log')
     test.ok(messageLines[3].indexOf('Controller: Home.index') >= 0, 'controller#action not included in log')
