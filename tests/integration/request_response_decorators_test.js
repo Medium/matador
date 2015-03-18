@@ -2,6 +2,10 @@ var falkor = require('falkor')
 
 var port = process.env.PORT || 3000
 
+exports.testResponsePermanentRedirect = falkor.fetch('http://localhost:' + port + '/redirectPermanent')
+  .expectStatusCode(301)
+  .expectHeader('Location', '/elsewhere')
+
 exports.testResponseRedirect = falkor.fetch('http://localhost:' + port + '/redirect')
   .expectStatusCode(302)
   .expectHeader('Location', '/target')

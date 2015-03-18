@@ -10,6 +10,10 @@ module.exports = function (app, config) {
 
   util.inherits(HomeController, ApplicationController)
 
+  HomeController.prototype.redirectPermanent = function (req, res) {
+    res.redirectPermanent('/elsewhere')
+  }
+
   HomeController.prototype.redirect = function (req, res) {
     res.redirect('/target')
   }

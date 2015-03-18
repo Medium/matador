@@ -415,6 +415,12 @@ function requestDecorator(app, err, req, res, next) {
     res.end()
   }
 
+  // Add a method to permanently redirect the response to a new url.
+  res.redirectPermanent = function redirectRequestPermanent(url) {
+    res.writeHead(301, {'Location': url})
+    res.end()
+  }
+
   // Add a method for sending output to the response. Defaults to HTML.
   res.send = function sendResponse(data, headers, status) {
     var bytesWritten

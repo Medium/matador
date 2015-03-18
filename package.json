@@ -1,7 +1,7 @@
 {
   "name": "matador",
   "description": "an MVC framework for Node",
-  "version": "2.0.0-alpha.9",
+  "version": "2.0.0-alpha.10",
   "homepage": "https://github.com/Medium/matador",
   "main": "src/matador.js",
   "authors": [
