@@ -1,7 +1,7 @@
 {
   "name": "matador",
   "description": "an MVC framework for Node",
-  "version": "2.0.0-alpha.10",
+  "version": "2.0.0-alpha.11",
   "homepage": "https://github.com/Medium/matador",
   "main": "src/matador.js",
   "authors": [
@@ -23,7 +23,7 @@
   "dependencies": {
     "connect": "2.3.3",
     "valentine": "1.8.0",
-    "soynode": "^0.7.0",
+    "soynode": "^1.0.0",
     "useragent": "~2.0.6"
   },
   "devDependencies": {

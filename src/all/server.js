@@ -5,7 +5,12 @@ var matador = require('matador')
 
 app.useDevErrorHandler()
 app.useCommonMiddleware()
-app.start()
-app.listen(port)
-
-console.log('matador running on port ' + port)
+app.start(function (err) {
+  if (err) {
+    console.error('matador failed to boot')
+    console.error(err)
+  } else {
+    app.listen(port)
+    console.log('matador running on port ' + port)
+  }
+})
