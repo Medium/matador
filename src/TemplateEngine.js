@@ -29,7 +29,10 @@ TemplateEngine.prototype.precompileTemplates = function (searchPaths, options, c
 
   var pathsLeft = searchPaths.length
 
-  function onPathDone(err) {
+  function onPathDone(dir, err) {
+    if (dir) {
+      console.log('Done compiling templates in', dir)
+    }
     pathsLeft--
 
     if (err) {
@@ -46,12 +49,12 @@ TemplateEngine.prototype.precompileTemplates = function (searchPaths, options, c
     dir = dir + '/views'
 
     if (!isDirectory(dir)) {
-      onPathDone(null)
+      onPathDone(null, null)
       return
     }
 
     console.log('Compiling Templates in', dir)
-    soynode.compileTemplates(dir, onPathDone)
+    soynode.compileTemplates(dir, onPathDone.bind(null, dir))
   })
 }
 
