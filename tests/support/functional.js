@@ -13,10 +13,6 @@ var connect = require('connect')
 
 module.exports = request
 
-connect.proto.request = function(){
-  return request(this)
-}
-
 function request(app) {
   return new Request(app)
 }

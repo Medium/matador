@@ -190,7 +190,12 @@ PathMatcher.prototype._getMatchRecursive =
  */
 PathMatcher.prototype.getPathParts_ = function (path) {
   return path.replace(/(^\/|\/$)/g, '').split('/').map(function (pathPart) {
-    return decodeURIComponent(pathPart)
+    try {
+      return decodeURIComponent(pathPart)
+    } catch (e) {
+      // If the uri is malformed, that's ok, just keep going.
+      return ''
+    }
   })
 }
 

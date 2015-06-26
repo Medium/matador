@@ -1,6 +1,6 @@
 // Copyright The Obvious Corporation 2013
 
-require('../support/functional')
+var request = require('../support/functional')
 
 var matador = require('../../src/matador')
 
