@@ -1,6 +1,6 @@
 // Copyright The Obvious Corporation 2013
 
-require('../support/functional')
+var request = require('../support/functional')
 
 var matador = require('../../src/matador')
   , RequestMessage = require('../../src/RequestMessage')
@@ -21,7 +21,7 @@ exports.testLogsRequest = function (test) {
   app.useCommonMiddleware()
   app.start()
 
-  app.request()
+  request(app)
   .get('/?hello=world')
   .end(function (res) {
     var messageLines = messages[0].split('\n')

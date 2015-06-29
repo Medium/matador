@@ -1,6 +1,6 @@
 // Copyright The Obvious Corporation 2013
 
-require('../support/functional')
+var request = require('../support/functional')
 
 var matador = require('../../src/matador')
   , RequestMessage = require('../../src/RequestMessage')
@@ -21,7 +21,7 @@ exports.testAfterBootCallbackRuns = function (test) {
   app.useCommonMiddleware()
   app.start()
 
-  app.request()
+  request(app)
   .get('/')
   .end(function (res) {
     test.ok(booted, 'AfterBoot is not being called')

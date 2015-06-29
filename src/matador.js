@@ -2,6 +2,12 @@ var fs = require('fs')
 var connect = require('connect')
 var http = require('http')
 var path = require('path')
+var bodyParser = require('body-parser')
+var serveStatic = require('serve-static')
+var errorHandler = require('errorhandler')
+var cookieParser = require('cookie-parser')
+var url = require('url')
+var qs = require('qs')
 
 var CookieService = require('./cookie')
 var router = require('./router')
@@ -134,7 +140,7 @@ var createApp = function (baseDir, configuration) {
     fileLoader.appDirs.forEach(function (dir) {
       var directory = dir + '/public'
       if (fileLoader.fileExists(directory)) {
-        app.use(connect.static(directory, configuration.publicStaticOptions))
+        app.use(serveStatic(directory, configuration.publicStaticOptions))
       }
     })
   }
@@ -254,23 +260,26 @@ var createApp = function (baseDir, configuration) {
 
     app.use(requestDecorator.bind(null, app)) // error handler
     app.use(requestDecorator.bind(null, app, undefined)) // normal handler
-    app.use(connect.query())
 
     // stupid body parser is stupid (doesn't check for http method in current
     // connect version, manually create body parser from the 3 child methods)
-    var jsonParser = connect.json(app.get('configMiddlewareJson', {limit: '10mb'}))
+    var jsonParser = bodyParser.json(
+        app.get('configMiddlewareJson', {limit: '10mb'}))
     app.use(function (req, res, next) {
-      req.body = {}
       if (req.method == 'GET' || req.method == 'HEAD') return next()
       return jsonParser(req, res, next)
     })
-    app.use(connect.urlencoded(app.get('configMiddlewareUrlEncoded', {limit: '10mb'})))
-    app.use(connect.multipart(app.get('configMiddlewareMultipart', null)))
+
+    var urlEncodedParser = bodyParser.urlencoded(
+      app.get('configMiddlewareUrlEncoded', {limit: '10mb', extended: true}))
+    app.use(function (req, res, next) {
+      if (req.method == 'GET' || req.method == 'HEAD') return next()
+      return urlEncodedParser(req, res, next)
+    })
 
     app.use(preRouter.bind(null, app))
 
-    app.use(connect.query())
-    app.use(connect.cookieParser())
+    app.use(cookieParser())
 
     app.emit('afterBoot') // Deprecated.
   }
@@ -318,7 +327,7 @@ var createApp = function (baseDir, configuration) {
    */
   app.useDevErrorHandler = function () {
     app.use(app.developmentRequestLogger())
-    app.use(connect.errorHandler({ dumpExceptions: true, showStack: true }))
+    app.use(errorHandler({log: true}))
     app.set('soy options', {
       eraseTemporaryFiles: true,
       allowDynamicRecompile: true
@@ -399,6 +408,9 @@ module.exports.getSoynode = function () {
  * Installed as both an error and regular middleware.
  */
 function requestDecorator(app, err, req, res, next) {
+  req.query = qs.parse(url.parse(req.url).query)
+  req.body = {}
+
   // Cookie service which allows for setting and retrieval of cookies
   var cookieService = new CookieService(req, res, app.get('force_secure_cookies', false))
   res.cookie = cookieService.set.bind(cookieService)

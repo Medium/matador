@@ -1,6 +1,6 @@
 // Copyright 2014. A Medium Corporation
 
-require('../support/functional')
+var request = require('../support/functional')
 
 var matador = require('../../src/matador')
   , RequestMessage = require('../../src/RequestMessage')
@@ -13,7 +13,7 @@ exports.testRequestDecorator = function (test) {
   })
   app.start()
 
-  app.request()
+  request(app)
   .get('/')
   .end(function (res) {
     test.equal(302, res.statusCode)
@@ -24,12 +24,12 @@ exports.testRequestDecorator = function (test) {
 exports.testRequestDecoratorBogusPath = function (test) {
   var app = matador.createApp(__dirname, {})
   app.useCommonMiddleware()
-  app.use(function (err, req, res, next) {
+  app.use(function (req, res, next) {
     res.redirect('github.com')
   })
   app.start()
 
-  app.request()
+  request(app)
   .get('/%20/%94')
   .end(function (res) {
     test.equal(302, res.statusCode)

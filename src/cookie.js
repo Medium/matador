@@ -14,6 +14,8 @@
  * @author dan@pupi.us (Daniel Pupius)
  */
 
+var Cookies = require('cookies')
+
 module.exports = CookieService
 
 
@@ -28,8 +30,8 @@ module.exports = CookieService
 function CookieService(req, res, forceSecureCookies) {
   this.req = req
   this.res = res
-  this.parsedCookies_ = null
   this.forceSecureCookies = forceSecureCookies
+  this._cookies = new Cookies(req, res)
 }
 
 
@@ -40,9 +42,8 @@ function CookieService(req, res, forceSecureCookies) {
  * @return {string} The cookie's value.
  */
 CookieService.prototype.get = function (name, opt_default) {
-  var cookies = this.parseCookies_()
-  var cookie = cookies[name]
-  return typeof cookie !== 'undefined' ? cookie : opt_default
+  var value = this._cookies.get(name)
+  return typeof value !== 'undefined' ? value : opt_default
 }
 
 
@@ -66,65 +67,5 @@ CookieService.prototype.set = function (name, value, opt_options) {
     options.secure = true
   }
 
-  var cookies = this.res.getHeader('Set-Cookie') || []
-  if (typeof cookies === 'string') {
-    cookies = [cookies]
-  }
-  //cookies.push(new Cookie(name, value, options).toString())
-  this.res.setHeader('Set-Cookie', new Cookie(name, value, options).toString())
-}
-
-
-CookieService.prototype.parseCookies_ = function () {
-  if (!this.parsedCookies_) {
-    var cookies = this.parsedCookies_ = {}
-    if (this.req.headers.cookie) {
-      this.req.headers.cookie.split(';').forEach(function (cookie) {
-        var parts = cookie.split('=')
-        var name = parts[0].trim()
-        // If multiple cookie's path match the client will send all of them. We
-        // only consider the first, since it will be most specific. In the rare
-        // case someone cares about all values, they can parse the header
-        // themselves.
-        if (!cookies[name]) {
-          cookies[name] = (parts[1] || '').trim()
-        }
-      })
-    }
-  }
-  return this.parsedCookies_
-}
-
-
-
-/**
- * @constructor
- */
-function Cookie(name, value, options) {
-  this.name = name
-  this.value = value
-  this.options = options
-}
-
-
-Cookie.prototype.toString = function () {
-  var str = this.name + '=' + this.value
-  if (this.options.maxAge) {
-    str += '; expires=' + new Date(this.options.maxAge + Date.now()).toUTCString()
-  } else if (this.options.expires) {
-    str += '; expires=' + new Date(this.options.expires).toUTCString()
-  }
-  if (this.options.path) {
-    str += '; path=' + this.options.path
-  }
-  if (this.options.domain) {
-    str += '; domain=' + this.options.domain
-  }
-  if (this.options.secure) {
-    str += '; secure'
-  }
-  if (this.options.httpOnly) {
-    str += '; httponly'
-  }
-  return str
+  this._cookies.set(name, value, options)
 }
