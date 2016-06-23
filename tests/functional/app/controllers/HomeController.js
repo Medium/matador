@@ -11,6 +11,14 @@ module.exports = function (app, config) {
     return res.send('hello')
   }
 
+  HomeController.prototype.wildcard = function(req, res) {
+    var matched = req.params['*'] || []
+    return res.send(matched.join(', '))
+  }
+
+  HomeController.prototype.name = function(req, res) {
+    return res.send(req.params['name'] || '')
+  }
 
   return HomeController
 }

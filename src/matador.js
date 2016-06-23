@@ -483,12 +483,7 @@ function preRouter(app, req, res, next) {
   req.params = {}
   if (handler.matches) {
     for (var key in handler.matches) {
-      if (key == '*' && Array.isArray(handler.matches['*'])) {
-        // The wildcard param passes an array of path parts.
-        req.params['*'] = handler.matches['*'].map(decodeURI)
-      } else {
-        req.params[key] = decodeURI(handler.matches[key])
-      }
+      req.params[key] = handler.matches[key]
     }
   }
   return next()
