@@ -21,25 +21,25 @@
     "matador": "bin/matador.js"
   },
   "dependencies": {
-    "body-parser": "^1.13.1",
-    "connect": "^3.4.0",
-    "cookies": "^0.5.0",
-    "cookie-parser": "^1.3.5",
-    "errorhandler": "^1.4.0",
-    "qs": "^3.1.0",  
+    "body-parser": "^1.15.1",
+    "connect": "^3.4.1",
+    "cookies": "^0.6.1",
+    "cookie-parser": "^1.4.3",
+    "errorhandler": "^1.4.3",
+    "qs": "^6.2.0",
     "soynode": "^1.1.0",
-    "serve-static": "^1.10.0",
-    "useragent": "^2.1.7",
-    "valentine": "1.8.0"
+    "serve-static": "^1.11.0",
+    "useragent": "^2.1.9",
+    "valentine": "2.1.4"
   },
   "devDependencies": {
-    "jshint": "2.0.1",
-    "falkor": "~1.2.9",
-    "nodeunit": "~0.8.0",
-    "semver": "~4.2.0"
+    "jshint": "2.9.2",
+    "falkor": "~1.5.3",
+    "nodeunit": "~0.9.1",
+    "semver": "~5.1.0"
   },
   "scripts": {
-    "test": "node_modules/nodeunit/bin/nodeunit tests/functional/ tests/unit/ && ./runIntegrationTests.sh",
-    "lint": "node_modules/jshint/bin/hint src/ --reporter dev/reporter.js"
+    "test": "nodeunit tests/functional/ tests/unit/ && ./runIntegrationTests.sh",
+    "lint": "jshint src/ --reporter dev/reporter.js"
   }
 }

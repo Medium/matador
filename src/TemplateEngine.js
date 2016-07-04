@@ -38,7 +38,7 @@ TemplateEngine.prototype.precompileTemplates = function (searchPaths, options, c
     if (err) {
       callback(err)
       callback = nullFunction
-    } else if (pathsLeft == 0) {
+    } else if (pathsLeft === 0) {
       callback()
       callback = nullFunction
     }
