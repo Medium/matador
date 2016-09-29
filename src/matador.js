@@ -423,12 +423,14 @@ function requestDecorator(app, err, req, res, next) {
 
   // Add a method to redirect the response to a new url.
   res.redirect = function redirectRequest(url) {
+    res.emit('redirect', url)
     res.writeHead(302, {'Location': url})
     res.end()
   }
 
   // Add a method to permanently redirect the response to a new url.
   res.redirectPermanent = function redirectRequestPermanent(url) {
+    res.emit('redirectPermanent', url)
     res.writeHead(301, {'Location': url})
     res.end()
   }
