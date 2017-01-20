@@ -1,5 +1,8 @@
 # Matador
 
+**DEPRECATION WARNING: Matador has been deprecated and is no longer actively maintained. We do not recommend continuing to use Matador.**
+
+
 [![Build Status](https://travis-ci.org/Medium/matador.svg)](https://travis-ci.org/Medium/matador)
 
 Sane defaults and a simple structure, scaling as your application grows.
