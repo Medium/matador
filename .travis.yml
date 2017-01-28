@@ -1,5 +1,28 @@
-language: node_js
 sudo: false
+
+language: node_js
+
 node_js:
   - "0.12"
   - "4.1"
+  - "5"
+  - "6"
+
+install:
+  - npm install
+
+script:
+  - npm run test
+  - npm run lint
+
+# Necessary to compile native modules for io.js v3 or Node.js v4
+env:
+  - CXX=g++-4.8
+
+# Necessary to compile native modules for io.js v3 or Node.js v4
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8

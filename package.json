@@ -39,7 +39,7 @@
     "semver": "~4.2.0"
   },
   "scripts": {
-    "test": "node_modules/nodeunit/bin/nodeunit tests/functional/ tests/unit/ && ./runIntegrationTests.sh",
-    "lint": "node_modules/jshint/bin/hint src/ --reporter dev/reporter.js"
+    "test": "nodeunit tests/functional/ tests/unit/ && ./runIntegrationTests.sh",
+    "lint": "jshint src/ --reporter dev/reporter.js"
   }
 }
